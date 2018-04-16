@@ -18,7 +18,7 @@ public class Queue{
 	
 	public long quantum(){return quantum;}
 	
-	public long getSchedAlg(){
+	public int getSchedAlg(){
 		return SCHEDALGORITHM;
 	}
 	

@@ -19,14 +19,13 @@ public class Scheduler {
 		queues = new Queue[numOfQueues];	
 	}
 		
-	public void generateQueues(/*int[] algorithms*/){
-		//for(int i = 0; i < numOfQueues; i++){
-			queues[0] = new Queue(/*algorithms[i]*/SchedulingAlgorithm.RR);
-			queues[0].setQuantum(2000);
-			queues[1] = new Queue(/*algorithms[i]*/SchedulingAlgorithm.RR);
-			queues[1].setQuantum(3000);
-			queues[2] = new Queue(/*algorithms[i]*/SchedulingAlgorithm.FCFS);
-		//}					
+	public void generateQueues(int[] algorithms, long[] quantums){
+		for(int i = 0; i < numOfQueues; i++){
+			queues[i] = new Queue(algorithms[i]);
+			if (algorithms[i] == SchedulingAlgorithm.RR){
+				queues[i].setQuantum(quantums[i]);
+			}
+		}					
 	}		
 	
 	public void simulate(){
@@ -41,9 +40,14 @@ public class Scheduler {
 		queues[0].enqueue(newProcess);
 
 		// TODO It should allow preemption
-		if(timeEnd == 0 && cur > 0){			
+		/*if(timeEnd == 0 && cur > 0){			
 			preempt();			
-		}		
+		}		*/
+
+		long burstTime = newProcess.getBurstTime();
+		long arrivalTime = newProcess.getArrivalTime();
+		
+		GanttChart.addNewArrivedProcess("p" + newProcess.getId(), arrivalTime, burstTime);
 	}
 
 	public void insertOnQueue(int queue, Process newProcess){	
@@ -51,9 +55,17 @@ public class Scheduler {
 		
 		if(queues[queue].getSchedAlg() == SchedulingAlgorithm.SJF){
 			sortSJF(queue);
-		}
+		}		
+		
+		long burstTime = newProcess.getBurstTime();
+		long arrivalTime = newProcess.getArrivalTime();
+		
+		GanttChart.addNewArrivedProcess("p" + newProcess.getId(), arrivalTime, burstTime);
+		
+		//GanttChart.addCompForBorder("p" + newProcess.getId(), newProcess.getBurstTime(), queues[queue].getSchedAlg());		
 	}
 	
+	/* Sort the processes in ascending order according to burst time. */
 	private void sortSJF(int queue){
 		
 	}
@@ -69,8 +81,6 @@ public class Scheduler {
 		currProcess.setBurstTime(burstLeft);
 			
 		System.out.println("Current executing process #" + currProcess.getId() + " preempted. Burst time left: " + burstLeft);
-
-		// Change current executing queue to Queue #0;
 		cur = 0;		
 	}
 	
@@ -89,12 +99,17 @@ public class Scheduler {
 						try {
 							timeStart = System.currentTimeMillis();							
 							
+							long burstTime = currProcess.getBurstTime();
+							int algorithm = queues[cur].getSchedAlg();
+							
+							GanttChart.addExecutingProcess(currProcess.getId(), burstTime, algorithm);
+							
 							if(queues[cur].getSchedAlg() == SchedulingAlgorithm.RR){
 								
 								System.out.println("\n(Queue #" + cur + " RR Quantum=" + queues[cur].quantum() + " Executing process " + 
 										currProcess.getId() + " Burst: " + currProcess.getBurstTime() + "ms");
 								
-								System.out.println("cur: " + cur);
+								System.out.println("cur: " + cur);															
 								
 								Thread.sleep(queues[cur].quantum());
 								

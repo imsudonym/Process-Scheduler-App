@@ -1,14 +1,22 @@
+import javax.swing.JFrame;
 
 public class Main {
 	private static Queue arrivOrderOfProcesses = new Queue(-1);
 	private static long prevArrivalTime;
 	
 	public static void main(String[] args) {
-		Scheduler scheduler = new Scheduler(3);
 		
-		//int algorithms[] = {SchedulingAlgorithm.FCFS};
+		int algorithms[] = {SchedulingAlgorithm.RR, SchedulingAlgorithm.FCFS};
+		long respectiveQuantum[] = {2000};
 		
-		scheduler.generateQueues(/*algorithms*/);
+		GanttChart gantt = new GanttChart();
+		gantt.setVisible(true);
+		gantt.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		gantt.init(algorithms);
+		
+		Scheduler scheduler = new Scheduler(algorithms.length);	
+		
+		scheduler.generateQueues(algorithms, respectiveQuantum);
 				
 		arrivOrderOfProcesses.enqueue(new Process(1, 0, 10000, 0));
 		arrivOrderOfProcesses.enqueue(new Process(2, 1000, 10000, 0));
