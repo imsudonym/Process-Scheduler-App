@@ -1,12 +1,12 @@
 
 public class Process {
 	private int id;
-	private int arrivalTime;
-	private int burstTime;
+	private long arrivalTime;
+	private long burstTime;
 	private int priority;
 	private int timesPreempted = 0;
 	
-	public Process(int id, int arrivalTime, int burstTime, int priority){
+	public Process(int id, long arrivalTime, long burstTime, int priority){
 		this.id = id;
 		this.arrivalTime = arrivalTime;
 		this.burstTime = burstTime;
@@ -17,11 +17,15 @@ public class Process {
 		return id;
 	}
 	
-	public int getArrivalTime(){
+	public long getArrivalTime(){
 		return arrivalTime;
 	}
 	
-	public int getBurstTime(){
+	public void setBurstTime(long burstLeft){
+		this.burstTime = burstLeft;
+	}
+	
+	public long getBurstTime(){
 		return burstTime;
 	}
 	
