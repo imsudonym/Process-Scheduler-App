@@ -1,7 +1,6 @@
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
-import java.awt.GridLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -15,6 +14,7 @@ public class GanttChart extends JFrame{
 	public static JPanel fcfsTimePanel;
 	public static JPanel srtfPanel;
 	public static JPanel sjfPanel;
+	public static JPanel sjfTimePanel;
 	public static JPanel preemptivePanel;
 	public static JPanel nonpreemptivePanel;
 	public static JPanel roundrobinPanel;
@@ -29,6 +29,7 @@ public class GanttChart extends JFrame{
 	
 	private static JLabel[] fcfsTimeLabel = new JLabel[50];
 	private static JLabel[] roundrobinTimeLabel = new JLabel[50];
+	private static JLabel[] sjfTimeLabel = new JLabel[50];
 	
 	private static Font font = new Font("Helvetica", Font.BOLD, 20);
 	private static Font timeLabelFont = new Font("Helvetica", Font.BOLD, 12);
@@ -37,17 +38,21 @@ public class GanttChart extends JFrame{
 	
 	private static int xRR = -1;
 	private static int xFCFS = -1;
+	private static int xSJF = -1;
 	private static int y = -1;	
 	private static int prevProcLengthName = -1;
 	private static int prevFCFSBurstLength = -1;
 	private static int prevRRBurstLength = -1;
+	private static int prevSJFBurstLength = -1;
 	private int queue_ypos = -1;
 		
 	private static Color darkBlue = new Color(0, 46, 70);
 	private static int fcfsTimeCounter = 0;
 	private static int roundrobinTimeCounter = 0;
+	private static int sjfTimeCounter = 0;
 	private static int fcfsTimeLapse = 0;
 	private static int roundrobinTimeLapse = 0;
+	private static int sjfTimeLapse = 0;
 	
 	public GanttChart(){
 		super("CPU Scheduling Gantt Chart");		
@@ -57,7 +62,7 @@ public class GanttChart extends JFrame{
 		con.setLayout(null);				
 	}
 	
-	public void init(int[] algorithms){
+	public void init(int[] algorithms, long[] quanta){
 		Border loweredbevel = BorderFactory.createLoweredBevelBorder();						
 		
 		processArrivedLabel = new JLabel("ARRIVED: ");
@@ -76,6 +81,11 @@ public class GanttChart extends JFrame{
 		roundrobinTimeLabel[roundrobinTimeCounter].setForeground(Color.WHITE);
 		roundrobinTimeLabel[roundrobinTimeCounter++].setBounds(4, 0, 10, 10);
 		
+		sjfTimeLabel[sjfTimeCounter] = new JLabel("0");
+		sjfTimeLabel[sjfTimeCounter].setFont(timeLabelFont);
+		sjfTimeLabel[sjfTimeCounter].setForeground(Color.WHITE);
+		sjfTimeLabel[sjfTimeCounter++].setBounds(4, 0, 10, 10);
+		
 		for(int i = 0; i < algorithms.length; i++){
 			
 			if (queue_ypos < 0) {
@@ -84,9 +94,7 @@ public class GanttChart extends JFrame{
 				queue_ypos += 70 + 20;
 			}
 			
-			if(algorithms[i] == SchedulingAlgorithm.FCFS){				
-				
-				System.out.println("Hi FCFS");
+			if(algorithms[i] == SchedulingAlgorithm.FCFS){								
 				
 				TitledBorder title = BorderFactory.createTitledBorder(
 		                loweredbevel, "FCFS", TitledBorder.ABOVE_TOP, TitledBorder.ABOVE_TOP, font, Color.WHITE);
@@ -107,11 +115,10 @@ public class GanttChart extends JFrame{
 				add(fcfsPanel);
 				add(fcfsTimePanel);
 				
-			}
-			if (algorithms[i] == SchedulingAlgorithm.RR){
+			}else if (algorithms[i] == SchedulingAlgorithm.RR){
 				
 				TitledBorder title = BorderFactory.createTitledBorder(
-		                loweredbevel, "Round Robin (q= )", TitledBorder.ABOVE_TOP, TitledBorder.ABOVE_TOP, font, Color.WHITE);
+		                loweredbevel, "Round Robin (q = " + (quanta[i]/1000) + ")", TitledBorder.ABOVE_TOP, TitledBorder.ABOVE_TOP, font, Color.WHITE);
 				
 				roundrobinPanel = new JPanel();
 				roundrobinPanel.setLayout(null);
@@ -128,6 +135,26 @@ public class GanttChart extends JFrame{
 								
 				add(roundrobinTimePanel);
 				add(roundrobinPanel);				
+			}else if (algorithms[i] == SchedulingAlgorithm.SJF){
+				
+				TitledBorder title = BorderFactory.createTitledBorder(
+		                loweredbevel, "SJF", TitledBorder.ABOVE_TOP, TitledBorder.ABOVE_TOP, font, Color.WHITE);
+				
+				sjfPanel = new JPanel();
+				sjfPanel.setLayout(null);
+				sjfPanel.setBorder(title);
+				sjfPanel.setBackground(darkBlue);
+				sjfPanel.setBounds(100, queue_ypos, 1150, 70);		
+				
+				sjfTimePanel = new JPanel();
+				sjfTimePanel.setLayout(null);
+				sjfTimePanel.setBackground(darkBlue);
+				sjfTimePanel.setBounds(100, queue_ypos + 70, 1150, 20);											
+				
+				sjfTimePanel.add(sjfTimeLabel[0]);
+								
+				add(sjfTimePanel);
+				add(sjfPanel);				
 			}
 		}
 		
@@ -181,10 +208,11 @@ public class GanttChart extends JFrame{
 		fcfsPanel.add(roundrobinLabel);*/
 	}
 	
-	public static void addExecutingProcess(int processId, long burstTime, int algorithm) {
+	public static void addExecutingProcess(int processId, long executionTime, int algorithm) {
 						
 		Container container = null;		
-		int burstLength = (int)burstTime/100;
+		int burstLength = (int)(executionTime/100);
+		int procLength = (burstLength < 20)? 20: burstLength;
 		String processName = "p" + processId;		
 		
 		JPanel comp = new JPanel();		
@@ -200,7 +228,7 @@ public class GanttChart extends JFrame{
 			}else{				
 				xFCFS += prevFCFSBurstLength + 1;
 				
-				fcfsTimeLapse += burstTime;
+				fcfsTimeLapse += executionTime;
 				fcfsTimeLabel[fcfsTimeCounter] = new JLabel("" + (fcfsTimeLapse/1000));
 				fcfsTimeLabel[fcfsTimeCounter].setFont(timeLabelFont);
 				fcfsTimeLabel[fcfsTimeCounter].setForeground(Color.WHITE);
@@ -209,8 +237,10 @@ public class GanttChart extends JFrame{
 				fcfsTimePanel.add(fcfsTimeLabel[fcfsTimeCounter++]);
 			}
 									
-			prevFCFSBurstLength = burstLength;					
-			comp.setBounds(xFCFS, y, burstLength, 37);	
+			prevFCFSBurstLength = burstLength;		
+			System.out.println("burstLength: " + burstLength);
+			System.out.println("procLength: " + procLength);
+			comp.setBounds(xFCFS, y, procLength, 37);	
 			
 		} else if (algorithm == SchedulingAlgorithm.RR) {
 			container = roundrobinPanel;
@@ -220,7 +250,7 @@ public class GanttChart extends JFrame{
 				y = 29;				
 			}else{				
 				xRR += prevRRBurstLength + 1;
-				roundrobinTimeLapse += burstTime;
+				roundrobinTimeLapse += executionTime;
 				roundrobinTimeLabel[roundrobinTimeCounter] = new JLabel("" + (roundrobinTimeLapse/1000));
 				roundrobinTimeLabel[roundrobinTimeCounter].setFont(timeLabelFont);
 				roundrobinTimeLabel[roundrobinTimeCounter].setForeground(Color.WHITE);
@@ -229,9 +259,29 @@ public class GanttChart extends JFrame{
 				roundrobinTimePanel.add(roundrobinTimeLabel[roundrobinTimeCounter++]);
 			}
 						
-			prevRRBurstLength = burstLength;			
-			comp.setBounds(xRR, y, burstLength, 37);	
-		}			
+			prevRRBurstLength = burstLength + ((burstLength < 20)? 20-burstLength : 0);					
+			comp.setBounds(xRR, y, procLength, 37);	
+			
+		} else if (algorithm == SchedulingAlgorithm.SJF) {
+			container = sjfPanel;
+			
+			if(prevSJFBurstLength < 0){
+				xSJF = 4;
+				y = 29;				
+			}else{				
+				xSJF += prevSJFBurstLength + 1;
+				sjfTimeLapse += executionTime;
+				sjfTimeLabel[sjfTimeCounter] = new JLabel("" + (sjfTimeLapse/1000));
+				sjfTimeLabel[sjfTimeCounter].setFont(timeLabelFont);
+				sjfTimeLabel[sjfTimeCounter].setForeground(Color.WHITE);
+				sjfTimeLabel[sjfTimeCounter].setBounds(xSJF, 0, 50, 10);
+				
+				sjfTimePanel.add(sjfTimeLabel[sjfTimeCounter++]);
+			}
+						
+			prevSJFBurstLength = burstLength + ((burstLength < 20)? 20-burstLength : 0);					
+			comp.setBounds(xSJF, y, procLength, 37);	
+		}		
 								
 		comp.setBackground(new Color(0, 183, 0));		
 		container.add(comp);
@@ -242,13 +292,15 @@ public class GanttChart extends JFrame{
 		con.revalidate();
 	}
 	
-	public static void addNewArrivedProcess(String processName, long arrivalTime, long burstTime){							
+	public static void addNewArrivedProcess(int processId, long arrivalTime, long burstTime){							
 		
 		if(prevProcLengthName < 0){			
 			prevProcLengthName = 200;
 		}else{
 			prevProcLengthName += 25;
 		}
+		
+		String processName = "p" + processId;
 		
 		JLabel label = new JLabel(processName);
 		label.setFont(font);

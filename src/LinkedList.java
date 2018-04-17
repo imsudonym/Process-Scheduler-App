@@ -23,7 +23,6 @@ public class LinkedList{
 		}			
 		
 		display(newLink.getValue());
-		//CrazyCalculator.makeThreadSleep();
 	}
 	
 	public Link get(int index){		
@@ -42,7 +41,7 @@ public class LinkedList{
 		}
 		
 		return current;
-	}
+	}	
 	
 	public Process remove(){
 		Link temp = null;						
@@ -56,40 +55,14 @@ public class LinkedList{
 			process = temp.getValue();			
 		}						
 		
-		if(process != null){
-			/*if(!CrazyCalculator.evaluatingPostfix){
-				
-				if(stringTemp.length() > 0)
-					stringTemp = stringTemp.substring(1, stringTemp.length());				
-				
-				CrazyCalculator.sShots1.linkListBlocks.setText(stringTemp);
-				
-			}else{
-				
-				if(stringTemp.length() > 0)
-					stringTemp = stringTemp.substring(str.length(), stringTemp.length());				
-				
-				CrazyCalculator.sShots2.linkListBlocks.setText(stringTemp);	
-			}
-				
-			CrazyCalculator.makeThreadSleep();*/
-		
+		if(process != null){			
 			return process;
 		}
 		
 		return null;
 	}
 	
-	private void display(Process input){
-		
-		/*
-		if(CrazyCalculator.evaluatingPostfix){			
-			stringTemp += input;
-			CrazyCalculator.sShots2.linkListBlocks.setText(stringTemp);
-		}else{			
-			stringTemp += input;
-			CrazyCalculator.sShots1.linkListBlocks.setText(stringTemp);
-		}*/					
+	private void display(Process input){				
 	}
 		
 }

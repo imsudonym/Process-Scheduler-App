@@ -14,4 +14,8 @@ public class Link {
 	public Process getValue(){
 		return value;
 	}
+
+	public void setValue(Process newValue) {
+		this.value = newValue;
+	}
 }

@@ -1,14 +1,20 @@
 
 public class Scheduler {
-	private static final int MAX_QUEUE = 8;
-	private static Queue[] queues; 	
+	private static final int MAX_QUEUE = 8;	
 	private int numOfQueues = 0;
-	private int cur = 0;
+	
+	private int itr = 0;
 	private long timeStart = 0;
 	private long timeArrive = 0;
 	private long timeEnd = 0;
+	private long prevArrivalTime = 0;
 	
+	private Object[] queues;
+	private Process[] processes;
 	private static Process currProcess = null;
+	
+	private FCFSQueue fcfsQueue;
+	private RRQueue rrQueue;		
 	
 	public Scheduler(int numOfQueues){		
 		if (numOfQueues > MAX_QUEUE){
@@ -16,55 +22,70 @@ public class Scheduler {
 		}
 		
 		this.numOfQueues = numOfQueues;		
-		queues = new Queue[numOfQueues];	
+		this.queues = new Object[numOfQueues];
 	}
 		
-	public void generateQueues(int[] algorithms, long[] quantums){
-		for(int i = 0; i < numOfQueues; i++){
-			queues[i] = new Queue(algorithms[i]);
-			if (algorithms[i] == SchedulingAlgorithm.RR){
-				queues[i].setQuantum(quantums[i]);
-			}
-		}					
-	}		
-	
-	public void simulate(){
-		simulate.start();
+	public void initProcesses(Process[] processes){
+		this.processes = processes; 
 	}
 	
-	public void insertOnQueue(Process newProcess){
-				
-		timeArrive = System.currentTimeMillis();
-		System.out.println("Inserting newProcess..\n   Lapse: " + (timeArrive-timeStart));
-					
-		queues[0].enqueue(newProcess);
+	public void simulate(){
+		thread.start();
+	}
+	
+	public void generateQueues(int[] algorithms, long[] quantums){
+		for(int i = 0; i < numOfQueues; i++){	
+			if(algorithms[i] == SchedulingAlgorithm.FCFS){
+				queues[i] = new FCFSQueue();
+			}else if (algorithms[i] == SchedulingAlgorithm.RR){
+				queues[i] = new RRQueue(quantums[i]);
+			}else if (algorithms[i] == SchedulingAlgorithm.SJF){
+				queues[i] = new SJFQueue();
+			}
+		}							
+	}			
+	
+	public void insertOnQueue(Process newProcess){				
+		timeArrive = System.currentTimeMillis();	
+		
+		if(queues[0] instanceof FCFSQueue){
+			((FCFSQueue) queues[0]).enqueue(newProcess);		
+		}else if(queues[0] instanceof RRQueue){
+			((RRQueue) queues[0]).enqueue(newProcess);
+		}else if(queues[0] instanceof SJFQueue){
+			((SJFQueue) queues[0]).enqueue(newProcess);
+		}
 
-		if(timeEnd == 0 && cur > 0){			
+		/*if(timeEnd == 0 && cur > 0){			
 			preempt();			
-		}		
+		}*/
 
 		long burstTime = newProcess.getBurstTime();
 		long arrivalTime = newProcess.getArrivalTime();
 		
-		GanttChart.addNewArrivedProcess("p" + newProcess.getId(), arrivalTime, burstTime);
+		GanttChart.addNewArrivedProcess(newProcess.getId(), arrivalTime, burstTime);
 	}
 
-	public void insertOnQueue(int queue, Process newProcess){	
-		queues[queue].enqueue(newProcess);
+	public void insertOnQueue(Object queue, Process newProcess){	
+		if(queue instanceof FCFSQueue){
+			fcfsQueue.enqueue(newProcess);
+		}else if(queue instanceof SJFQueue){
+			// do something
+		}else if(queue instanceof RRQueue){
+			rrQueue.enqueue(newProcess);
+		}else if(queue instanceof SJFQueue){
+			//sjfQueue.enqueue(newProcess);
+		}			
 		
-		if(queues[queue].getSchedAlg() == SchedulingAlgorithm.SJF){
-			sortSJF(queue);
-		}						
-	}
-	
-	/* Sort the processes in ascending order according to burst time. */
-	private void sortSJF(int queue){
+		long burstTime = newProcess.getBurstTime();
+		long arrivalTime = newProcess.getArrivalTime();
 		
+		GanttChart.addNewArrivedProcess(newProcess.getId(), arrivalTime, burstTime);
 	}
 	
 	private void preempt(){
 		
-		simulate.interrupt();
+		//simulate.interrupt();
 		
 		long lapse = (timeStart == 0)? 0 : (timeArrive - timeStart);
 		
@@ -73,9 +94,35 @@ public class Scheduler {
 		currProcess.setBurstTime(burstLeft);
 			
 		System.out.println("Current executing process #" + currProcess.getId() + " preempted. Burst time left: " + burstLeft);
-		cur = 0;		
+		//cur = 0;		
 	}
 	
+	// Thread to allow arrival time latency
+	Thread thread = new Thread(){
+		public void run(){
+			while(true){
+				Process process = null;		
+					//System.out.println("itr: " + itr);
+					while(itr < processes.length){						
+						process = processes[itr++]; 
+						try {
+							//Process arrival time delay
+							if(prevArrivalTime != process.getArrivalTime()){
+								Thread.sleep(process.getArrivalTime());
+							}
+							prevArrivalTime = process.getArrivalTime();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+							// Add process on scheduler queue for execution
+							System.out.println("Insert process p" + process.getId());
+							insertOnQueue(process);										
+					}
+				}
+			}
+		};								
+	
+	/*
 	// Thread to allow burst time latency
 	Thread simulate = new Thread(){
 		public void run(){
@@ -157,5 +204,5 @@ public class Scheduler {
 				}												
 			}
 		}
-	};
+	};*/
 }

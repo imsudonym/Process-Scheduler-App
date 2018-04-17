@@ -19,9 +19,6 @@ public class PseudoArray {
 			list.add(newLink);
 			ctr++;
 			
-			display(value);
-			//CrazyCalculator.makeThreadSleep();
-			
 		}else{
 			throw new java.lang.RuntimeException("ArrayIndexOutOfBounds.");
 		}
@@ -32,44 +29,40 @@ public class PseudoArray {
 		return list.get(index);
 	}
 	
-	public Process remove(){
-		
-		Process prc = list.remove(); 	
-		
-		/*if(!CrazyCalculator.evaluatingPostfix){
-			if(stringTemp.length() > 0)
-				stringTemp = stringTemp.substring(1, stringTemp.length());
-			
-			CrazyCalculator.sShots1.arrayBlocks.setText(stringTemp);
-		}else{
-			
-			if(stringTemp.length() > 0)
-				stringTemp = stringTemp.substring(str.length(), stringTemp.length());
-			
-			CrazyCalculator.sShots2.arrayBlocks.setText(stringTemp);
-		}	
-		
-		CrazyCalculator.makeThreadSleep();		*/
-								
+	public Process remove(){		
+		Process prc = list.remove(); 											
 		ctr--;
-		return prc;
-		
+		return prc;		
 	}
 	
 	public int getSize(){
 		return ctr;
 	}	
 	
-	private void display(Process input){
+	public void sortSJF(){	
+		System.out.println("softSJF was called");
+		for(int i = 0; i <= ctr-1; i++){
+			Link current = get(0);
+			
+			if(current.next == null){
+				continue;
+			}else if(current.getValue().getBurstTime() > current.next.getValue().getBurstTime()){
+				System.out.println("swapping");
+				Process temp = current.getValue();
+				current.setValue(current.next.getValue());
+				current.next.setValue(temp);
+			}
+			
+			current = current.next;
+		}
 		
-		/*
-		if(CrazyCalculator.evaluatingPostfix){			
-			stringTemp += input;
-			CrazyCalculator.sShots2.arrayBlocks.setText(stringTemp);
-		}else{
-			stringTemp += input;
-			CrazyCalculator.sShots1.arrayBlocks.setText(stringTemp);
-
-		}			*/
+		printContents();
+	}
+	
+	public void printContents(){
+		for(int i = 0; i <= ctr; i++){
+			Link current = get(i);			
+			System.out.print("P" + current.getValue().getId() + "-");			
+		}
 	}
 }
