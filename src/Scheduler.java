@@ -39,10 +39,9 @@ public class Scheduler {
 					
 		queues[0].enqueue(newProcess);
 
-		// TODO It should allow preemption
-		/*if(timeEnd == 0 && cur > 0){			
+		if(timeEnd == 0 && cur > 0){			
 			preempt();			
-		}		*/
+		}		
 
 		long burstTime = newProcess.getBurstTime();
 		long arrivalTime = newProcess.getArrivalTime();
@@ -55,14 +54,7 @@ public class Scheduler {
 		
 		if(queues[queue].getSchedAlg() == SchedulingAlgorithm.SJF){
 			sortSJF(queue);
-		}		
-		
-		long burstTime = newProcess.getBurstTime();
-		long arrivalTime = newProcess.getArrivalTime();
-		
-		GanttChart.addNewArrivedProcess("p" + newProcess.getId(), arrivalTime, burstTime);
-		
-		//GanttChart.addCompForBorder("p" + newProcess.getId(), newProcess.getBurstTime(), queues[queue].getSchedAlg());		
+		}						
 	}
 	
 	/* Sort the processes in ascending order according to burst time. */
@@ -101,8 +93,20 @@ public class Scheduler {
 							
 							long burstTime = currProcess.getBurstTime();
 							int algorithm = queues[cur].getSchedAlg();
+							long quantum = 0;
 							
-							GanttChart.addExecutingProcess(currProcess.getId(), burstTime, algorithm);
+							if(queues[cur].getSchedAlg() == SchedulingAlgorithm.RR){
+								quantum = queues[cur].quantum();
+								
+								if(burstTime > quantum){
+									GanttChart.addExecutingProcess(currProcess.getId(), quantum, algorithm);
+								}else{
+									GanttChart.addExecutingProcess(currProcess.getId(), burstTime, algorithm);
+								}
+									
+							}else{
+								GanttChart.addExecutingProcess(currProcess.getId(), burstTime, algorithm);
+							}
 							
 							if(queues[cur].getSchedAlg() == SchedulingAlgorithm.RR){
 								
