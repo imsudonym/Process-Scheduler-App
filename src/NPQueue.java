@@ -1,5 +1,5 @@
 
-public class FCFSQueue {
+public class NPQueue {
 		
 	private PseudoArray array = new PseudoArray(20);
 	private Process currProcess;
@@ -8,23 +8,24 @@ public class FCFSQueue {
 	private long timeStart;
 	private long timeEnd;
 	
-	public FCFSQueue(){		
+	public NPQueue(){		
 		startThread();
 	}
 	
 	private void startThread(){
 		running = true;
-		FCFSThread.start();
+		NPThread.start();
 	}
 	
 	public void stopThread(){
-		FCFSThread.interrupt();
+		NPThread.interrupt();
 		running = false;
 	}
 	
 	public void enqueue(Process newProcess){
 		
 		array.add(newProcess);		
+		sortPriority();
 		allProcessesDone = 0;
 	}	
 	
@@ -34,8 +35,12 @@ public class FCFSQueue {
 		return prc;
 	}
 	
+	public void sortPriority(){
+		array.sortPriority();
+	}
+	
 	public Process peekHead(){
-		return array.get(0).getValue(); 
+		return array.getHead().getValue(); 
 	}
 	
 	public Process peekTail(){
@@ -46,25 +51,25 @@ public class FCFSQueue {
 		return array.getSize();
 	}
 	
-	Thread FCFSThread = new Thread(){		
+	Thread NPThread = new Thread(){				
 		public void run(){
 			while(running){					
 				timeStart = 0; timeEnd = 0;
-										
-				if((currProcess = dequeue()) != null){						
-					try {
+													
+				if(getSize() > 0 && peekHead() != null){											
+					try {						
+						currProcess = dequeue();
 						
 						System.out.println("Process p" + currProcess.getId() + " executing...");
 						timeStart = System.currentTimeMillis();							
 						
-						long burstTime = currProcess.getBurstTime();																									
-						GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.FCFS);																				
+						long burstTime = currProcess.getBurstTime();	
+						GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);																				
 								
 						Thread.sleep(currProcess.getBurstTime());						
 						System.out.println("Done executing.");
+												
 						timeEnd = System.currentTimeMillis();
-						
-						System.out.println("Current process: " + currProcess.getId());
 						
 					} catch (InterruptedException e) {
 
@@ -73,12 +78,14 @@ public class FCFSQueue {
 						//insertOnQueue(currProcess);
 																			
 					}	
-				}else{
+				}else{										
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.FCFS);		
+						GanttChart.addLastCompletionTime(SchedulingAlgorithm.NP_PRIO);		
 						allProcessesDone = 1;						
 					}
 				}
+				
+				
 			}
 		}
 	};

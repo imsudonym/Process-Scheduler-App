@@ -20,27 +20,33 @@ public class LinkedList{
 			
 			last.next = newLink;
 			last = last.next;
-		}			
-		
-		display(newLink.getValue());
+		}						
 	}
 	
 	public Link get(int index){		
-		Link current = first;
-		
-		while(current.key != index){			
-			if(current.next == null){
-				current = null;
-				break;
-			}else if(current.key == last.key){
-				current = null;
-				break;
-			}else{
-				current = current.next;
+		if(!isEmpty()){
+			Link current = first;
+						
+			int key = current.key;
+			
+			while(key != index){			
+				if(current.next == null){
+					current = null;
+					break;
+				}else if(current.key == last.key){
+					current = null;
+					break;
+				}else{
+					current = current.next;
+				}
+				
+				key = current.key;
 			}
+			
+			return current;
 		}
 		
-		return current;
+		return null;
 	}	
 	
 	public Process remove(){
@@ -62,7 +68,20 @@ public class LinkedList{
 		return null;
 	}
 	
-	private void display(Process input){				
+	public void printContents(){
+		if(!isEmpty()){
+			System.out.print("[");
+			Link current = first;
+			while(true){
+				if(current == null)
+					break;
+				System.out.print("p" + current.getValue().getId() + " ");
+				current = current.next;
+			}
+			System.out.println("]");
+		}else{
+			System.out.println("[]");
+		}
 	}
 		
 }

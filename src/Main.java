@@ -6,7 +6,7 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
-		int algorithms[] = {SchedulingAlgorithm.NP_PRIO};
+		int algorithms[] = {SchedulingAlgorithm.SRTF};
 		long respectiveQuantum[] = {2000};
 		
 		GanttChart gantt = new GanttChart();
