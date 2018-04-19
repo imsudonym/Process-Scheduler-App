@@ -5,6 +5,7 @@ public class RRQueue {
 	private Process currProcess;
 	private Object nextQueue = null;
 	private boolean running = false;
+	private byte allProcessesDone = 1;
 	private long quantum = 0;
 	private long timeStart;
 	private long timeEnd;
@@ -39,7 +40,7 @@ public class RRQueue {
 	public void enqueue(Process newProcess){
 		
 		array.add(newProcess);		
-		//displayQueue(newProcess);		
+		allProcessesDone = 0;
 	}	
 	
 	public Process dequeue(){
@@ -102,6 +103,11 @@ public class RRQueue {
 						System.out.println("Process preempted!");
 						//insertOnQueue(currProcess);																			
 					}	
+				}else{
+					if (allProcessesDone == 0){
+						GanttChart.addLastCompletionTime(SchedulingAlgorithm.RR);		
+						allProcessesDone = 1;						
+					}
 				}
 			}
 		}

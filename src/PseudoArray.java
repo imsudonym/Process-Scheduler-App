@@ -19,10 +19,14 @@ public class PseudoArray {
 			list.add(newLink);
 			ctr++;
 			
+			
 		}else{
 			throw new java.lang.RuntimeException("ArrayIndexOutOfBounds.");
-		}
-		
+		}		
+	}
+	
+	public Link getHead(){
+		return list.first;
 	}
 	
 	public Link get(int index){
@@ -30,39 +34,42 @@ public class PseudoArray {
 	}
 	
 	public Process remove(){		
-		Process prc = list.remove(); 											
-		ctr--;
+		Process prc = list.remove(); 
+		if(prc != null){			
+			ctr--;			
+		}
 		return prc;		
 	}
 	
-	public int getSize(){
+	public int getSize(){		
+		System.out.print("");
 		return ctr;
 	}	
 	
-	public void sortSJF(){	
-		System.out.println("softSJF was called");
+	public void sortSJF(){			
 		for(int i = 0; i <= ctr-1; i++){
-			Link current = get(0);
+			Link current = list.first;					
 			
-			if(current.next == null){
-				continue;
-			}else if(current.getValue().getBurstTime() > current.next.getValue().getBurstTime()){
-				System.out.println("swapping");
-				Process temp = current.getValue();
-				current.setValue(current.next.getValue());
-				current.next.setValue(temp);
-			}
-			
-			current = current.next;
+			while(true){
+				if(current.next == null)
+					break;
+				
+				long currBurst = current.getValue().getBurstTime();
+				long nextBurst = current.next.getValue().getBurstTime();												
+				
+				if(currBurst > nextBurst){					
+					Process temp = current.getValue();
+					current.setValue(current.next.getValue());
+					current.next.setValue(temp);
+				}
+				current = current.next;
+			}			
 		}
 		
 		printContents();
 	}
 	
 	public void printContents(){
-		for(int i = 0; i <= ctr; i++){
-			Link current = get(i);			
-			System.out.print("P" + current.getValue().getId() + "-");			
-		}
+		list.printContents();
 	}
 }

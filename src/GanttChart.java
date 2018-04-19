@@ -225,22 +225,20 @@ public class GanttChart extends JFrame{
 			if(prevFCFSBurstLength < 0){
 				xFCFS = 4;
 				y = 29;				
-			}else{				
-				xFCFS += prevFCFSBurstLength + 1;
-				
-				fcfsTimeLapse += executionTime;
+			}else{							
+				xFCFS += prevFCFSBurstLength + 1;							
 				fcfsTimeLabel[fcfsTimeCounter] = new JLabel("" + (fcfsTimeLapse/1000));
 				fcfsTimeLabel[fcfsTimeCounter].setFont(timeLabelFont);
 				fcfsTimeLabel[fcfsTimeCounter].setForeground(Color.WHITE);
-				fcfsTimeLabel[fcfsTimeCounter].setBounds(xFCFS, 0, 50, 10);
+				fcfsTimeLabel[fcfsTimeCounter].setBounds(xFCFS-5, 0, 50, 10);
 				
 				fcfsTimePanel.add(fcfsTimeLabel[fcfsTimeCounter++]);
 			}
 									
-			prevFCFSBurstLength = burstLength;		
-			System.out.println("burstLength: " + burstLength);
-			System.out.println("procLength: " + procLength);
-			comp.setBounds(xFCFS, y, procLength, 37);	
+			fcfsTimeLapse += executionTime;
+			prevFCFSBurstLength = burstLength + ((burstLength < 20)? 20-burstLength : 0);					
+			comp.setBounds(xFCFS, y, procLength, 37);
+			fcfsTimePanel.repaint();
 			
 		} else if (algorithm == SchedulingAlgorithm.RR) {
 			container = roundrobinPanel;
@@ -249,44 +247,48 @@ public class GanttChart extends JFrame{
 				xRR = 4;
 				y = 29;				
 			}else{				
-				xRR += prevRRBurstLength + 1;
-				roundrobinTimeLapse += executionTime;
+				xRR += prevRRBurstLength + 1;				
 				roundrobinTimeLabel[roundrobinTimeCounter] = new JLabel("" + (roundrobinTimeLapse/1000));
 				roundrobinTimeLabel[roundrobinTimeCounter].setFont(timeLabelFont);
 				roundrobinTimeLabel[roundrobinTimeCounter].setForeground(Color.WHITE);
-				roundrobinTimeLabel[roundrobinTimeCounter].setBounds(xRR, 0, 50, 10);
+				roundrobinTimeLabel[roundrobinTimeCounter].setBounds(xRR-5, 0, 50, 10);
 				
 				roundrobinTimePanel.add(roundrobinTimeLabel[roundrobinTimeCounter++]);
 			}
-						
+			
+			roundrobinTimeLapse += executionTime;
 			prevRRBurstLength = burstLength + ((burstLength < 20)? 20-burstLength : 0);					
 			comp.setBounds(xRR, y, procLength, 37);	
+			roundrobinTimePanel.repaint();
 			
 		} else if (algorithm == SchedulingAlgorithm.SJF) {
 			container = sjfPanel;
 			
 			if(prevSJFBurstLength < 0){
 				xSJF = 4;
-				y = 29;				
-			}else{				
+				y = 29;		
+			}else{						
 				xSJF += prevSJFBurstLength + 1;
-				sjfTimeLapse += executionTime;
+				System.out.println("prevBurstLength: " + prevSJFBurstLength);
+				System.out.println("xSJF: " + xSJF);
 				sjfTimeLabel[sjfTimeCounter] = new JLabel("" + (sjfTimeLapse/1000));
 				sjfTimeLabel[sjfTimeCounter].setFont(timeLabelFont);
 				sjfTimeLabel[sjfTimeCounter].setForeground(Color.WHITE);
-				sjfTimeLabel[sjfTimeCounter].setBounds(xSJF, 0, 50, 10);
+				sjfTimeLabel[sjfTimeCounter].setBounds(xSJF-5, 0, 50, 10);
 				
-				sjfTimePanel.add(sjfTimeLabel[sjfTimeCounter++]);
+				sjfTimePanel.add(sjfTimeLabel[sjfTimeCounter++]);				
 			}
 						
-			prevSJFBurstLength = burstLength + ((burstLength < 20)? 20-burstLength : 0);					
-			comp.setBounds(xSJF, y, procLength, 37);	
+			
+			sjfTimeLapse += executionTime;
+			prevSJFBurstLength = burstLength + ((burstLength < 20)? 20-burstLength : 0);
+			comp.setBounds(xSJF, y, procLength, 37);
+			sjfTimePanel.repaint();
 		}		
 								
 		comp.setBackground(new Color(0, 183, 0));		
 		container.add(comp);
-				
-		//fcfsTimePanel.repaint();		
+										
 		container.repaint();
 		con.repaint();
 		con.revalidate();
@@ -312,5 +314,33 @@ public class GanttChart extends JFrame{
 		
 		con.repaint();
 		con.revalidate();
+	}
+	
+	public static void addLastCompletionTime(int algorithm){
+		if(algorithm == SchedulingAlgorithm.FCFS){			
+			fcfsTimeLabel[fcfsTimeCounter] = new JLabel("" + (fcfsTimeLapse/1000));
+			fcfsTimeLabel[fcfsTimeCounter].setFont(timeLabelFont);
+			fcfsTimeLabel[fcfsTimeCounter].setForeground(Color.WHITE);
+			fcfsTimeLabel[fcfsTimeCounter].setBounds(xFCFS + prevFCFSBurstLength - 4, 0, 50, 10);
+			
+			fcfsTimePanel.add(fcfsTimeLabel[fcfsTimeCounter++]);
+			fcfsTimePanel.repaint();
+		}else if(algorithm == SchedulingAlgorithm.RR){			
+			roundrobinTimeLabel[roundrobinTimeCounter] = new JLabel("" + (roundrobinTimeLapse/1000));
+			roundrobinTimeLabel[roundrobinTimeCounter].setFont(timeLabelFont);
+			roundrobinTimeLabel[roundrobinTimeCounter].setForeground(Color.WHITE);
+			roundrobinTimeLabel[roundrobinTimeCounter].setBounds(xRR + prevRRBurstLength - 4, 0, 50, 10);
+			
+			roundrobinTimePanel.add(roundrobinTimeLabel[roundrobinTimeCounter++]);
+			roundrobinTimePanel.repaint();
+		}else if(algorithm == SchedulingAlgorithm.SJF){			
+			sjfTimeLabel[sjfTimeCounter] = new JLabel("" + (sjfTimeLapse/1000));
+			sjfTimeLabel[sjfTimeCounter].setFont(timeLabelFont);
+			sjfTimeLabel[sjfTimeCounter].setForeground(Color.WHITE);
+			sjfTimeLabel[sjfTimeCounter].setBounds(xSJF + prevSJFBurstLength - 4, 0, 50, 10);
+			
+			sjfTimePanel.add(sjfTimeLabel[sjfTimeCounter++]);
+			sjfTimePanel.repaint();
+		}
 	}
 }

@@ -4,6 +4,7 @@ public class FCFSQueue {
 	private PseudoArray array = new PseudoArray(20);
 	private Process currProcess;
 	private boolean running = false;
+	private byte allProcessesDone = 1;
 	private long timeStart;
 	private long timeEnd;
 	
@@ -24,7 +25,7 @@ public class FCFSQueue {
 	public void enqueue(Process newProcess){
 		
 		array.add(newProcess);		
-		//displayQueue(newProcess);		
+		allProcessesDone = 0;
 	}	
 	
 	public Process dequeue(){
@@ -70,6 +71,11 @@ public class FCFSQueue {
 						//insertOnQueue(currProcess);
 																			
 					}	
+				}else{
+					if (allProcessesDone == 0){
+						GanttChart.addLastCompletionTime(SchedulingAlgorithm.FCFS);		
+						allProcessesDone = 1;						
+					}
 				}
 			}
 		}
