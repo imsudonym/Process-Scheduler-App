@@ -29,7 +29,7 @@ public class NonPQueue {
 	}	
 	
 	public Process dequeue(){
-					
+		
 		Process prc = array.remove();											
 		return prc;
 	}
@@ -67,13 +67,12 @@ public class NonPQueue {
 
 						timeEnd = System.currentTimeMillis();
 						
-						
 					} catch (InterruptedException e) {
 
 						currProcess.setPreempted();
 						System.out.println("Process preempted!");
 						//insertOnQueue(currProcess);
-																			
+
 					}	
 				}
 			}
