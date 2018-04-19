@@ -64,6 +64,8 @@ public class FCFSQueue {
 						System.out.println("Done executing.");
 						timeEnd = System.currentTimeMillis();
 						
+						System.out.println("Current process: " + currProcess.getId());
+						
 					} catch (InterruptedException e) {
 
 						currProcess.setPreempted();

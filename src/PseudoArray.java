@@ -92,6 +92,38 @@ public class PseudoArray {
 		printContents();
 	}
 	
+	public void sortNonPQ(){
+		System.out.println("sortNonPQ was called");
+			Link current = get(0);
+			long timeEnd = current.getValue().getBurstTime();
+		for(int i = 0; i <= ctr-1; i++){
+			if(current.next == null){
+				continue;
+			}else if(current.next.getValue().getArrivalTime() == current.getValue().getArrivalTime()){
+				if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority
+					System.out.println("swapping");
+					Process temp = current.getValue();
+					current.setValue(current.next.getValue());
+					current.next.setValue(temp);
+					timeEnd += current.getValue().getBurstTime();
+				}
+			}else if(current.next.getValue().getArrivalTime() > current.getValue().getArrivalTime() &&
+				current.next.getValue().getArrivalTime() <= timeEnd && current.getValue().getArrivalTime() <= timeEnd){
+				if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority
+					System.out.println("swapping");
+					Process temp = current.getValue();
+					current.setValue(current.next.getValue());
+					current.next.setValue(temp);
+					timeEnd += current.getValue().getBurstTime();
+				}
+			}
+			
+			current = current.next;
+		}
+		
+		printContents();
+	}
+	
 	public void printContents(){
 		list.printContents();
 	}

@@ -13,7 +13,8 @@ public class Scheduler {
 	private static Process currProcess = null;
 	
 	private FCFSQueue fcfsQueue;
-	private RRQueue rrQueue;		
+	private RRQueue rrQueue;
+	private NonPQueue nonpQueue;
 	
 	public Scheduler(int numOfQueues){		
 		if (numOfQueues > MAX_QUEUE){
