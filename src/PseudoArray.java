@@ -69,6 +69,29 @@ public class PseudoArray {
 		printContents();
 	}
 	
+	public void sortPriority(){
+		for(int i = 0; i <= ctr-1; i++){
+			Link current = list.first;					
+			
+			while(true){
+				if(current.next == null)
+					break;
+				
+				long currPriority = current.getValue().getPriority();
+				long nextPriority = current.next.getValue().getPriority();												
+				
+				if(currPriority > nextPriority){					
+					Process temp = current.getValue();
+					current.setValue(current.next.getValue());
+					current.next.setValue(temp);
+				}
+				current = current.next;
+			}			
+		}
+		
+		printContents();
+	}
+	
 	public void printContents(){
 		list.printContents();
 	}

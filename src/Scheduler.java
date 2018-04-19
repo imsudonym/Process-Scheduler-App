@@ -5,8 +5,7 @@ public class Scheduler {
 	
 	private int itr = 0;
 	private long timeStart = 0;
-	private long timeArrive = 0;
-	private long timeEnd = 0;
+	private long timeArrive = 0;	
 	private long prevArrivalTime = 0;
 	
 	private Object[] queues;
@@ -41,11 +40,18 @@ public class Scheduler {
 				queues[i] = new RRQueue(quantums[i]);
 			}else if (algorithms[i] == SchedulingAlgorithm.SJF){
 				queues[i] = new SJFQueue();
+			}else if (algorithms[i] == SchedulingAlgorithm.NP_PRIO){
+				queues[i] = new NPQueue();
+			}else if (algorithms[i] == SchedulingAlgorithm.PRIO){
+				queues[i] = new PQueue();
+			}else if (algorithms[i] == SchedulingAlgorithm.SRTF){
+				queues[i] = new SRTFQueue();
 			}
+			
 		}							
 	}			
 	
-	public void insertOnQueue(Process newProcess){				
+	private void insertOnQueue(Process newProcess){				
 		timeArrive = System.currentTimeMillis();	
 		
 		if(queues[0] instanceof FCFSQueue){
@@ -54,6 +60,12 @@ public class Scheduler {
 			((RRQueue) queues[0]).enqueue(newProcess);
 		}else if(queues[0] instanceof SJFQueue){
 			((SJFQueue) queues[0]).enqueue(newProcess);
+		}else if(queues[0] instanceof NPQueue){
+			((NPQueue) queues[0]).enqueue(newProcess);
+		}else if(queues[0] instanceof PQueue){
+			((PQueue) queues[0]).enqueue(newProcess);
+		}else if(queues[0] instanceof SRTFQueue){
+			((SRTFQueue) queues[0]).enqueue(newProcess);
 		}
 
 		/*if(timeEnd == 0 && cur > 0){			
@@ -64,37 +76,7 @@ public class Scheduler {
 		long arrivalTime = newProcess.getArrivalTime();
 		
 		GanttChart.addNewArrivedProcess(newProcess.getId(), arrivalTime, burstTime);
-	}
-
-	public void insertOnQueue(Object queue, Process newProcess){	
-		if(queue instanceof FCFSQueue){
-			fcfsQueue.enqueue(newProcess);
-		}else if(queue instanceof SJFQueue){
-			// do something
-		}else if(queue instanceof RRQueue){
-			rrQueue.enqueue(newProcess);
-		}else if(queue instanceof SJFQueue){
-			//sjfQueue.enqueue(newProcess);
-		}			
-		
-		long burstTime = newProcess.getBurstTime();
-		long arrivalTime = newProcess.getArrivalTime();
-		
-		GanttChart.addNewArrivedProcess(newProcess.getId(), arrivalTime, burstTime);
-	}
-	
-	private void preempt(){
-		
-		//simulate.interrupt();
-		
-		long lapse = (timeStart == 0)? 0 : (timeArrive - timeStart);
-		
-		// Save burst time left for current executing process..
-		long burstLeft = currProcess.getBurstTime() - lapse;
-		currProcess.setBurstTime(burstLeft);
-			
-		System.out.println("Current executing process #" + currProcess.getId() + " preempted. Burst time left: " + burstLeft);
-	}
+	}		
 	
 	// Thread to allow arrival time latency
 	Thread thread = new Thread(){
