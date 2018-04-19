@@ -14,7 +14,8 @@ public class Scheduler {
 	private static Process currProcess = null;
 	
 	private FCFSQueue fcfsQueue;
-	private RRQueue rrQueue;		
+	private RRQueue rrQueue;
+	private NonPQueue nonpQueue;
 	
 	public Scheduler(int numOfQueues){		
 		if (numOfQueues > MAX_QUEUE){
@@ -41,6 +42,8 @@ public class Scheduler {
 				queues[i] = new RRQueue(quantums[i]);
 			}else if (algorithms[i] == SchedulingAlgorithm.SJF){
 				queues[i] = new SJFQueue();
+			}else if (algorithms[i] == SchedulingAlgorithm.NP_PRIO){
+				queues[i] = new NonPQueue();
 			}
 		}							
 	}			
@@ -54,6 +57,8 @@ public class Scheduler {
 			((RRQueue) queues[0]).enqueue(newProcess);
 		}else if(queues[0] instanceof SJFQueue){
 			((SJFQueue) queues[0]).enqueue(newProcess);
+		}else if(queues[0] instanceof NonPQueue){
+			((NonPQueue) queues[0]).enqueue(newProcess);
 		}
 
 		/*if(timeEnd == 0 && cur > 0){			
@@ -75,7 +80,9 @@ public class Scheduler {
 			rrQueue.enqueue(newProcess);
 		}else if(queue instanceof SJFQueue){
 			//sjfQueue.enqueue(newProcess);
-		}			
+		}else if(queue instanceof NonPQueue){
+			nonpQueue.enqueue(newProcess);
+		}
 		
 		long burstTime = newProcess.getBurstTime();
 		long arrivalTime = newProcess.getArrivalTime();
