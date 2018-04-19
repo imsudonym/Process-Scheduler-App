@@ -1,6 +1,6 @@
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
 
 import javax.swing.BorderFactory;
@@ -26,6 +26,10 @@ public class GanttChart extends JFrame{
 	private static JPanel preemptiveTimePanel;
 	private static JPanel roundrobinTimePanel;
 	
+	private static JPanel preemptiveInnerPanel[];
+	
+	public static int preemptiveInnerCounter = 0;
+	
 	public JLabel processArrivedLabel;
 	public JLabel srtfLabel;
 	public JLabel sjfLabel;
@@ -50,7 +54,6 @@ public class GanttChart extends JFrame{
 	private static int xSRTF = -1;
 	private static int xSJF = -1;
 	private static int xNP = -1;
-
 	private static int xP = -1;
 	private static int xRR = -1;
 	
@@ -58,44 +61,39 @@ public class GanttChart extends JFrame{
 	private static int prevFCFSBurstLength = -1;
 	private static int prevRRBurstLength = -1;
 	private static int prevSJFBurstLength = -1;
-
-	//private static int prevNonPreemptiveBurstLength = -1;
+	private static int prevNonPreemptiveBurstLength = -1;
 	private static int prevPreemptiveBurstLength = -1;
-	private static int prevSRTFBurstLength = -1;
-		
+	private static int prevSRTFBurstLength = -1;		
 	private static int prevNPBurstLength = -1;
+	
 	private int queue_ypos = -1;
-
-		
+	
 	private static Color darkBlue = new Color(0, 46, 70);
+	
 	private static int fcfsTimeCounter = 0;
 	private static int roundrobinTimeCounter = 0;
 	private static int sjfTimeCounter = 0;
-
-	//private static int nonpreemptiveTimeCounter = 0;
+	private static int nonpreemptiveTimeCounter = 0;
 	private static int preemptiveTimeCounter = 0;
 	private static int srtfTimeCounter = 0;
 	
-	/*
+	
 	private static int fcfsTimeLapse = 0;
 	private static int roundrobinTimeLapse = 0;
 	private static int sjfTimeLapse = 0;
 	private static int nonpreemptiveTimeLapse = 0;
 	private static int preemptiveTimeLapse = 0;
-	private static int srtfTimeLapse = 0;*/
-
-	private static int npTimeCounter = 0;
-	private static int fcfsTimeLapse = 0;
-	private static int roundrobinTimeLapse = 0;
-	private static int sjfTimeLapse = 0;
+	private static int srtfTimeLapse = 0;
 	private static int npTimeLapse = 0;
-	
+
 	public GanttChart(){
 		super("CPU Scheduling Gantt Chart");		
 		setExtendedState(MAXIMIZED_BOTH);
 		con = getContentPane();
 		con.setBackground(new Color(0, 46, 70));
-		con.setLayout(null);				
+		con.setLayout(null);
+		
+		preemptiveInnerPanel = new JPanel[50];
 	}
 	
 	public void init(int[] algorithms, long[] quanta){
@@ -172,7 +170,8 @@ public class GanttChart extends JFrame{
 				add(sjfPanel);				
 			}else if (algorithms[i] == SchedulingAlgorithm.NP_PRIO){
 				
-				TitledBorder title = BorderFactory.createTitledBorder(loweredbevel, "NonPreemptive Priority Queue", TitledBorder.ABOVE_TOP, TitledBorder.ABOVE_TOP, font, Color.WHITE);
+				TitledBorder title = BorderFactory.createTitledBorder(loweredbevel, 
+						"NonPreemptive Priority Queue", TitledBorder.ABOVE_TOP, TitledBorder.ABOVE_TOP, font, Color.WHITE);
 
 				
 				nonpreemptivePanel = new JPanel();
@@ -223,66 +222,9 @@ public class GanttChart extends JFrame{
 				srtfTimePanel.setBounds(100, queue_ypos + 70, 1150, 20);														
 								
 				add(srtfTimePanel);
-				add(srtfPanel);				
-
-				nonpreemptiveTimePanel.setBounds(100, queue_ypos + 70, 1150, 20);											
-				
-				nonpreemptiveTimePanel.add(nonpreemptiveTimeLabel[0]);
-								
-				add(nonpreemptiveTimePanel);
-				add(nonpreemptivePanel);
-
+				add(srtfPanel);								
 			}
-		}
-		
-		/*srtfPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		srtfPanel.setLayout(null);
-		srtfPanel.setBackground(new Color(0, 46, 70));
-		add(srtfPanel);
-		
-		sjfPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		sjfPanel.setLayout(null);
-		sjfPanel.setBackground(new Color(0, 46, 70));
-		add(sjfPanel);
-		
-		preemptivePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		preemptivePanel.setLayout(null);
-		preemptivePanel.setBackground(new Color(0, 46, 70));
-		add(preemptivePanel);
-		
-		nonpreemptivePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		nonpreemptivePanel.setLayout(null);
-		nonpreemptivePanel.setBackground(new Color(0, 46, 70));
-		add(nonpreemptivePanel);
-		
-		roundrobinPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		roundrobinPanel.setLayout(null);
-		roundrobinPanel.setBackground(new Color(0, 46, 70));
-		add(roundrobinPanel);
-		
-		fcfsLabel = new JLabel("FCFS Algorithm");
-		fcfsLabel.setForeground(Color.WHITE);
-		fcfsPanel.add(fcfsLabel);
-		
-		srtfLabel = new JLabel("SRTF Algorithm");
-		srtfLabel.setForeground(Color.WHITE);
-		fcfsPanel.add(srtfLabel);
-		
-		sjfLabel = new JLabel("SJF Algorithm");
-		sjfLabel.setForeground(Color.WHITE);
-		fcfsPanel.add(sjfLabel);
-		
-		preemptiveLabel = new JLabel("Preemptive Algorithm");
-		preemptiveLabel.setForeground(Color.WHITE);
-		fcfsPanel.add(preemptiveLabel);
-		
-		nonpreemptiveLabel = new JLabel("Non Preemptive Algorithm");
-		nonpreemptiveLabel.setForeground(Color.WHITE);
-		fcfsPanel.add(nonpreemptiveLabel);
-		
-		roundrobinLabel = new JLabel("Round Robin Algorithm");
-		roundrobinLabel.setForeground(Color.WHITE);
-		fcfsPanel.add(roundrobinLabel);*/
+		}	
 	}
 	
 	public static void addExecutingProcess(int processId, long executionTime, int algorithm) {
@@ -362,7 +304,7 @@ public class GanttChart extends JFrame{
 			comp.setBounds(xSJF, y, procLength, 37);
 			sjfTimePanel.repaint();					
 			
-		} /*else if (algorithm == SchedulingAlgorithm.NP_PRIO) {
+		} else if (algorithm == SchedulingAlgorithm.NP_PRIO) {
 			container = nonpreemptivePanel;
 			
 			if(prevNonPreemptiveBurstLength < 0){
@@ -385,6 +327,9 @@ public class GanttChart extends JFrame{
 			nonpreemptiveTimePanel.repaint();
 		} else if (algorithm == SchedulingAlgorithm.PRIO) {
 			container = preemptivePanel;
+			preemptiveInnerPanel[preemptiveInnerCounter] = new JPanel();
+			JLabel preemptiveLabel = new JLabel(processName, JLabel.CENTER);		
+			preemptiveInnerPanel[preemptiveInnerCounter].add(preemptiveLabel);
 			
 			if(prevPreemptiveBurstLength < 0){
 				xP = 4;
@@ -403,8 +348,11 @@ public class GanttChart extends JFrame{
 			
 			preemptiveTimeLapse += executionTime;
 			prevPreemptiveBurstLength = burstLength + ((burstLength < 20)? 20-burstLength : 0);
-			comp.setBounds(xP, y, procLength, 37);
+			preemptiveInnerPanel[preemptiveInnerCounter].setBounds(xP, y, procLength, 37);			
 			preemptiveTimePanel.repaint();
+			
+			preemptiveInnerPanel[preemptiveInnerCounter].setBackground(new Color(0, 183, 0));		
+			container.add(preemptiveInnerPanel[preemptiveInnerCounter++]);
 			
 		} else if (algorithm == SchedulingAlgorithm.SRTF) {
 			container = srtfPanel;
@@ -427,33 +375,12 @@ public class GanttChart extends JFrame{
 			prevSRTFBurstLength = burstLength + ((burstLength < 20)? 20-burstLength : 0);
 			comp.setBounds(xSRTF, y, procLength, 37);
 			srtfTimePanel.repaint();	
-		}*/else if( algorithm == SchedulingAlgorithm.NP_PRIO){
-			container = nonpreemptivePanel;
-			
-			if(prevNPBurstLength < 0){
-				xNP = 4;
-				y = 29;				
-			}else{				
-				xNP += prevNPBurstLength + 1;
-				
-				npTimeLapse += executionTime;
-				nonpreemptiveTimeLabel[npTimeCounter] = new JLabel("" + (npTimeLapse/1000));
-				nonpreemptiveTimeLabel[npTimeCounter].setFont(timeLabelFont);
-				nonpreemptiveTimeLabel[npTimeCounter].setForeground(Color.WHITE);
-				nonpreemptiveTimeLabel[npTimeCounter].setBounds(xFCFS, 0, 50, 10);
-				
-				nonpreemptiveTimePanel.add(nonpreemptiveTimeLabel[npTimeCounter++]);
-			}
-									
-			prevNPBurstLength = burstLength;		
-			System.out.println("burstLength: " + burstLength);
-			System.out.println("procLength: " + procLength);
-			comp.setBounds(xFCFS, y, procLength, 37);	
-			
 		}
-								
-		comp.setBackground(new Color(0, 183, 0));		
-		container.add(comp);
+							
+		if(algorithm != SchedulingAlgorithm.PRIO){
+			comp.setBackground(new Color(0, 183, 0));		
+			container.add(comp);
+		}
 										
 		container.repaint();
 		con.repaint();
@@ -507,7 +434,7 @@ public class GanttChart extends JFrame{
 			
 			sjfTimePanel.add(sjfTimeLabel[sjfTimeCounter++]);
 			sjfTimePanel.repaint();
-		}/*else if(algorithm == SchedulingAlgorithm.NP_PRIO){			
+		}else if(algorithm == SchedulingAlgorithm.NP_PRIO){			
 			nonpreemptiveTimeLabel[nonpreemptiveTimeCounter] = new JLabel("" + (nonpreemptiveTimeLapse/1000));
 			nonpreemptiveTimeLabel[nonpreemptiveTimeCounter].setFont(timeLabelFont);
 			nonpreemptiveTimeLabel[nonpreemptiveTimeCounter].setForeground(Color.WHITE);
@@ -531,48 +458,37 @@ public class GanttChart extends JFrame{
 			
 			srtfTimePanel.add(srtfTimeLabel[srtfTimeCounter++]);
 			srtfTimePanel.repaint();
-		}*/
+		}
 		
 	}
 
-	/*public static void updatePreemptedProcess(int id, long prevBurst, long burstLeft, int algorithm) {		
-		Container container = null;		
-		int prevBurstLength = (int)(prevBurst/100);
+	public static void updatePreemptedProcess(int index, long prevBurst, long burstLeft, int algorithm) {		
+		Container container = null;				
 		int burstLength = (int)(burstLeft/100);
-		int procLength = (prevBurstLength < 20)? 20: prevBurstLength;
-		String processName = "p" + id;		
+		int procLength = (burstLength < 20)? 20: burstLength;				
 		
-		JPanel comp = new JPanel();		
-		JLabel label = new JLabel(processName, JLabel.CENTER);		
-		comp.add(label);
-		
-		if(algorithm == SchedulingAlgorithm.SRTF){
-			container = srtfPanel;
+		if(algorithm == SchedulingAlgorithm.PRIO){
+			container = preemptivePanel;
 			
-			/*xSRTF -= (prevSRTFBurstLength + 1);													
+			preemptiveTimeLapse -= prevBurst;
+			preemptiveTimeLapse += burstLeft;
 			
-			srtfTimeLabel[srtfTimeCounter] = new JLabel("" + (srtfTimeLapse/1000));
-			srtfTimeLabel[srtfTimeCounter].setFont(timeLabelFont);
-			srtfTimeLabel[srtfTimeCounter].setForeground(Color.WHITE);
-			srtfTimeLabel[srtfTimeCounter].setBounds(xSRTF-5, 0, 50, 10);
+			preemptiveInnerPanel[index].setBackground(Color.RED);						
+			preemptiveInnerPanel[index].setSize(new Dimension(procLength, 37));														
+						
+			preemptiveTimeLabel[preemptiveTimeCounter] = new JLabel("" + (preemptiveTimeLapse/1000));
+			preemptiveTimeLabel[preemptiveTimeCounter].setFont(timeLabelFont);
+			preemptiveTimeLabel[preemptiveTimeCounter].setForeground(Color.WHITE);
+			preemptiveTimeLabel[preemptiveTimeCounter].setBounds(xP-5, 0, 50, 10);
+											
+			prevPreemptiveBurstLength = burstLength + ((burstLength < 20)? 20-burstLength : 0);									
 			
-			srtfTimePanel.add(srtfTimeLabel[srtfTimeCounter-1]);						
-			
-			srtfTimeLapse -= prevBurstLength;
-			srtfTimeLapse += burstLeft;
-			prevSRTFBurstLength = burstLength + ((burstLength < 20)? 20-burstLength : 0);
-			System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-			comp.setBounds(100, 29, 20, 37);
-			
-			//comp.setBackground(new Color(0, 183, 0));
-			//srtfTimePanel.repaint();	
-			//srtfTimePanel.revalidate();
+			preemptiveInnerPanel[preemptiveInnerCounter-1].repaint();
+			preemptiveTimePanel.repaint();				
 		}
-			
-		comp.setBackground(Color.RED);		
-		container.add(comp);										
+																
 		container.repaint();
 		con.repaint();
 		con.revalidate();
-	}*/
+	}
 }

@@ -10,11 +10,7 @@ public class Scheduler {
 	
 	private Object[] queues;
 	private Process[] processes;
-	private static Process currProcess = null;
-	
-	private FCFSQueue fcfsQueue;
-	private RRQueue rrQueue;
-	private NonPQueue nonpQueue;
+	private static Process currProcess = null;	
 	
 	public Scheduler(int numOfQueues){		
 		if (numOfQueues > MAX_QUEUE){
@@ -26,9 +22,34 @@ public class Scheduler {
 	}
 		
 	public void initProcesses(Process[] processes){
-		this.processes = processes; 
+		this.processes = processes;
+		if(queues[0] instanceof PQueue){
+			preSortSameArrivalTime();
+		}
 	}
 	
+	private void preSortSameArrivalTime() {
+		for(int i = 0; i < processes.length; i++){
+			for(int j = i; j < processes.length; j++){
+				if(processes[i].getArrivalTime() == processes[j].getArrivalTime() && processes[i].getPriority() > processes[j].getPriority()){
+					System.out.println("Swapping p" + processes[i].getId() + " and p" + processes[j].getId());
+					Process temp = processes[i];
+					processes[i] = processes[j];
+					processes[j] = temp; 
+				}
+			}			
+		}
+		printContents(processes);
+	}
+
+	private void printContents(Process[] processes2) {
+		System.out.print("[");
+		for(int i = 0; i < processes2.length; i++){
+			System.out.print("p" + processes2[i].getId());
+		}
+		System.out.println("]");		
+	}
+
 	public void simulate(){
 		thread.start();
 	}
@@ -42,7 +63,7 @@ public class Scheduler {
 			}else if (algorithms[i] == SchedulingAlgorithm.SJF){
 				queues[i] = new SJFQueue();
 			}else if (algorithms[i] == SchedulingAlgorithm.NP_PRIO){
-				queues[i] = new NPQueue();
+				queues[i] = new NonPQueue();
 			}else if (algorithms[i] == SchedulingAlgorithm.PRIO){
 				queues[i] = new PQueue();
 			}else if (algorithms[i] == SchedulingAlgorithm.SRTF){
@@ -61,8 +82,8 @@ public class Scheduler {
 			((RRQueue) queues[0]).enqueue(newProcess);
 		}else if(queues[0] instanceof SJFQueue){
 			((SJFQueue) queues[0]).enqueue(newProcess);
-		}else if(queues[0] instanceof NPQueue){
-			((NPQueue) queues[0]).enqueue(newProcess);
+		}else if(queues[0] instanceof NonPQueue){
+			((NonPQueue) queues[0]).enqueue(newProcess);
 		}else if(queues[0] instanceof PQueue){
 			((PQueue) queues[0]).enqueue(newProcess);
 		}else if(queues[0] instanceof SRTFQueue){
