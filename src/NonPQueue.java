@@ -51,7 +51,12 @@ public class NonPQueue {
 			while(running){					
 				if(getSize() > 0 && peekHead() != null){									
 					currProcess = dequeue();
-					timeStart = Scheduler.clockTime;
+					
+					if(timeEnd != 0){						
+						timeStart = timeEnd;
+					}else{
+						timeStart = Scheduler.clockTime;
+					}
 					
 					System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
 					
