@@ -106,7 +106,7 @@ public class Scheduler {
 								
 				for(int i = itr; i < processes.length; i++){								
 					if(processes[i].getArrivalTime() == clockTime){						
-						System.out.println("Insert process p" + processes[i].getId() + " time: " + clockTime);
+						System.out.println("Clock time: " + clockTime + " insert p" + processes[i].getId());
 						insertOnQueue(processes[i]);
 						itr++;
 					}else if(processes[i].getArrivalTime() > clockTime){

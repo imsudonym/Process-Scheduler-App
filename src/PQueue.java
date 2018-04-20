@@ -72,9 +72,7 @@ public class PQueue {
 	
 	Thread PThread = new Thread(){				
 		public void run(){
-			while(running){					
-				timeStart = 0; timeEnd = 0;
-													
+			while(running){									
 				if(getSize() > 0 && peekHead() != null){											
 					try {						
 						currProcess = dequeue();

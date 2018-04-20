@@ -92,8 +92,7 @@ public class PseudoArray {
 		printContents();
 	}
 	
-	public void sortNonPQ(){
-		System.out.println("sortNonPQ was called");
+	public void sortNonPQ(){		
 		Link current = list.first;
 		if(current != null){
 			long timeEnd = current.getValue().getBurstTime();
@@ -102,8 +101,7 @@ public class PseudoArray {
 				if(current.next == null){
 					continue;
 				}else if(current.next.getValue().getArrivalTime() == current.getValue().getArrivalTime()){
-					if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority
-						System.out.println("swapping");
+					if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority						
 						Process temp = current.getValue();
 						current.setValue(current.next.getValue());
 						current.next.setValue(temp);
@@ -111,8 +109,7 @@ public class PseudoArray {
 					}
 				}else if(current.next.getValue().getArrivalTime() > current.getValue().getArrivalTime() &&
 					current.next.getValue().getArrivalTime() <= timeEnd && current.getValue().getArrivalTime() <= timeEnd){
-					if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority
-						System.out.println("swapping");
+					if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority						
 						Process temp = current.getValue();
 						current.setValue(current.next.getValue());
 						current.next.setValue(temp);
@@ -123,7 +120,7 @@ public class PseudoArray {
 				current = current.next;
 			}
 			
-			printContents();
+			//printContents();
 		}
 	}
 	
