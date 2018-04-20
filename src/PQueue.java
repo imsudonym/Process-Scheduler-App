@@ -4,10 +4,9 @@ public class PQueue {
 	private PseudoArray array = new PseudoArray(20);
 	private Process currProcess;
 	private boolean running = false;
+	private boolean preempted = false;
 	private byte allProcessesDone = 1;
-	private long timeStart;
-	private long timeArrive;	
-	private long timeEnd;
+	private long prevTime	
 	
 	public PQueue(){		
 		startThread();
@@ -23,12 +22,9 @@ public class PQueue {
 		running = false;
 	}
 	
-	public void enqueue(Process newProcess){
-		
-		timeArrive = System.currentTimeMillis();
-		
-		array.add(newProcess);		
+	public void enqueue(Process newProcess){		
 		deterMineIfToPreempt(newProcess);	
+		array.add(newProcess);				
 		sortPriority();
 		allProcessesDone = 0;
 	}	
@@ -37,15 +33,17 @@ public class PQueue {
 		if(currProcess != null){
 			int currPriority = currProcess.getPriority();
 			int newPriority = newProcess.getPriority();			
-			System.out.println("" + currPriority + " > " + newPriority);
-			if(currPriority > newPriority){
-				preempt();
+			//System.out.println("" + currPriority + " > " + newPriority);
+			if(currPriority > newPriority){		
+				preempt(newProcess);
 			}
 		}
 	}
 
-	private void preempt() {
-		PThread.interrupt();				
+	private void preempt(Process newProcess) {		
+		preempted = false;
+		System.out.println("p" + currProcess.getId() + " = " + currProcess.getBurstTime());
+		currProcess = newProcess;		
 	}
 
 	public Process dequeue(){
@@ -74,47 +72,32 @@ public class PQueue {
 		public void run(){
 			while(running){									
 				if(getSize() > 0 && peekHead() != null){											
-					try {						
-						currProcess = dequeue();
-						timeStart = System.currentTimeMillis();	
+					if(!preempted)
+						currProcess = peekHead();								
+					long timeNow = Scheduler.clockTime;
+					
+					if(prevTime < timeNow){
+						long lapse = timeNow - currProcess.getArrivalTime();
+						long burstLeft = currProcess.getBurstTime() - lapse;					
+						currProcess.setBurstTime(burstLeft);					
+						GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getBurstTime(), SchedulingAlgorithm.PRIO);
 						
-						System.out.println("Process p" + currProcess.getId() + " executing...");											
-						
-						long burstTime = currProcess.getBurstTime();	
-						GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.PRIO);																				
-								
-						Thread.sleep(currProcess.getBurstTime());						
-						System.out.println("Done executing.");						
-						
-						timeEnd = System.currentTimeMillis();
-						
-					} catch (InterruptedException e) {
-
-						currProcess.setPreempted();
-						System.out.println("Process preempted!");
-												
-						long lapse = (timeStart == 0)? 0 : (timeArrive - timeStart);						
-						long burstLeft = currProcess.getBurstTime() - lapse;							
-						
-						System.out.println("lapse: " + lapse + "\n burstLeft: " + burstLeft);						
-						
-						GanttChart.updatePreemptedProcess(GanttChart.preemptiveInnerCounter-1, currProcess.getBurstTime(), lapse, SchedulingAlgorithm.PRIO);
-						try {
-							Thread.sleep(1);
-						} catch (InterruptedException e1) {							
-						}
-						currProcess.setBurstTime(burstLeft);
-						enqueue(currProcess);																			
-					}	
+						if(currProcess.getBurstTime() <= 0){
+							dequeue();						
+							GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getBurstTime(), SchedulingAlgorithm.PRIO);
+							System.out.println("Process p" + currProcess.getId() + " Done executing.");
+						}													
+					}
+					preempted = false;
+					prevTime = timeNow;
 					
 				}else{										
+				
 					if (allProcessesDone == 0){
 						GanttChart.addLastCompletionTime(SchedulingAlgorithm.PRIO);		
 						allProcessesDone = 1;						
-					}
+					}		
 				}
-				
-				
 			}
 		}
 	};
