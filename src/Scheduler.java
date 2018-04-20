@@ -4,8 +4,7 @@ public class Scheduler {
 	private int numOfQueues = 0;
 	
 	private int itr = 0;
-	private long timeStart = 0;
-	private long timeArrive = 0;	
+	public static long clockTime = 0;	
 	private long prevArrivalTime = 0;
 	
 	private Object[] queues;
@@ -51,7 +50,8 @@ public class Scheduler {
 	}
 
 	public void simulate(){
-		thread.start();
+		//thread.start();
+		clock.start();
 	}
 	
 	public void generateQueues(int[] algorithms, long[] quantums){
@@ -74,7 +74,7 @@ public class Scheduler {
 	}			
 	
 	private void insertOnQueue(Process newProcess){				
-		timeArrive = System.currentTimeMillis();	
+		//timeArrive = System.currentTimeMillis();	
 		
 		if(queues[0] instanceof FCFSQueue){
 			((FCFSQueue) queues[0]).enqueue(newProcess);		
@@ -100,6 +100,29 @@ public class Scheduler {
 		GanttChart.addNewArrivedProcess(newProcess.getId(), arrivalTime, burstTime);
 	}		
 	
+	Thread clock = new Thread(){
+		public void run(){
+			while(true){				
+								
+				for(int i = itr; i < processes.length; i++){								
+					if(processes[i].getArrivalTime() == clockTime){						
+						System.out.println("Insert process p" + processes[i].getId() + " time: " + clockTime);
+						insertOnQueue(processes[i]);
+						itr++;
+					}else if(processes[i].getArrivalTime() > clockTime){
+						break;
+					}
+				}
+								
+				clockTime++;
+				
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {}
+			}
+		}
+	};
+	
 	// Thread to allow arrival time latency
 	Thread thread = new Thread(){
 		public void run(){
@@ -108,8 +131,6 @@ public class Scheduler {
 					while(itr < processes.length){									
 						process = processes[itr++]; 
 						try {
-							
-							//Process arrival time delay
 							if(prevArrivalTime != process.getArrivalTime()){
 								System.out.println("arrivalTime = " + process.getArrivalTime());
 								Thread.sleep(process.getArrivalTime());
@@ -119,8 +140,7 @@ public class Scheduler {
 							e.printStackTrace();
 						}
 							// Add process on scheduler queue for execution
-							System.out.println("Insert process p" + process.getId());
-							insertOnQueue(process);										
+																	
 					}
 				}
 			}

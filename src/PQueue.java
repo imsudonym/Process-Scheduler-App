@@ -103,8 +103,7 @@ public class PQueue {
 						GanttChart.updatePreemptedProcess(GanttChart.preemptiveInnerCounter-1, currProcess.getBurstTime(), lapse, SchedulingAlgorithm.PRIO);
 						try {
 							Thread.sleep(1);
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
+						} catch (InterruptedException e1) {							
 						}
 						currProcess.setBurstTime(burstLeft);
 						enqueue(currProcess);																			
