@@ -20,10 +20,10 @@ public class Main {
 		}
 		
 		System.out.println("Choose which algorithm to use: ");
-		System.out.println("0 - FCFS\n1 - SJF\n2 - SRTF\n3 - NP_PRIO\n4 - PRIO\n5 - RR\nCHOICE: ");
+		System.out.print("0 - FCFS\n1 - SJF\n2 - SRTF\n3 - NP_PRIO\n4 - PRIO\n5 - RR\nCHOICE: ");
 		algorithm = scan.nextInt();
 		
-		int algorithms[] = {SchedulingAlgorithm.FCFS};
+		int algorithms[] = {SchedulingAlgorithm.SJF};
 		long respectiveQuantum[] = {2000};
 		
 		processes = new Process[noOfProcesses];
@@ -67,7 +67,7 @@ public class Main {
 		Process temp;
 		for(int i = 0; i < noOfProcesses; i++){  
 			for(int j = 1; j < (noOfProcesses - i); j++){  
-				if(arrivalTime[j - 1] > arrivalTime[j]){  
+				if(processes[j - 1].getArrivalTime() > processes[j].getArrivalTime()){  
 					//swap elements  
 					temp = processes[j-1];
 					processes[j-1] = processes[j];				
@@ -75,6 +75,12 @@ public class Main {
 				}
 			}
     }
+		
+		System.out.println("PID		Arrival Time 		Burst Time");
+		for(int i = 0; i < noOfProcesses; i++){
+			//processes[i] = new Process(i+1, arrivalTime[i], burstTime[i], 0);
+			System.out.println(" " + processes[i].getId() + " 		" + processes[i].getArrivalTime() + "			" + processes[i].getBurstTime());
+		}
 
 		scheduler.initProcesses(processes);
 		scheduler.simulate();
