@@ -56,11 +56,11 @@ public class Main {
 				System.out.println(" " + (i+1) + " 		" + arrivalTime[i] + "			" + burstTime[i]);
 			}
 		}else if(algorithm == SchedulingAlgorithm.NP_PRIO || algorithm == SchedulingAlgorithm.PRIO){
-			System.out.println("PID		Arrival Time 		Burst Time		Priority");
+			System.out.println("PID		Arrival Time 		Burst Time	Priority");
 			for(int i = 0; i < noOfProcesses; i++){
 				priority[i] = rand.nextInt(20)+1;
 				processes[i] = new Process(i+1, arrivalTime[i], burstTime[i], priority[i]);
-				System.out.println(" " + (i+1) + " 		" + arrivalTime[i] + "			" + burstTime[i] + "	" + priority[i]);
+				System.out.println(" " + (i+1) + " 		" + arrivalTime[i] + "			" + burstTime[i] + "		" + priority[i]);
 			}
 		}
 		
