@@ -23,7 +23,8 @@ public class Main {
 		System.out.print("0 - FCFS\n1 - SJF\n2 - SRTF\n3 - NP_PRIO\n4 - PRIO\n5 - RR\nCHOICE: ");
 		algorithm = scan.nextInt();
 		
-		int algorithms[] = {SchedulingAlgorithm.SJF};
+		//int algorithms[] = {SchedulingAlgorithm.FCFS};
+		int algorithms[] = {algorithm};
 		long respectiveQuantum[] = {2000};
 		
 		processes = new Process[noOfProcesses];
@@ -76,10 +77,11 @@ public class Main {
 			}
     }
 		
-		System.out.println("PID		Arrival Time 		Burst Time");
+		System.out.println("PID		Arrival Time 		Burst Time		Priority");
 		for(int i = 0; i < noOfProcesses; i++){
 			//processes[i] = new Process(i+1, arrivalTime[i], burstTime[i], 0);
-			System.out.println(" " + processes[i].getId() + " 		" + processes[i].getArrivalTime() + "			" + processes[i].getBurstTime());
+			System.out.println(" " + processes[i].getId() + " 		" + processes[i].getArrivalTime() + "			" + processes[i].getBurstTime() +
+													"		" + processes[i].getPriority());
 		}
 
 		scheduler.initProcesses(processes);
