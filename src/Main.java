@@ -11,7 +11,7 @@ public class Main {
 	//burstTime 0-50
 	//noOfProcesses 0-20
 	public static void main(String[] args) {
-		
+
 		System.out.println("Enter number of processes: ");
 		scan = new Scanner(System.in);
 		noOfProcesses = scan.nextInt();
@@ -45,7 +45,7 @@ public class Main {
 		}
 		/*
 		processes[0] = new Process(1, 0, 10000, 5);
-		processes[1] = new Process(2, 1000, 2000, 2);
+		processes[1] = new Process(2, 1000, 2000, 4);
 		processes[2] = new Process(3, 1000, 1000, 1);
 		processes[3] = new Process(4, 5000, 5000, 4);
 		processes[4] = new Process(5, 5000, 3000, 3);

@@ -1,9 +1,9 @@
-
 public class NonPQueue {
 		
 	private PseudoArray array = new PseudoArray(20);
 	private Process currProcess;
 	private boolean running = false;
+	private byte allProcessesDone = 1;
 	private long timeStart;
 	private long timeEnd;
 	
@@ -25,11 +25,11 @@ public class NonPQueue {
 		
 		array.add(newProcess);
 		array.sortNonPQ();
-		//displayQueue(newProcess);		
+		allProcessesDone = 0;		
 	}	
 	
 	public Process dequeue(){
-		
+					
 		Process prc = array.remove();											
 		return prc;
 	}
@@ -67,13 +67,18 @@ public class NonPQueue {
 
 						timeEnd = System.currentTimeMillis();
 						
+						
 					} catch (InterruptedException e) {
 
 						currProcess.setPreempted();
 						System.out.println("Process preempted!");
-						//insertOnQueue(currProcess);
 
 					}	
+				}else{										
+					if (allProcessesDone == 0){
+						GanttChart.addLastCompletionTime(SchedulingAlgorithm.NP_PRIO);		
+						allProcessesDone = 1;						
+					}
 				}
 			}
 		}
