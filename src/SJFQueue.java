@@ -54,38 +54,40 @@ public class SJFQueue {
 	Thread SJFThread = new Thread(){				
 		public void run(){
 			while(running){					
-				timeStart = 0; timeEnd = 0;
-													
-				if(getSize() > 0 && peekHead() != null){											
-					try {
-						
-						currProcess = dequeue();			
-						System.out.println("Process p" + currProcess.getId() + " executing...");
-						timeStart = System.currentTimeMillis();							
-						
-						long burstTime = currProcess.getBurstTime();	
-						GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.SJF);																				
+				if(getSize() > 0 && peekHead() != null){									
+					currProcess = dequeue();
+					
+					if(timeEnd != 0){						
+						timeStart = timeEnd;
+					}else{
+						timeStart = Scheduler.clockTime;
+					}
+					
+					System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
+					
+					long burstTime = currProcess.getBurstTime();																								
+					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.SJF);
+					System.out.println("burstTime: " + burstTime);
+					System.out.println("clockTime: " + Scheduler.clockTime);
+					
+					while(Scheduler.clockTime != (timeStart + burstTime)){					
+						try {
+							Thread.sleep(1);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}				
+					}
 								
-						Thread.sleep(currProcess.getBurstTime());						
-						System.out.println("Done executing.");
-												
-						timeEnd = System.currentTimeMillis();
-						
-					} catch (InterruptedException e) {
-
-						currProcess.setPreempted();
-						System.out.println("Process preempted!");
-						//insertOnQueue(currProcess);
-						
-					}	
-				}else{										
+					timeEnd = Scheduler.clockTime;											
+					System.out.println("  burstTime: " + burstTime);
+					System.out.println("Done executing. timeEnd = " + timeEnd);			
+				
+				}else{				
 					if (allProcessesDone == 0){
 						GanttChart.addLastCompletionTime(SchedulingAlgorithm.SJF);		
 						allProcessesDone = 1;						
 					}
 				}
-				
-				
 			}
 		}
 	};

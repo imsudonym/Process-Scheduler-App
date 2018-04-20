@@ -35,7 +35,7 @@ public class NonPQueue {
 	}
 	
 	public Process peekHead(){
-		return array.get(0).getValue(); 
+		return array.getHead().getValue(); 
 	}
 	
 	public Process peekTail(){
@@ -49,32 +49,35 @@ public class NonPQueue {
 	Thread NonPThread = new Thread(){		
 		public void run(){
 			while(running){					
-				timeStart = 0; timeEnd = 0;
-										
-				if((currProcess = dequeue()) != null){						
-					try {
-						
-						System.out.println("Process p" + currProcess.getId() + " executing...");
-						timeStart = System.currentTimeMillis();							
-						
-						long burstTime = currProcess.getBurstTime();																									
-						GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);																				
+				if(getSize() > 0 && peekHead() != null){									
+					currProcess = dequeue();
+					
+					if(timeEnd != 0){						
+						timeStart = timeEnd;
+					}else{
+						timeStart = Scheduler.clockTime;
+					}
+					
+					System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
+					
+					long burstTime = currProcess.getBurstTime();																								
+					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);
+					System.out.println("burstTime: " + burstTime);
+					System.out.println("clockTime: " + Scheduler.clockTime);
+					
+					while(Scheduler.clockTime != (timeStart + burstTime)){					
+						try {
+							Thread.sleep(1);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}				
+					}
 								
-						Thread.sleep(currProcess.getBurstTime());
-						System.out.println("Done executing.");
-
-						array.sortNonPQ();
-
-						timeEnd = System.currentTimeMillis();
-						
-						
-					} catch (InterruptedException e) {
-
-						currProcess.setPreempted();
-						System.out.println("Process preempted!");
-
-					}	
-				}else{										
+					timeEnd = Scheduler.clockTime;											
+					System.out.println("  burstTime: " + burstTime);
+					System.out.println("Done executing. timeEnd = " + timeEnd);			
+				
+				}else{				
 					if (allProcessesDone == 0){
 						GanttChart.addLastCompletionTime(SchedulingAlgorithm.NP_PRIO);		
 						allProcessesDone = 1;						
