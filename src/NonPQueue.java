@@ -1,4 +1,3 @@
-
 public class NonPQueue {
 		
 	private PseudoArray array = new PseudoArray(20);

@@ -76,7 +76,7 @@ public class SJFQueue {
 						currProcess.setPreempted();
 						System.out.println("Process preempted!");
 						//insertOnQueue(currProcess);
-																			
+						
 					}	
 				}else{										
 					if (allProcessesDone == 0){
