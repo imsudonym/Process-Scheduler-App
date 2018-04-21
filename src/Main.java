@@ -96,6 +96,7 @@ public class Main {
 													"		" + processes[i].getPriority());
 		}
 
+		// Uncomment below to start simulation.
 		//scheduler.initProcesses(processes);
 		//scheduler.simulate();
 	}
