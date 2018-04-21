@@ -354,6 +354,7 @@ public class GanttChart extends JFrame{
 			
 			fcfsTimeLabel[fcfsTimeCounter] = new JLabel("" + fcfsTimeLapse);
 			fcfsTimeLabel[fcfsTimeCounter].setFont(timeLabelFont);
+			fcfsTimeLabel[fcfsTimeCounter].setForeground(Color.WHITE);
 			fcfsTimeLabel[fcfsTimeCounter].setBounds(xFCFS + 1, 2, 30, 15);
 			
 			fcfsTimePanel.add(fcfsTimeLabel[fcfsTimeCounter++]);
@@ -379,12 +380,14 @@ public class GanttChart extends JFrame{
 			}
 			
 			roundrobinTimeLabel[roundrobinTimeCounter] = new JLabel("" + roundrobinTimeLapse);
-			roundrobinTimeLabel[roundrobinTimeCounter].setFont(timeLabelFont);			
+			roundrobinTimeLabel[roundrobinTimeCounter].setFont(timeLabelFont);
+			roundrobinTimeLabel[roundrobinTimeCounter].setForeground(Color.WHITE);
 			roundrobinTimeLabel[roundrobinTimeCounter].setBounds(xRR + 1, 2, 30, 15);
 			
 			roundrobinTimePanel.add(roundrobinTimeLabel[roundrobinTimeCounter++]);
+						
+			roundrobinTimeLapse += executionTime;			
 			
-			roundrobinTimeLapse += executionTime;
 			prevRRBurstLength = 50;					
 			comp.setBounds(xRR, y, 50, 51);	
 			roundrobinTimePanel.repaint();
@@ -405,7 +408,8 @@ public class GanttChart extends JFrame{
 			}
 			
 			sjfTimeLabel[sjfTimeCounter] = new JLabel("" + sjfTimeLapse);
-			sjfTimeLabel[sjfTimeCounter].setFont(timeLabelFont);			
+			sjfTimeLabel[sjfTimeCounter].setFont(timeLabelFont);
+			sjfTimeLabel[sjfTimeCounter].setForeground(Color.WHITE);			
 			sjfTimeLabel[sjfTimeCounter].setBounds(xSJF + 1, 2, 30, 15);
 			
 			sjfTimePanel.add(sjfTimeLabel[sjfTimeCounter++]);						
@@ -432,6 +436,7 @@ public class GanttChart extends JFrame{
 			
 			nonpreemptiveTimeLabel[nonpreemptiveTimeCounter] = new JLabel("" + nonpreemptiveTimeLapse);
 			nonpreemptiveTimeLabel[nonpreemptiveTimeCounter].setFont(timeLabelFont);
+			nonpreemptiveTimeLabel[nonpreemptiveTimeCounter].setForeground(Color.WHITE);
 			nonpreemptiveTimeLabel[nonpreemptiveTimeCounter].setBounds(xNP + 1, 2, 30, 15);
 			
 			nonpreemptiveTimePanel.add(nonpreemptiveTimeLabel[nonpreemptiveTimeCounter++]);						
@@ -458,6 +463,7 @@ public class GanttChart extends JFrame{
 			
 			preemptiveTimeLabel[preemptiveTimeCounter] = new JLabel("" + preemptiveTimeLapse);
 			preemptiveTimeLabel[preemptiveTimeCounter].setFont(timeLabelFont);
+			preemptiveTimeLabel[preemptiveTimeCounter].setForeground(Color.WHITE);
 			preemptiveTimeLabel[preemptiveTimeCounter].setBounds(xP + 1, 2, 30, 15);
 			
 			preemptiveTimePanel.add(preemptiveTimeLabel[preemptiveTimeCounter++]);

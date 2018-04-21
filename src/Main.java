@@ -24,7 +24,7 @@ public class Main {
 		System.out.print("0 - FCFS\n1 - SJF\n2 - SRTF\n3 - NP_PRIO\n4 - PRIO\n5 - RR\nCHOICE: ");
 		algorithm = scan.nextInt();*/
 		
-		int algorithms[] = {SchedulingAlgorithm.SRTF};
+		int algorithms[] = {SchedulingAlgorithm.RR};
 		int respectiveQuantum[] = {2};
 		
 		processes = new Process[10];
