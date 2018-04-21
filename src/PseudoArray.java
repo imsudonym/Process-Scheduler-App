@@ -79,8 +79,8 @@ public class PseudoArray {
 				if(current.next == null)
 					break;
 				
-				long currPriority = current.getValue().getPriority();
-				long nextPriority = current.next.getValue().getPriority();												
+				int currPriority = current.getValue().getPriority();
+				int nextPriority = current.next.getValue().getPriority();												
 				
 				if(currPriority > nextPriority){					
 					Process temp = current.getValue();
@@ -97,7 +97,7 @@ public class PseudoArray {
 	public void sortNonPQ(){		
 		Link current = list.first;
 		if(current != null){
-			long timeEnd = current.getValue().getBurstTime();
+			long timeEnd = current.getValue().getArrivalTime() + current.getValue().getBurstTime();
 			
 			for(int i = 0; i <= ctr-1; i++){
 				if(current.next == null){
