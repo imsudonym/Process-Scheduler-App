@@ -24,7 +24,7 @@ public class NonPQueue {
 	public void enqueue(Process newProcess){
 		
 		array.add(newProcess);
-		array.sortNonPQ();
+		array.sortPriority();
 		allProcessesDone = 0;		
 	}	
 	
@@ -61,7 +61,7 @@ public class NonPQueue {
 					System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
 					
 					long burstTime = currProcess.getBurstTime();																								
-					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);
+					//GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);
 					System.out.println("burstTime: " + burstTime);
 					System.out.println("clockTime: " + Scheduler.clockTime);
 					
@@ -79,7 +79,7 @@ public class NonPQueue {
 				
 				}else{				
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.NP_PRIO);		
+						//GanttChart.addLastCompletionTime(SchedulingAlgorithm.NP_PRIO);		
 						allProcessesDone = 1;						
 					}
 				}

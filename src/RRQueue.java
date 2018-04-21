@@ -7,9 +7,7 @@ public class RRQueue {
 	private boolean running = false;
 	private byte allProcessesDone = 1;
 	private long quantum = 0;
-	private boolean preempted = false;
-	private long prevTime;
-	private long timeNow; 
+	private long prevTime;	
 	private long timeStart;
 	private long timeEnd;
 
@@ -105,40 +103,8 @@ public class RRQueue {
 							timeEnd = Scheduler.clockTime;
 							timeStart = -1;
 						}													
-					}
-					preempted = false;
-					prevTime = timeNow;	
-					
-					/*if(prevTime < timeNow){
-						
-						if(timeNow == prevTimeQuantum + quantum){							
-							//enqueue(dequeue());
-							//currProcess = peekHead(); 
-							System.out.println("prevTime: " + prevTime + " timeNow: " + timeNow);
-							prevTimeQuantum = timeNow;		
-						}
-						
-						/*long lapse = timeNow - currProcess.getArrivalTime();
-						long burstLeft = currProcess.getBurstTime() - lapse;					
-						currProcess.setBurstTime(burstLeft);				
-						System.out.println("burstLeft: " + burstLeft);
-						//GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getBurstTime(), SchedulingAlgorithm.RR);
-						
-						if(currProcess.getBurstTime() <= 0){
-							dequeue();						
-							///GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getBurstTime(), SchedulingAlgorithm.RR);
-							System.out.println("Process p" + currProcess.getId() + " Done executing.");
-						}
-						System.out.println("prevTime: " + prevTime + " timeNow: " + timeNow);
-					}
-					preempted = false;		
-					prevTime = timeNow;*/		
-					/*try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}*/
-					
+					}					
+					prevTime = timeNow;										
 				}else{										
 				
 					if (allProcessesDone == 0){

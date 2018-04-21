@@ -33,7 +33,6 @@ public class PQueue {
 		if(currProcess != null){
 			int currPriority = currProcess.getPriority();
 			int newPriority = newProcess.getPriority();			
-			//System.out.println("" + currPriority + " > " + newPriority);
 			if(currPriority > newPriority){		
 				preempt(newProcess);
 			}

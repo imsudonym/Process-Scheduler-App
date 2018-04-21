@@ -2,6 +2,7 @@
 public class Process {
 	private int id;
 	private long arrivalTime;
+	private long burstNeeded;
 	private long burstTime;
 	private int priority;
 	private int timesPreempted = 0;
@@ -10,11 +11,16 @@ public class Process {
 		this.id = id;
 		this.arrivalTime = arrivalTime;
 		this.burstTime = burstTime;
+		this.burstNeeded = burstTime;
 		this.priority = priority;
 	}
 	
 	public int getId(){
 		return id;
+	}
+	
+	public long getBurstNeeded(){
+		return burstNeeded;
 	}
 	
 	public long getArrivalTime(){

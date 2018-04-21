@@ -56,8 +56,8 @@ public class PseudoArray {
 				if(current.next == null)
 					break;
 				
-				long currBurst = current.getValue().getBurstTime();
-				long nextBurst = current.next.getValue().getBurstTime();												
+				long currBurst = current.getValue().getBurstNeeded();
+				long nextBurst = current.next.getValue().getBurstNeeded();												
 				
 				if(currBurst > nextBurst){					
 					Process temp = current.getValue();
