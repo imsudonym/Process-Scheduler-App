@@ -1,37 +1,39 @@
 
 public class Process {
 	private int id;
-	private long arrivalTime;
-	private long burstNeeded;
-	private long burstTime;
+	private int arrivalTime;
+	private int burstNeeded;
+	private int burstTime;
 	private int priority;
 	private int timesPreempted = 0;
+	private int prevBurstPreempted;
 	
-	public Process(int id, long arrivalTime, long burstTime, int priority){
+	public Process(int id, int arrivalTime, int burstTime, int priority){
 		this.id = id;
 		this.arrivalTime = arrivalTime;
-		this.burstTime = burstTime;
+		this.burstTime = burstTime;		
 		this.burstNeeded = burstTime;
-		this.priority = priority;
+		this.prevBurstPreempted = burstTime;
+		this.priority = priority;		
 	}
 	
 	public int getId(){
 		return id;
 	}
 	
-	public long getBurstNeeded(){
+	public int getBurstNeeded(){
 		return burstNeeded;
 	}
 	
-	public long getArrivalTime(){
+	public int getArrivalTime(){
 		return arrivalTime;
 	}
 	
-	public void setBurstTime(long burstLeft){
+	public void setBurstTime(int burstLeft){
 		this.burstTime = burstLeft;
 	}
 	
-	public long getBurstTime(){
+	public int getBurstTime(){
 		return burstTime;
 	}
 	
@@ -45,6 +47,14 @@ public class Process {
 	
 	public void setPreempted(){
 		timesPreempted++;
+	}
+
+	public int getPrevBurstPreempted() {
+		return prevBurstPreempted;
+	}
+
+	public void setPrevBurstPreempted(int prevBurstPreempted) {
+		this.prevBurstPreempted = prevBurstPreempted;
 	}
 
 }

@@ -51,12 +51,12 @@ public class FCFSQueue {
 						timeStart = Scheduler.clockTime;
 					}
 					
-					System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
+					//System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
 					
-					long burstTime = currProcess.getBurstTime();																								
+					int burstTime = currProcess.getBurstTime();																								
 					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.FCFS);
-					System.out.println("burstTime: " + burstTime);
-					System.out.println("clockTime: " + Scheduler.clockTime);
+					//System.out.println("burstTime: " + burstTime);
+					//System.out.println("clockTime: " + Scheduler.clockTime);
 					
 					while(Scheduler.clockTime != (timeStart + burstTime)){					
 						try {
@@ -67,8 +67,8 @@ public class FCFSQueue {
 					}
 								
 					timeEnd = Scheduler.clockTime;											
-					System.out.println("  burstTime: " + burstTime);
-					System.out.println("Done executing. timeEnd = " + timeEnd);			
+					//System.out.println("  burstTime: " + burstTime);
+					//System.out.println("Done executing. timeEnd = " + timeEnd);			
 				
 				}else{				
 					if (allProcessesDone == 0){
