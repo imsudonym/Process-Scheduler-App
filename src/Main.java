@@ -31,10 +31,10 @@ public class Main {
 		long arrivalTime[] = new long[noOfProcesses];
 		int priority[] = new int[noOfProcesses];
 		
-		GanttChart gantt = new GanttChart();
-		gantt.setVisible(true);
-		gantt.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		gantt.init(algorithms, respectiveQuantum);
+		//GanttChart gantt = new GanttChart();
+		//gantt.setVisible(true);
+		//gantt.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//gantt.init(algorithms, respectiveQuantum);
 		
 		Scheduler scheduler = new Scheduler(algorithms.length);	
 		scheduler.generateQueues(algorithms, respectiveQuantum);
