@@ -6,7 +6,7 @@ public class PQueue {
 	private boolean running = false;
 	private boolean preempted = false;
 	private byte allProcessesDone = 1;
-	private long prevTime	
+	private long prevTime;
 	
 	public PQueue(){		
 		startThread();
@@ -77,14 +77,16 @@ public class PQueue {
 					long timeNow = Scheduler.clockTime;
 					
 					if(prevTime < timeNow){
-						long lapse = timeNow - currProcess.getArrivalTime();
+						long lapse = timeNow - prevTime;
+						System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
 						long burstLeft = currProcess.getBurstTime() - lapse;					
-						currProcess.setBurstTime(burstLeft);					
-						GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getBurstTime(), SchedulingAlgorithm.PRIO);
+						currProcess.setBurstTime(burstLeft);		
+						System.out.println("   burstLeft: " + burstLeft);
+						//GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getBurstTime(), SchedulingAlgorithm.PRIO);
 						
 						if(currProcess.getBurstTime() <= 0){
 							dequeue();						
-							GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getBurstTime(), SchedulingAlgorithm.PRIO);
+							//GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getBurstTime(), SchedulingAlgorithm.PRIO);
 							System.out.println("Process p" + currProcess.getId() + " Done executing.");
 						}													
 					}

@@ -22,7 +22,9 @@ public class PseudoArray {
 			
 		}else{
 			throw new java.lang.RuntimeException("ArrayIndexOutOfBounds.");
-		}		
+		}	
+		
+		//printContents();
 	}
 	
 	public Link getHead(){

@@ -24,9 +24,9 @@ public class Main {
 		algorithm = scan.nextInt();*/
 		
 		int algorithms[] = {SchedulingAlgorithm.PRIO};
-		long respectiveQuantum[] = {2000};
+		long respectiveQuantum[] = {2};
 		
-		processes = new Process[5];
+		processes = new Process[10];
 		long burstTime[] = new long[noOfProcesses];
 		long arrivalTime[] = new long[noOfProcesses];
 		int priority[] = new int[noOfProcesses];
@@ -44,6 +44,11 @@ public class Main {
 		processes[2] = new Process(3, 2, 10, 2);
 		processes[3] = new Process(4, 3, 10, 5);
 		processes[4] = new Process(5, 4, 10, 4);
+		processes[5] = new Process(6, 5, 10, 3);
+		processes[6] = new Process(7, 6, 10, 1);
+		processes[7] = new Process(8, 7, 10, 2);
+		processes[8] = new Process(9, 8, 10, 5);
+		processes[9] = new Process(10, 9, 10, 4);
 		
 		/*Random rand = new Random();
 		int tmp1, tmp2;
