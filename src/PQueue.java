@@ -6,6 +6,7 @@ public class PQueue {
 	private Process prevProcess;
 	private boolean running = false;
 	private boolean preempted = false;
+	private int numOfProcesses;
 	private byte allProcessesDone = 1;
 	private long prevTime;
 	
@@ -21,13 +22,25 @@ public class PQueue {
 	public void stopThread(){
 		PThread.interrupt();
 		running = false;
+		reset();
 	}
 	
-	public void enqueue(Process newProcess){		
+	private void reset(){
+		currProcess = null;
+		prevProcess = null;
+		running = false;
+		preempted = false;
+		numOfProcesses = 0;
+		allProcessesDone = 1;	
+		prevTime = 0;
+	}
+	
+	public void enqueue(Process newProcess){
+		numOfProcesses--;
 		deterMineIfToPreempt(newProcess);	
 		array.add(newProcess);				
 		sortPriority();
-		allProcessesDone = 0;
+		allProcessesDone = 0;		
 	}	
 	
 	private void deterMineIfToPreempt(Process newProcess) {
@@ -43,7 +56,12 @@ public class PQueue {
 	private void preempt(Process newProcess) {		
 		preempted = true;
 		System.out.println("p" + currProcess.getId() + " = " + currProcess.getBurstTime());
-		prevProcess = currProcess;
+		
+		int burstNeeded = currProcess.getBurstNeeded();
+		int burstTime = currProcess.getBurstTime(); 
+		if(burstNeeded-burstTime > 0){
+			prevProcess = currProcess;
+		}
 		currProcess = newProcess;		
 	}
 
@@ -81,25 +99,29 @@ public class PQueue {
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-						int burstPreempted = prevProcess.getBurstTime();
-						prevProcess.setPrevBurstPreempted(burstPreempted);
-						GanttChart.addExecutingProcess(prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.PRIO);						
+						
+						if(prevProcess != null){
+							int burstPreempted = prevProcess.getBurstTime();
+							System.out.println("burstPreempted: " + burstPreempted);
+							prevProcess.setPrevBurstPreempted(burstPreempted);
+							GanttChart.addExecutingProcess(prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.PRIO);
+						}
 					}
 					
 					long timeNow = Scheduler.clockTime;
 					
 					if(prevTime < timeNow){
 						long lapse = timeNow - prevTime;
-						//System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
+						System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
 						int burstLeft = (int)(currProcess.getBurstTime() - lapse);					
 						currProcess.setBurstTime(burstLeft);		
-						//System.out.println("   burstLeft: " + burstLeft);												
+						System.out.println("   burstLeft: " + burstLeft);												
 						
 						if(currProcess.getBurstTime() <= 0){
-							//System.out.println("TimeDone: " + (currProcess.getPrevBurstPreempted()));
+							System.out.println("TimeDone: " + (currProcess.getPrevBurstPreempted()));
 							GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);
 							dequeue();													
-							//System.out.println("Process p" + currProcess.getId() + " Done executing.");
+							System.out.println("Process p" + currProcess.getId() + " Done executing.");
 						}													
 					}
 					preempted = false;
@@ -111,10 +133,22 @@ public class PQueue {
 						GanttChart.addLastCompletionTime(SchedulingAlgorithm.PRIO);		
 						allProcessesDone = 1;						
 					}		
+					
+					if(numOfProcesses <= 0){
+						simulationDone();
+					}
 				}
 			}
 		}
 	};
+	
+	public void simulationDone(){
+		GanttChart.simulationDone();
+	}
+	
+	public void setNumberOFProcesses(int length) {
+		this.numOfProcesses = length;
+	}
 	
 	public void restart() {
 		running = true;

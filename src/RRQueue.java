@@ -6,6 +6,7 @@ public class RRQueue {
 	private Object nextQueue = null;
 	private boolean running = false;
 	private byte allProcessesDone = 1;
+	private int numOfProcesses;
 	private int quantum = 0;
 	private long prevTime;	
 	private long timeStart;
@@ -42,6 +43,13 @@ public class RRQueue {
 	public void enqueue(Process newProcess){		
 		array.add(newProcess);		
 		allProcessesDone = 0;
+		numOfProcesses--;
+		System.out.println("numOfProcesses: " +numOfProcesses);
+	}
+	
+	public void reenqueue(Process newProcess){		
+		array.add(newProcess);		
+		allProcessesDone = 0;		
 	}	
 	
 	public Process dequeue(){
@@ -82,22 +90,22 @@ public class RRQueue {
 					if(prevTime < timeNow){
 																		
 						int lapse = (int)(timeNow - prevTime);
-						//System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
+						System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
 						int burstLeft = currProcess.getBurstTime() - lapse;					
 						currProcess.setBurstTime(burstLeft);																	
 						
-						//System.out.println("prevTimeQuantum: " + prevTimeQuantum + " timeNow: " + timeNow);
+						System.out.println("prevTimeQuantum: " + prevTimeQuantum + " timeNow: " + timeNow);
 						if(timeNow == prevTimeQuantum + quantum){
-							//System.out.println("Time na!");
-							//System.out.println("   burstLeft: " + burstLeft);
+							System.out.println("Time na!");
+							System.out.println("   burstLeft: " + burstLeft);
 														
-							//System.out.println("burstDone: " + quantum);
+							System.out.println("burstDone: " + quantum);
 							GanttChart.addExecutingProcess(currProcess.getId(), quantum, SchedulingAlgorithm.RR);
 							
 							if(burstLeft > 0){																
 								int burstPreempted = currProcess.getBurstTime();
 								currProcess.setPrevBurstPreempted(burstPreempted);
-								enqueue(dequeue());
+								reenqueue(dequeue());
 							}
 							
 							prevTimeQuantum = timeNow;
@@ -108,7 +116,7 @@ public class RRQueue {
 								GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.RR);								
 							}
 							dequeue();													
-							//System.out.println(" Done executing.");
+							System.out.println(" Done executing.");
 							timeEnd = Scheduler.clockTime;
 							prevTimeQuantum = timeNow;
 							timeStart = -1;							
@@ -121,10 +129,22 @@ public class RRQueue {
 						GanttChart.addLastCompletionTime(SchedulingAlgorithm.RR);		
 						allProcessesDone = 1;						
 					}		
+					
+					if(numOfProcesses <= 0){
+						simulationDone();
+					}
 				}
 			}
 		}
 	};
+	
+	public void simulationDone(){
+		GanttChart.simulationDone();
+	}
+	
+	public void setNumberOFProcesses(int length) {
+		this.numOfProcesses = length;
+	}
 	
 	public void restart() {
 		running = true;

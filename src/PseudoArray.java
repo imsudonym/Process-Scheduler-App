@@ -91,7 +91,7 @@ public class PseudoArray {
 			}			
 		}
 		
-		printContents();
+		//printContents();
 	}
 	
 	public void sortNonPQ(){		

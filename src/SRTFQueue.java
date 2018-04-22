@@ -6,6 +6,7 @@ public class SRTFQueue {
 	private Process prevProcess;
 	private boolean running = false;
 	private boolean preempted = false;
+	private int numOfProcesses;
 	private byte allProcessesDone = 1;	
 	private long prevTime;
 	
@@ -21,9 +22,21 @@ public class SRTFQueue {
 	public void stopThread(){
 		SRTFThread.interrupt();
 		running = false;
+		reset();
 	}
 	
-	public void enqueue(Process newProcess){		
+	private void reset(){
+		currProcess = null;
+		prevProcess = null;
+		running = false;
+		preempted = false;
+		numOfProcesses = 0;
+		allProcessesDone = 1;	
+		prevTime = 0;
+	}
+	
+	public void enqueue(Process newProcess){
+		numOfProcesses--;
 		deterMineIfToPreempt(newProcess);
 		array.add(newProcess);											
 		sortSJF();
@@ -42,7 +55,11 @@ public class SRTFQueue {
 
 	private void preempt(Process newProcess) {				
 		preempted = true;				
-		prevProcess = currProcess;
+		int burstNeeded = currProcess.getBurstNeeded();
+		int burstTime = currProcess.getBurstTime(); 
+		if(burstNeeded-burstTime > 0){
+			prevProcess = currProcess;
+		}
 		currProcess = newProcess;	
 	}
 
@@ -79,9 +96,12 @@ public class SRTFQueue {
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-						int burstPreempted = prevProcess.getBurstTime();
-						prevProcess.setPrevBurstPreempted(burstPreempted);
-						GanttChart.addExecutingProcess(prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.SRTF);
+						
+						if(prevProcess != null){
+							int burstPreempted = prevProcess.getBurstTime();
+							prevProcess.setPrevBurstPreempted(burstPreempted);
+							GanttChart.addExecutingProcess(prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.SRTF);
+						}
 					}
 					
 					long timeNow = Scheduler.clockTime;
@@ -108,10 +128,22 @@ public class SRTFQueue {
 						GanttChart.addLastCompletionTime(SchedulingAlgorithm.SRTF);		
 						allProcessesDone = 1;						
 					}		
+					
+					if(numOfProcesses <= 0){
+						simulationDone();
+					}
 				}				
 			}
 		}
 	};
+	
+	public void simulationDone(){
+		GanttChart.simulationDone();
+	}
+	
+	public void setNumberOFProcesses(int length) {
+		this.numOfProcesses = length;
+	}
 	
 	public void restart() {
 		running = true;
