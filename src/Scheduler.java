@@ -54,7 +54,7 @@ public class Scheduler {
 		clock.start();
 	}
 	
-	public void generateQueues(int[] algorithms, long[] quantums){
+	public void generateQueues(int[] algorithms, int[] quantums){
 		for(int i = 0; i < numOfQueues; i++){	
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
 				queues[i] = new FCFSQueue();
@@ -90,14 +90,11 @@ public class Scheduler {
 			((SRTFQueue) queues[0]).enqueue(newProcess);
 		}
 
-		/*if(timeEnd == 0 && cur > 0){			
-			preempt();			
-		}*/
-
-		long burstTime = newProcess.getBurstTime();
-		long arrivalTime = newProcess.getArrivalTime();
+		int burstTime = newProcess.getBurstNeeded();
+		int arrivalTime = newProcess.getArrivalTime();
+		int priority = newProcess.getPriority();
 		
-		GanttChart.addNewArrivedProcess(newProcess.getId(), arrivalTime, burstTime);
+		GanttChart.addNewArrivedProcess(newProcess.getId(), arrivalTime, burstTime, priority);
 	}		
 	
 	Thread clock = new Thread(){
@@ -117,7 +114,7 @@ public class Scheduler {
 				clockTime++;
 				
 				try {
-					Thread.sleep(10);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {}
 			}
 		}

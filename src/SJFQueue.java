@@ -65,7 +65,7 @@ public class SJFQueue {
 					
 					System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
 					
-					long burstTime = currProcess.getBurstTime();																								
+					int burstTime = currProcess.getBurstTime();																								
 					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.SJF);
 					System.out.println("burstTime: " + burstTime);
 					System.out.println("clockTime: " + Scheduler.clockTime);

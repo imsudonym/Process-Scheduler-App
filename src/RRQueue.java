@@ -6,13 +6,13 @@ public class RRQueue {
 	private Object nextQueue = null;
 	private boolean running = false;
 	private byte allProcessesDone = 1;
-	private long quantum = 0;
+	private int quantum = 0;
 	private long prevTime;	
 	private long timeStart;
 	private long timeEnd;
 
 	
-	public RRQueue(long quantum){
+	public RRQueue(int quantum){
 		this.quantum = quantum;
 		startThread();
 	}	
@@ -64,6 +64,7 @@ public class RRQueue {
 	
 	Thread RRThread = new Thread(){				
 		private long prevTimeQuantum;
+		private int prevBurstLeft = -1;
 
 		public void run(){
 			while(running){					
@@ -76,32 +77,41 @@ public class RRQueue {
 						else
 							timeStart = Scheduler.clockTime;						
 					}					
-					long timeNow = Scheduler.clockTime;
+					long timeNow = Scheduler.clockTime;					
 					
 					if(prevTime < timeNow){
 																		
-						long lapse = timeNow - prevTime;
-						System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
-						long burstLeft = currProcess.getBurstTime() - lapse;					
-						currProcess.setBurstTime(burstLeft);					
-						//GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getBurstTime(), SchedulingAlgorithm.PRIO);
+						int lapse = (int)(timeNow - prevTime);
+						//System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
+						int burstLeft = currProcess.getBurstTime() - lapse;					
+						currProcess.setBurstTime(burstLeft);																	
 						
-						System.out.println("prevTimeQuantum: " + prevTimeQuantum + " timeNow: " + timeNow);
+						//System.out.println("prevTimeQuantum: " + prevTimeQuantum + " timeNow: " + timeNow);
 						if(timeNow == prevTimeQuantum + quantum){
-							System.out.println("Time na!");
-							System.out.println("   burstLeft: " + burstLeft);
-							if(burstLeft > 0){
+							//System.out.println("Time na!");
+							//System.out.println("   burstLeft: " + burstLeft);
+														
+							//System.out.println("burstDone: " + quantum);
+							GanttChart.addExecutingProcess(currProcess.getId(), quantum, SchedulingAlgorithm.RR);
+							
+							if(burstLeft > 0){																
+								int burstPreempted = currProcess.getBurstTime();
+								currProcess.setPrevBurstPreempted(burstPreempted);
 								enqueue(dequeue());
-							}							
+							}
+							
 							prevTimeQuantum = timeNow;
 						}						
 						
-						if(burstLeft <= 0){
-							dequeue();						
-							//GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getBurstTime(), SchedulingAlgorithm.PRIO);
-							System.out.println(" Done executing.");
+						if(burstLeft <= 0){							
+							if(currProcess.getPrevBurstPreempted() < quantum){							
+								GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.RR);								
+							}
+							dequeue();													
+							//System.out.println(" Done executing.");
 							timeEnd = Scheduler.clockTime;
-							timeStart = -1;
+							prevTimeQuantum = timeNow;
+							timeStart = -1;							
 						}													
 					}					
 					prevTime = timeNow;										

@@ -58,12 +58,12 @@ public class NonPQueue {
 						timeStart = Scheduler.clockTime;
 					}
 					
-					System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
+					//System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
 					
-					long burstTime = currProcess.getBurstTime();																								
-					//GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);
-					System.out.println("burstTime: " + burstTime);
-					System.out.println("clockTime: " + Scheduler.clockTime);
+					int burstTime = currProcess.getBurstTime();																								
+					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);
+					//System.out.println("burstTime: " + burstTime);
+					//System.out.println("clockTime: " + Scheduler.clockTime);
 					
 					while(Scheduler.clockTime != (timeStart + burstTime)){					
 						try {
@@ -74,12 +74,12 @@ public class NonPQueue {
 					}
 								
 					timeEnd = Scheduler.clockTime;											
-					System.out.println("  burstTime: " + burstTime);
-					System.out.println("Done executing. timeEnd = " + timeEnd);			
+					//System.out.println("  burstTime: " + burstTime);
+					//System.out.println("Done executing. timeEnd = " + timeEnd);			
 				
 				}else{				
 					if (allProcessesDone == 0){
-						//GanttChart.addLastCompletionTime(SchedulingAlgorithm.NP_PRIO);		
+						GanttChart.addLastCompletionTime(SchedulingAlgorithm.NP_PRIO);		
 						allProcessesDone = 1;						
 					}
 				}

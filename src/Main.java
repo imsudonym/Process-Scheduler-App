@@ -11,7 +11,7 @@ public class Main {
 	static int algorithm = 0;
 	
 	public static void main(String[] args) {
-		System.out.println("Enter number of processes: ");
+		/*System.out.println("Enter number of processes: ");
 		Scanner scan = new Scanner(System.in);
 		noOfProcesses = scan.nextInt();
 		
@@ -22,40 +22,36 @@ public class Main {
 		
 		System.out.println("Choose which algorithm to use: ");
 		System.out.print("0 - FCFS\n1 - SJF\n2 - SRTF\n3 - NP_PRIO\n4 - PRIO\n5 - RR\nCHOICE: ");
-		algorithm = scan.nextInt();
+		algorithm = scan.nextInt();*/
 		
-		while(algorithm < 0 || algorithm > 5){
-			System.out.println("Choose which algorithm to use: ");
-			System.out.print("0 - FCFS\n1 - SJF\n2 - SRTF\n3 - NP_PRIO\n4 - PRIO\n5 - RR\nCHOICE: ");
-			algorithm = scan.nextInt();
-		}
+		int algorithms[] = {SchedulingAlgorithm.RR};
+		int respectiveQuantum[] = {2};
 		
-		System.out.println("Processes will be: ");
-		System.out.print("1 - Random\n2 - User-defined\nCHOICE: ");
-		choice = scan.nextInt();
-		
-		while(choice > 2){
-			System.out.println("Processes will be: ");
-			System.out.print("1 - Random\n2 - User-defined\nCHOICE: ");
-			choice = scan.nextInt();
-		}
-		
-		int algorithms[] = {algorithm};
-		long respectiveQuantum[] = {2};
-		
-		processes = new Process[noOfProcesses];
+		processes = new Process[10];
 		long burstTime[] = new long[noOfProcesses];
 		long arrivalTime[] = new long[noOfProcesses];
 		int priority[] = new int[noOfProcesses];
 		
 		GanttChart gantt = new GanttChart();
 		gantt.setVisible(true);
-		gantt.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		gantt.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 		gantt.init(algorithms, respectiveQuantum);
 		
 		Scheduler scheduler = new Scheduler(algorithms.length);	
 		scheduler.generateQueues(algorithms, respectiveQuantum);
+
+		processes[0] = new Process(1, 0, 10, 3);
+		processes[1] = new Process(2, 1, 9, 1);
+		processes[2] = new Process(3, 2, 8, 2);
+		processes[3] = new Process(4, 3, 7, 5);
+		processes[4] = new Process(5, 4, 6, 4);
+		processes[5] = new Process(6, 5, 5, 3);
+		processes[6] = new Process(7, 6, 4, 1);
+		processes[7] = new Process(8, 7, 3, 2);
+		processes[8] = new Process(9, 8, 2, 5);
+		processes[9] = new Process(10, 9, 1, 4);
 		
+		/*Random rand = new Random();
 		int tmp1, tmp2, tmp3;
 		if(choice == 1){
 			Random rand = new Random();
@@ -101,7 +97,7 @@ public class Main {
 		
 		//sort processes by arrival time
 		Process temp;
-		for(int i = 0; i < noOfProcesses; i++){  
+		for(int i = 0; i < noOfProcesses; i++){  	
 			for(int j = 1; j < (noOfProcesses - i); j++){  
 				if(processes[j - 1].getArrivalTime() > processes[j].getArrivalTime()){  
 					//swap elements  
@@ -119,7 +115,7 @@ public class Main {
 													"			" + processes[i].getPriority());
 		}
 		System.out.println();
-
+		*/
 		// Uncomment below to start simulation.
 		scheduler.initProcesses(processes);
 		scheduler.simulate();
