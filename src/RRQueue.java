@@ -125,4 +125,8 @@ public class RRQueue {
 			}
 		}
 	};
+	
+	public void restart() {
+		running = true;
+	}
 }

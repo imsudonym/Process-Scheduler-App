@@ -115,4 +115,8 @@ public class PQueue {
 			}
 		}
 	};
+	
+	public void restart() {
+		running = true;
+	}
 }

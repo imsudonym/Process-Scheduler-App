@@ -3,12 +3,13 @@ public class Scheduler {
 	private static final int MAX_QUEUE = 8;	
 	private int numOfQueues = 0;
 	
-	private int itr = 0;
+	private static int itr = 0;
 	public static long clockTime = 0;	
 	private long prevArrivalTime = 0;
+	private static boolean running = false;
 	
-	private Object[] queues;
-	private Process[] processes;
+	public static Object[] queues;
+	public static Process[] processes;
 	private static Process currProcess = null;	
 	
 	public Scheduler(int numOfQueues){		
@@ -22,16 +23,30 @@ public class Scheduler {
 		
 	public void initProcesses(Process[] processes){
 		this.processes = processes;
+		sortByArrivalTime();
 		if(queues[0] instanceof PQueue){
 			preSortSameArrivalTime();
-		}
+		}				
 	}
 	
+	private void sortByArrivalTime() {
+		for(int i = 0; i < processes.length; i++){
+			for(int j = i; j < processes.length; j++){
+				if(processes[i].getArrivalTime() > processes[j].getArrivalTime()){
+					Process temp = processes[i];
+					processes[i] = processes[j];
+					processes[j] = temp; 
+				}
+			}			
+		}
+		printContents(processes);
+	}
+
 	private void preSortSameArrivalTime() {
 		for(int i = 0; i < processes.length; i++){
 			for(int j = i; j < processes.length; j++){
 				if(processes[i].getArrivalTime() == processes[j].getArrivalTime() && processes[i].getPriority() > processes[j].getPriority()){
-					System.out.println("Swapping p" + processes[i].getId() + " and p" + processes[j].getId());
+					//System.out.println("Swapping p" + processes[i].getId() + " and p" + processes[j].getId());
 					Process temp = processes[i];
 					processes[i] = processes[j];
 					processes[j] = temp; 
@@ -50,9 +65,40 @@ public class Scheduler {
 	}
 
 	public void simulate(){
-		//thread.start();
+		System.out.println("In simulate");
+		running  = true;		
 		clock.start();
 	}
+	
+	public static void stop(){
+		clock.interrupt();
+		running = false;
+	}
+	
+	public void generateQueues(int algorithm, int quantum){
+		for(int i = 0; i < numOfQueues; i++){	
+			if(algorithm == SchedulingAlgorithm.FCFS){
+				queues[0] = new FCFSQueue();
+				((FCFSQueue) queues[0]).setNumberOFProcesses(processes.length);
+			}else if (algorithm == SchedulingAlgorithm.RR){
+				queues[0] = new RRQueue(quantum);
+				//((RRQueue) queues[0]).setNumberOFProcesses(processes.length);
+			}else if (algorithm == SchedulingAlgorithm.SJF){
+				queues[0] = new SJFQueue();
+				((SJFQueue) queues[0]).setNumberOFProcesses(processes.length);
+			}else if (algorithm == SchedulingAlgorithm.NP_PRIO){
+				queues[0] = new NonPQueue();
+				//((NonPueue) queues[0]).setNumberOFProcesses(processes.length);
+			}else if (algorithm == SchedulingAlgorithm.PRIO){
+				queues[0] = new PQueue();
+				//((PQueue) queues[0]).setNumberOFProcesses(processes.length);
+			}else if (algorithm == SchedulingAlgorithm.SRTF){
+				queues[0] = new SRTFQueue();
+				//((SRTFQueue) queues[0]).setNumberOFProcesses(processes.length);
+			}
+			
+		}							
+	}	
 	
 	public void generateQueues(int[] algorithms, int[] quantums){
 		for(int i = 0; i < numOfQueues; i++){	
@@ -73,7 +119,7 @@ public class Scheduler {
 		}							
 	}			
 	
-	private void insertOnQueue(Process newProcess){				
+	private static void insertOnQueue(Process newProcess){				
 		//timeArrive = System.currentTimeMillis();	
 		
 		if(queues[0] instanceof FCFSQueue){
@@ -97,13 +143,15 @@ public class Scheduler {
 		GanttChart.addNewArrivedProcess(newProcess.getId(), arrivalTime, burstTime, priority);
 	}		
 	
-	Thread clock = new Thread(){
+	static Thread clock = new Thread(){
 		public void run(){
-			while(true){				
-								
+			System.out.println("running: " + running);
+			while(running){				
+				
+				System.out.println("itr: " + itr);
 				for(int i = itr; i < processes.length; i++){								
 					if(processes[i].getArrivalTime() == clockTime){						
-						//System.out.println("Clock time: " + clockTime + " insert p" + processes[i].getId());
+						System.out.println("Clock time: " + clockTime + " insert p" + processes[i].getId());
 						insertOnQueue(processes[i]);
 						itr++;
 					}else if(processes[i].getArrivalTime() > clockTime){
@@ -114,33 +162,15 @@ public class Scheduler {
 				clockTime++;
 				
 				try {
-					Thread.sleep(100);
+					Thread.sleep(50);
 				} catch (InterruptedException e) {}
 			}
 		}
 	};
-	
-	// Thread to allow arrival time latency
-	Thread thread = new Thread(){
-		public void run(){
-			while(true){
-				Process process = null;		
-					while(itr < processes.length){									
-						process = processes[itr++]; 
-						try {
-							if(prevArrivalTime != process.getArrivalTime()){
-								System.out.println("arrivalTime = " + process.getArrivalTime());
-								Thread.sleep(process.getArrivalTime());
-							}
-							prevArrivalTime = process.getArrivalTime();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-							// Add process on scheduler queue for execution
-																	
-					}
-				}
-			}
-		};
+		
+	public void restart() {
+		itr = 0;
+		running = true;		
+	}
 									
 }

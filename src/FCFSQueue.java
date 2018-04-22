@@ -5,6 +5,7 @@ public class FCFSQueue {
 	private Process currProcess;	
 	private byte allProcessesDone = 1;
 	private boolean running = false;
+	private int numOfProcesses;
 	private long timeStart;
 	private long timeEnd;
 	
@@ -15,11 +16,17 @@ public class FCFSQueue {
 	private void startThread(){
 		running = true;
 		FCFSThread.start();
+	}
+	
+	public void stopThread(){
+		FCFSThread.interrupt();
+		running = false;		
 	}	
 	
 	public void enqueue(Process newProcess){		
 		array.add(newProcess);		
 		allProcessesDone = 0;		
+		numOfProcesses--;
 	}	
 	
 	public Process dequeue(){
@@ -39,7 +46,7 @@ public class FCFSQueue {
 		return array.getSize();
 	}
 	
-	Thread FCFSThread = new Thread(){
+	Thread FCFSThread = new Thread(){		
 		public void run(){
 			while(running){
 				if(getSize() > 0 && peekHead() != null){									
@@ -51,7 +58,7 @@ public class FCFSQueue {
 						timeStart = Scheduler.clockTime;
 					}
 					
-					//System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
+					System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
 					
 					int burstTime = currProcess.getBurstTime();																								
 					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.FCFS);
@@ -74,9 +81,25 @@ public class FCFSQueue {
 					if (allProcessesDone == 0){
 						GanttChart.addLastCompletionTime(SchedulingAlgorithm.FCFS);		
 						allProcessesDone = 1;						
+					}	
+					
+					if(numOfProcesses <= 0){
+						simulationDone();
 					}
 				}
 			}
 		}		
-	};
+	};	
+
+	public void simulationDone(){
+		GanttChart.simulationDone();
+	}
+	
+	public void setNumberOFProcesses(int length) {
+		this.numOfProcesses = length;
+	}
+
+	public void restart() {
+		running = true;
+	}
 }

@@ -5,6 +5,7 @@ public class SJFQueue {
 	private Process currProcess;
 	private boolean running = false;
 	private byte allProcessesDone = 1;
+	private int numOfProcesses;
 	private long timeStart;
 	private long timeEnd;
 	
@@ -22,11 +23,11 @@ public class SJFQueue {
 		running = false;
 	}
 	
-	public void enqueue(Process newProcess){
-		
+	public void enqueue(Process newProcess){		
 		array.add(newProcess);		
 		sortSJF();
 		allProcessesDone = 0;
+		numOfProcesses--;
 	}	
 	
 	public Process dequeue(){
@@ -87,8 +88,24 @@ public class SJFQueue {
 						GanttChart.addLastCompletionTime(SchedulingAlgorithm.SJF);		
 						allProcessesDone = 1;						
 					}
+					
+					if(numOfProcesses <= 0){
+						simulationDone();
+					}
 				}
 			}
 		}
 	};
+	
+	public void simulationDone(){
+		GanttChart.simulationDone();
+	}
+	
+	public void setNumberOFProcesses(int length) {
+		this.numOfProcesses = length;
+	}
+	
+	public void restart() {
+		running = true;
+	}
 }

@@ -112,4 +112,8 @@ public class SRTFQueue {
 			}
 		}
 	};
+	
+	public void restart() {
+		running = true;
+	}
 }
