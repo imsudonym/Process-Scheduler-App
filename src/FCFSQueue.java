@@ -52,7 +52,6 @@ public class FCFSQueue {
 					}
 					
 					System.out.println("\nProcess p" + currProcess.getId() + " executing... timeStart = " + timeStart);
-					//System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
 					
 					int burstTime = currProcess.getBurstTime();																								
 					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.FCFS);

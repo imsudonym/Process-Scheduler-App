@@ -124,23 +124,23 @@ public class Scheduler {
 	Thread thread = new Thread(){
 		public void run(){
 			while(true){
-				Process process = null;		
-					while(itr < processes.length){									
-						process = processes[itr++]; 
-						try {
-							if(prevArrivalTime != process.getArrivalTime()){
-								System.out.println("arrivalTime = " + process.getArrivalTime());
-								Thread.sleep(process.getArrivalTime());
-							}
-							prevArrivalTime = process.getArrivalTime();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
+			Process process = null;		
+				while(itr < processes.length){							
+					process = processes[itr++]; 
+					try {
+						if(prevArrivalTime != process.getArrivalTime()){
+							System.out.println("arrivalTime = " + process.getArrivalTime());
+							Thread.sleep(process.getArrivalTime());
 						}
-							// Add process on scheduler queue for execution
-																	
+						prevArrivalTime = process.getArrivalTime();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
+						// Add process on scheduler queue for execution
+
 				}
 			}
-		};
-									
+		}
+	};
+
 }
