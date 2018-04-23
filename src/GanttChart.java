@@ -128,6 +128,11 @@ public class GanttChart extends JFrame{
 		importFile = new JMenuItem("Import file");
 		importFile.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
+				
+				PID.removeAll(PID);
+				arrivalTime.removeAll(arrivalTime);
+				burstTime.removeAll(burstTime);
+				
 				JFileChooser fileChooser = new JFileChooser();
 			    FileNameExtensionFilter filter = new FileNameExtensionFilter(
 			        "Text files", "txt");
@@ -138,11 +143,12 @@ public class GanttChart extends JFrame{
 			        try(
 			        	BufferedReader in = new BufferedReader(new FileReader(fileChosen));
 			        ){
+			        	
 			        	String line;
 						while((line = in.readLine()) != null){
 						    System.out.println(line);
 						    String[] token = line.split("\t");
-						    
+						    						    						    
 						    PID.add(Integer.parseInt(token[0]));
 						    arrivalTime.add(Integer.parseInt(token[1]));
 						    burstTime.add(Integer.parseInt(token[2]));
@@ -156,10 +162,10 @@ public class GanttChart extends JFrame{
 							processes[i] = new Process(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
 						}
 						
-						if(algorithm != SchedulingAlgorithm.RR && quantum > 0)
-							startButton.setEnabled(true);
-						else
+						if(algorithm == SchedulingAlgorithm.RR && quantum < 0)
 							startButton.setEnabled(false);
+						else
+							startButton.setEnabled(true);
 			        } catch (Exception e1) { 
 			        	e1.printStackTrace();
 			        	startButton.setEnabled(false);
