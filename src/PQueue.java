@@ -55,12 +55,22 @@ public class PQueue {
 
 	private void preempt(Process newProcess) {		
 		preempted = true;
-		System.out.println("p" + currProcess.getId() + " = " + currProcess.getBurstTime());
+		System.out.println("p" + currProcess.getId() + " preempted! burst = " + currProcess.getBurstTime());
 		
 		int burstNeeded = currProcess.getBurstNeeded();
 		int burstTime = currProcess.getBurstTime(); 
 		if(burstNeeded-burstTime > 0){
-			prevProcess = currProcess;
+			int prevBurst = currProcess.getPrevBurstPreempted();
+			int burst = currProcess.getBurstTime();
+			if(prevBurst-burst == 0){
+				prevProcess = null;
+				System.out.println("prevProcess = null");				
+			}else{
+				prevProcess = currProcess;
+				System.out.println("prevProcess = currProcess");
+			}
+		}else{
+			prevProcess = null;
 		}
 		currProcess = newProcess;		
 	}
@@ -102,13 +112,14 @@ public class PQueue {
 						
 						if(prevProcess != null){
 							int burstPreempted = prevProcess.getBurstTime();
-							System.out.println("burstPreempted: " + burstPreempted);
 							prevProcess.setPrevBurstPreempted(burstPreempted);
 							GanttChart.addExecutingProcess(prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.PRIO);
 						}
+						preempted = false;
 					}
 					
 					long timeNow = Scheduler.clockTime;
+					currProcess.setStartTime(timeNow);
 					
 					if(prevTime < timeNow){
 						long lapse = timeNow - prevTime;

@@ -68,7 +68,7 @@ public class PseudoArray {
 			}			
 		}
 		
-		//printContents();
+		printContents();
 	}
 	
 	public void sortPriority(){

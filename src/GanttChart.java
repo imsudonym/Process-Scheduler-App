@@ -439,10 +439,8 @@ public class GanttChart extends JFrame{
 					
 					if(!threadStarted){																		
 						scheduler.simulate();
-						threadStarted = true;
-						System.out.println("huhuhuh");
-					}else{
-						System.out.println("hahahah");
+						threadStarted = true;						
+					}else{						
 						reset();
 						con.removeAll();						
 						

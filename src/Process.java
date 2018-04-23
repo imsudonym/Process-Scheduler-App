@@ -7,6 +7,7 @@ public class Process {
 	private int priority;
 	private int timesPreempted = 0;
 	private int prevBurstPreempted;
+	private int startTime;
 	
 	public Process(int id, int arrivalTime, int burstTime, int priority){
 		this.id = id;
@@ -56,5 +57,18 @@ public class Process {
 	public void setPrevBurstPreempted(int prevBurstPreempted) {
 		this.prevBurstPreempted = prevBurstPreempted;
 	}
+
+	public void setStartTime(long timeNow) {
+		this.startTime = (int)timeNow;
+	}
+
+	public int getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(int startTime) {
+		this.startTime = startTime;
+	}
+	
 
 }
