@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 
 public class Process {
 	private int id;
@@ -5,9 +6,17 @@ public class Process {
 	private int burstNeeded;
 	private int burstTime;
 	private int priority;
+	
 	private int timesPreempted = 0;
 	private int prevBurstPreempted;
-	private int startTime;
+	
+	private ArrayList<Long> timePreempted = new ArrayList<Long>();
+	private ArrayList<Long> timeResumed = new ArrayList<Long>();
+	
+	private long endTime;
+	private long waitTime;
+	private long responseTime;
+	private long turnaroundTime;
 	
 	public Process(int id, int arrivalTime, int burstTime, int priority){
 		this.id = id;
@@ -16,6 +25,9 @@ public class Process {
 		this.burstNeeded = burstTime;
 		this.prevBurstPreempted = burstTime;
 		this.priority = priority;		
+		
+		this.endTime = this.waitTime = this.responseTime 
+				= this.turnaroundTime = -1;
 	}
 	
 	public int getId(){
@@ -58,17 +70,52 @@ public class Process {
 		this.prevBurstPreempted = prevBurstPreempted;
 	}
 
-	public void setStartTime(long timeNow) {
-		this.startTime = (int)timeNow;
+	public long getEndTime() {
+		return endTime;
 	}
 
-	public int getStartTime() {
-		return startTime;
+	public void setEndTime(long endTime) {
+		this.endTime = endTime;
 	}
 
-	public void setStartTime(int startTime) {
-		this.startTime = startTime;
+	public long getTimePreempted(int index) {
+		return timePreempted.get(index);
+	}
+
+	public void setTimePreempted(long timePreempted) {
+		this.timePreempted.add(timePreempted);
+	}
+
+	public long getTimeResumed(int index) {
+		return timeResumed.get(index);
+	}
+
+	public void setTimeResumed(long timeResumed) {
+		this.timeResumed.add(timeResumed);
+	}
+
+	public long getWaitTime() {
+		return waitTime;
 	}
 	
+	public void setWaitTimePreemptive(long waitTime) {
+		this.waitTime = waitTime;
+	}
+
+	public void setWaitTimeNonPreemptive() {
+		this.waitTime = (responseTime - arrivalTime) < 0 ? 0: (responseTime - arrivalTime);
+	}
+	
+	public long getResponseTime() {
+		return responseTime;
+	}
+
+	public void setResponseTime(long responseTime) {
+		this.responseTime = responseTime;
+	}
+
+	public long getTurnaroundTime() {
+		return getWaitTime() + getBurstTime();
+	}
 
 }

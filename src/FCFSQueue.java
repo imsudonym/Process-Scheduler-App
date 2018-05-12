@@ -6,6 +6,7 @@ public class FCFSQueue {
 	private byte allProcessesDone = 1;
 	private boolean running = false;
 	private int numOfProcesses;
+	
 	private long timeStart;
 	private long timeEnd;
 	
@@ -52,38 +53,54 @@ public class FCFSQueue {
 				if(getSize() > 0 && peekHead() != null){									
 					currProcess = dequeue();
 					
+					if(currProcess.getResponseTime() < 0) {
+						currProcess.setResponseTime(Scheduler.clockTime-currProcess.getArrivalTime());
+					}
+					
 					if(timeEnd != 0){						
 						timeStart = timeEnd;
 					}else{
 						timeStart = Scheduler.clockTime;
 					}
 					
-					System.out.println("Process p" + currProcess.getId() + " executing... timeStart = " + timeStart);
-					
 					int burstTime = currProcess.getBurstTime();																								
 					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.FCFS);
-					//System.out.println("burstTime: " + burstTime);
-					//System.out.println("clockTime: " + Scheduler.clockTime);
 					
 					while(Scheduler.clockTime != (timeStart + burstTime)){					
 						try {
-							Thread.sleep(1);
+							Thread.sleep(5);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}				
 					}
 								
-					timeEnd = Scheduler.clockTime;											
-					//System.out.println("  burstTime: " + burstTime);
-					//System.out.println("Done executing. timeEnd = " + timeEnd);			
-				
+					timeEnd = Scheduler.clockTime;			
+					currProcess.setWaitTimeNonPreemptive();
+					
 				}else{				
 					if (allProcessesDone == 0){
 						GanttChart.addLastCompletionTime(SchedulingAlgorithm.FCFS);		
-						allProcessesDone = 1;						
+						allProcessesDone = 1;		
+						
 					}	
 					
 					if(numOfProcesses <= 0){
+						int s = Scheduler.processes.length;
+						Process[] p = Scheduler.processes;
+						
+						double totalRT = 0;
+						double totalWT = 0;
+						double totalTT = 0;
+						
+						for(int i = 0; i < s; i++) {
+							GanttChart.addTimesInformation(p[i].getId(), p[i].getResponseTime(), p[i].getWaitTime(), p[i].getTurnaroundTime());
+							totalRT += p[i].getResponseTime();
+							totalWT += p[i].getWaitTime();
+							totalTT += p[i].getTurnaroundTime();
+						}
+						
+						GanttChart.addTimeAverages(totalRT/s, totalWT/s, totalTT/s);
+						
 						simulationDone();
 					}
 				}

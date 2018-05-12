@@ -10,7 +10,6 @@ public class Scheduler {
 	
 	public static Object[] queues;
 	public static Process[] processes;
-	private static Process currProcess = null;	
 	
 	public Scheduler(int numOfQueues){		
 		if (numOfQueues > MAX_QUEUE){
@@ -65,7 +64,6 @@ public class Scheduler {
 	}
 
 	public void simulate(){
-		System.out.println("In simulate");
 		running  = true;		
 		clock.start();
 	}

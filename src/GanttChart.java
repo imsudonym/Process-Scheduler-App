@@ -3,7 +3,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -35,14 +34,20 @@ public class GanttChart extends JFrame{
 	private static JPanel pcbBurstPanel;
 	private static JPanel pcbPriorityPanel;	
 	
-	private static int idYOffset;
-	private static int arrYOffset;
-	private static int burstYOffset;
-	private static int prioYOffset;
+	private static JPanel turnaroundTimePanel;
+	private static JPanel timesPanel;
+	private static JPanel waitTimePanel;
+	private static JPanel responseTimePanel;
+	private static JPanel timesIdPanel;
+	
+	private static int procYOffset;
+	private static int timesYOffset;
 	
 	private static int processCount = 0;		
 	
-	private static int pcbPanelHeight = 355;
+	private static int pcbPanelHeight = 350;
+	private static int timesPanelHeight = 350;
+	
 	private static int panelWidth = 1150;
 	private static JButton startButton;
 	public JLabel srtfLabel;
@@ -77,6 +82,7 @@ public class GanttChart extends JFrame{
 	private int quantum = 2;
 	
 	private static Scheduler scheduler;
+	private static int timesEntry;
 	
 	private ArrayList<Integer> PID = new ArrayList<Integer>();
 	private ArrayList<Integer> arrivalTime = new ArrayList<Integer>();
@@ -85,6 +91,13 @@ public class GanttChart extends JFrame{
 	
 	private Process[] processes;
 	String fileChosen;
+	
+	
+	private static JPanel avgTimeTable;
+	private static JPanel avgResponseTime;
+	private static JPanel avgWaitTime;
+	private static JPanel avgTurnaroundTime;
+	private static JPanel avgTimeLblPanel;
 	
 	public GanttChart(){
 		super("CPU Scheduling Gantt Chart");		
@@ -333,7 +346,7 @@ public class GanttChart extends JFrame{
 			
 			title = new JLabel(titleName);
 			title.setFont(font);
-			title.setBounds(110, 110, titleWidth, 50);
+			title.setBounds(70, 45, titleWidth, 50);
 			
 			panel = new JPanel();
 			panel.setLayout(null);
@@ -350,7 +363,7 @@ public class GanttChart extends JFrame{
 			JScrollPane scrollPane = new JScrollPane(panel);
 			scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-			scrollPane.setBounds(100, 150, panelWidth, 85);
+			scrollPane.setBounds(60, 90, panelWidth, 85);
 			
 			add(title);
 			add(scrollPane);	
@@ -359,64 +372,127 @@ public class GanttChart extends JFrame{
 			// do MLFQ;
 		}						
 		
-		pcbPanel = new JPanel(new GridLayout(1, 4));
+		JLabel arrivingProcesses = new JLabel("PROCESSES");
+		arrivingProcesses.setFont(font);
+		arrivingProcesses.setBounds(270, 200, 500, 50);
+		add(arrivingProcesses);
+		
+		pcbPanel = new JPanel(null);
 		pcbPanel.setBorder(border);		
-		pcbPanel.setPreferredSize(new Dimension(575, pcbPanelHeight));		
+		pcbPanel.setPreferredSize(new Dimension(400, 350));		
 		
 		JScrollPane pcbScrollPane = new JScrollPane(pcbPanel);
 		pcbScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		pcbScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		pcbScrollPane.setBounds(100, 320, 575, 360);
+		pcbScrollPane.setBounds(150, 250, 405, 355);
 		add(pcbScrollPane);
 		
 		pcbIdPanel = new JPanel(null);
 		pcbIdPanel.setBorder(border);		
-		pcbIdPanel.setSize(144, 360);
+		pcbIdPanel.setBounds(1, 1, 50, 350);
 		
 		JPanel idLabelPanel = new JPanel();
-		idLabelPanel.setBounds(1, 1, 141, 25);
-		idLabelPanel.setBackground(Color.ORANGE);
+		idLabelPanel.setBounds(0, 0, 50, 25);
+		idLabelPanel.setBorder(border);
 		idLabelPanel.add(new JLabel("PID"));
 		pcbIdPanel.add(idLabelPanel);		
 		pcbPanel.add(pcbIdPanel);		
 		
 		pcbArrivalPanel = new JPanel(null);
 		pcbArrivalPanel.setBorder(border);		
-		pcbArrivalPanel.setSize(144, 360);		
+		pcbArrivalPanel.setBounds(51, 1, 120, 350);		
 		
 		JPanel arrivalLabelPanel = new JPanel();
-		arrivalLabelPanel.setBounds(1, 1, 141, 25);
-		arrivalLabelPanel.setBackground(Color.ORANGE);
+		arrivalLabelPanel.setBounds(0, 0, 120, 25);
+		arrivalLabelPanel.setBorder(border);
 		arrivalLabelPanel.add(new JLabel("ARRIVAL TIME"));
 		pcbArrivalPanel.add(arrivalLabelPanel, BorderLayout.NORTH);
 		pcbPanel.add(pcbArrivalPanel);
 		
 		pcbBurstPanel = new JPanel(null);
 		pcbBurstPanel.setBorder(border);		
-		pcbBurstPanel.setSize(144, 360);
+		pcbBurstPanel.setBounds(171, 1, 120, 350);
 		pcbPanel.add(pcbBurstPanel);
 		
 		JPanel burstLabelPanel = new JPanel();
-		burstLabelPanel.setBounds(1, 1, 141, 25);
-		burstLabelPanel.setBackground(Color.ORANGE);
+		burstLabelPanel.setBounds(0, 0, 120, 25);
+		burstLabelPanel.setBorder(border);
 		burstLabelPanel.add(new JLabel("BURST TIME"));
 		pcbBurstPanel.add(burstLabelPanel, BorderLayout.NORTH);
 		pcbPanel.add(pcbBurstPanel);
 		
 		pcbPriorityPanel = new JPanel(null);
 		pcbPriorityPanel.setBorder(border);		
-		pcbPriorityPanel.setSize(144, 360);
+		pcbPriorityPanel.setBounds(291, 1, 110, 350);
 		pcbPanel.add(pcbPriorityPanel);		
 		
 		JPanel priorityLabelPanel = new JPanel();
-		priorityLabelPanel.setBounds(1, 1, 141, 25);
-		priorityLabelPanel.setBackground(Color.ORANGE);
+		priorityLabelPanel.setBounds(0, 0, 110, 25);
+		priorityLabelPanel.setBorder(border);
 		priorityLabelPanel.add(new JLabel("PRIORITY"));
 		pcbPriorityPanel.add(priorityLabelPanel, BorderLayout.NORTH);
 		pcbPanel.add(pcbPriorityPanel);
 		
+		timesPanel = new JPanel(null);
+		timesPanel.setBorder(border);		
+		timesPanel.setPreferredSize(new Dimension(575, 250));		
+		
+		JScrollPane timesScrollPane = new JScrollPane(timesPanel);
+		timesScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		timesScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		timesScrollPane.setBounds(650, 300, 435, 255);
+		add(timesScrollPane);
+		
+		timesIdPanel = new JPanel(null);
+		timesIdPanel.setBorder(border);		
+		timesIdPanel.setBounds(1, 1, 50, 250);
+		
+		JPanel timeIdLabelPanel = new JPanel();
+		timeIdLabelPanel.setBounds(0, 0, 50, 25);
+		timeIdLabelPanel.setBorder(border);
+		timeIdLabelPanel.add(new JLabel("PID"));
+		timesIdPanel.add(timeIdLabelPanel);		
+		timesPanel.add(timesIdPanel);			
+		
+		responseTimePanel = new JPanel(null);
+		responseTimePanel.setBorder(border);		
+		responseTimePanel.setBounds(51, 1, 120, 250);		
+		
+		JPanel responseTimeLabelPanel = new JPanel();
+		responseTimeLabelPanel.setBounds(0, 0, 120, 25);
+		responseTimeLabelPanel.setBorder(border);
+		responseTimeLabelPanel.add(new JLabel("RESPONSE TIME"));
+		responseTimePanel.add(responseTimeLabelPanel, BorderLayout.NORTH);
+		timesPanel.add(responseTimePanel);
+		
+		waitTimePanel = new JPanel(null);
+		waitTimePanel.setBorder(border);		
+		waitTimePanel.setBounds(171, 1, 120, 250);
+		timesPanel.add(waitTimePanel);
+		
+		JPanel waitTimeLabelPanel = new JPanel();
+		waitTimeLabelPanel.setBounds(0, 0, 120, 25);
+		waitTimeLabelPanel.setBorder(border);
+		waitTimeLabelPanel.add(new JLabel("WAIT TIME"));
+		waitTimePanel.add(waitTimeLabelPanel, BorderLayout.NORTH);
+		timesPanel.add(waitTimePanel);
+		
+		turnaroundTimePanel = new JPanel(null);
+		turnaroundTimePanel.setBorder(border);		
+		turnaroundTimePanel.setBounds(291, 1, 141, 250);
+		timesPanel.add(turnaroundTimePanel);		
+		
+		JPanel turnaroundTimeLabelPanel = new JPanel();
+		turnaroundTimeLabelPanel.setBounds(0, 0, 141, 25);
+		turnaroundTimeLabelPanel.setBorder(border);
+		turnaroundTimeLabelPanel.add(new JLabel("TURNAROUND TIME"));
+		turnaroundTimePanel.add(turnaroundTimeLabelPanel, BorderLayout.NORTH);
+		timesPanel.add(turnaroundTimePanel);
+		
+		initAvgTimeTable();
+		
 		startButton = new JButton("START");
-		startButton.setBounds(1120, 250, 100, 50);
+		startButton.setBounds(1100, 200, 100, 50);
 		
 		if(processes == null || (algorithm == SchedulingAlgorithm.RR && quantum == 0)){
 			startButton.setEnabled(false);
@@ -479,6 +555,40 @@ public class GanttChart extends JFrame{
 		con.revalidate();					
 	}
 	
+	private void initAvgTimeTable() {
+		avgTimeTable = new JPanel(null);
+		avgTimeTable.setBorder(border);		
+		avgTimeTable.setBounds(650, 560, 433, 26);		
+		add(avgTimeTable);
+		
+		avgTimeLblPanel = new JPanel(null);
+		avgTimeLblPanel.setBorder(border);		
+		avgTimeLblPanel.setBounds(1, 1, 50, 25);
+		
+		JPanel avgTimeLbl = new JPanel();
+		avgTimeLbl.setBounds(0, 0, 50, 25);
+		avgTimeLbl.setBorder(border);
+		avgTimeLbl.add(new JLabel("Avg:"));
+		avgTimeLblPanel.add(avgTimeLbl);		
+		avgTimeTable.add(avgTimeLblPanel);			
+		
+		avgResponseTime = new JPanel(null);
+		avgResponseTime.setBorder(border);		
+		avgResponseTime.setBounds(51, 1, 120, 25);		
+		avgTimeTable.add(avgResponseTime);
+		
+		avgWaitTime = new JPanel(null);
+		avgWaitTime.setBorder(border);		
+		avgWaitTime.setBounds(171, 1, 120, 25);
+		avgTimeTable.add(avgWaitTime);
+		
+		avgTurnaroundTime = new JPanel(null);
+		avgTurnaroundTime.setBorder(border);		
+		avgTurnaroundTime.setBounds(291, 1, 141, 25);
+		avgTimeTable.add(avgTurnaroundTime);		
+		
+	}
+
 	public static void addExecutingProcess(int processId, int executionTime, int algorithm) {
 							
 		Container container = null;		
@@ -530,10 +640,8 @@ public class GanttChart extends JFrame{
 		prevFCFSBurstLength = -1;
 		xFCFS = 0;
 		fcfsTimeLapse = 0;
-		idYOffset = 0;
-		arrYOffset = 0;
-		burstYOffset = 0;
-		prioYOffset = 0;
+		procYOffset = 0;
+		timesYOffset = 0;
 		panelWidth = 1150;		
 	}
 	
@@ -542,30 +650,31 @@ public class GanttChart extends JFrame{
 		processCount++;
 		
 		if(processCount > 12){
-			pcbPanel.setPreferredSize(new Dimension(575, pcbPanelHeight+=25));
+			pcbPanelHeight += 25;
+			pcbPanel.setPreferredSize(new Dimension(575, pcbPanelHeight));
+			pcbIdPanel.setSize(new Dimension(pcbIdPanel.getWidth(), pcbPanelHeight));
+			pcbArrivalPanel.setSize(new Dimension(pcbArrivalPanel.getWidth(), pcbPanelHeight));
+			pcbBurstPanel.setSize(new Dimension(pcbBurstPanel.getWidth(), pcbPanelHeight));
+			pcbPriorityPanel.setSize(new Dimension(pcbPriorityPanel.getWidth(), pcbPanelHeight));
 		}
 		
 		JPanel idLabelPanel = new JPanel();
-		idLabelPanel.setBounds(1, idYOffset+=25, 141, 25);
-		idLabelPanel.setBackground(Color.orange);
+		idLabelPanel.setBounds(1, procYOffset+=25, 50, 25);
 		idLabelPanel.add(new JLabel(""+processId));		
 		pcbIdPanel.add(idLabelPanel);		
 
 		JPanel arrLabelPanel = new JPanel();
-		arrLabelPanel.setBounds(1, arrYOffset+=25, 141, 25);
-		arrLabelPanel.setBackground(Color.orange);
+		arrLabelPanel.setBounds(1, procYOffset, 120, 25);
 		arrLabelPanel.add(new JLabel(""+arrivalTime));		
 		pcbArrivalPanel.add(arrLabelPanel);
 		
 		JPanel burstLabelPanel = new JPanel();
-		burstLabelPanel.setBounds(1, burstYOffset+=25, 141, 25);
-		burstLabelPanel.setBackground(Color.orange);
+		burstLabelPanel.setBounds(1, procYOffset, 120, 25);
 		burstLabelPanel.add(new JLabel(""+burstTime));		
 		pcbBurstPanel.add(burstLabelPanel);				
 		
 		JPanel priorityLabelPanel = new JPanel();
-		priorityLabelPanel.setBounds(1, prioYOffset+=25, 141, 25);
-		priorityLabelPanel.setBackground(Color.orange);
+		priorityLabelPanel.setBounds(1, procYOffset, 118, 25);
 		priorityLabelPanel.add(new JLabel(""+priority));		
 		pcbPriorityPanel.add(priorityLabelPanel);
 		
@@ -589,6 +698,66 @@ public class GanttChart extends JFrame{
 		timePanel.repaint();
 	}
 	
+	public static void addTimesInformation(int processId, long responseTime, long waitTime, long turnaroundTime) {
+		timesEntry++;
+		if(timesEntry > 10){
+			timesPanelHeight += 25;
+			timesPanel.setPreferredSize(new Dimension(575, timesPanelHeight));
+			timesIdPanel.setSize(new Dimension(timesIdPanel.getWidth(), timesPanelHeight));
+			responseTimePanel.setSize(new Dimension(responseTimePanel.getWidth(), timesPanelHeight));
+			waitTimePanel.setSize(new Dimension(waitTimePanel.getWidth(), timesPanelHeight));
+			turnaroundTimePanel.setSize(new Dimension(turnaroundTimePanel.getWidth(), timesPanelHeight));
+		}
+		
+		JPanel idLabelPanel = new JPanel();
+		idLabelPanel.setBounds(1, timesYOffset+=25, 50, 25);
+		idLabelPanel.add(new JLabel("" + processId));		
+		timesIdPanel.add(idLabelPanel);		
+
+		JPanel resLabelPanel = new JPanel();
+		resLabelPanel.setBounds(1, timesYOffset, 120, 25);
+		resLabelPanel.add(new JLabel("" + responseTime));		
+		responseTimePanel.add(resLabelPanel);
+		
+		JPanel waitLabelPanel = new JPanel();
+		waitLabelPanel.setBounds(1, timesYOffset, 120, 25);
+		waitLabelPanel.add(new JLabel("" + waitTime));		
+		waitTimePanel.add(waitLabelPanel);				
+		
+		JPanel turnaroundLabelPanel = new JPanel();
+		turnaroundLabelPanel.setBounds(1, timesYOffset, 141, 25);
+		turnaroundLabelPanel.add(new JLabel("" + turnaroundTime));		
+		turnaroundTimePanel.add(turnaroundLabelPanel);
+		
+		timesIdPanel.repaint();
+		timesIdPanel.revalidate();
+		timesPanel.add(responseTimePanel);
+		timesPanel.add(waitTimePanel);
+		timesPanel.add(turnaroundTimePanel);
+	
+		con.repaint();
+		con.revalidate();
+	}
+	
+	public static void addTimeAverages(double avgWait, double avgResponse, double avgTurnaround) {
+		JPanel resLabelPanel = new JPanel();
+		resLabelPanel.setBounds(1, 1, 120, 23);
+		resLabelPanel.add(new JLabel("" + String.format("%.2f", avgResponse)));		
+		avgResponseTime.add(resLabelPanel);
+		
+		JPanel waitLabelPanel = new JPanel();
+		waitLabelPanel.setBounds(1, 1, 120, 23);
+		waitLabelPanel.add(new JLabel("" + String.format("%.2f", avgWait)));		
+		avgWaitTime.add(waitLabelPanel);				
+		
+		JPanel avgTurnaroundLabelPanel = new JPanel();
+		avgTurnaroundLabelPanel.setBounds(1, 1, 141, 23);
+		avgTurnaroundLabelPanel.add(new JLabel("" + String.format("%.2f", avgTurnaround)));		
+		avgTurnaroundTime.add(avgTurnaroundLabelPanel);
+		
+		con.repaint();
+		con.revalidate();
+	}
 
 	public static void simulationDone() {
 				
