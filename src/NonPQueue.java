@@ -58,7 +58,8 @@ public class NonPQueue {
 					}else{
 						timeStart = Scheduler.clockTime;
 					}
-									
+								
+					currProcess.setStartTime(timeStart);
 					if(currProcess.getResponseTime() < 0) {
 						currProcess.setResponseTime(timeStart-currProcess.getArrivalTime());
 					}

@@ -13,10 +13,13 @@ public class Process {
 	private ArrayList<Long> timePreempted = new ArrayList<Long>();
 	private ArrayList<Long> timeResumed = new ArrayList<Long>();
 	
+	private long startTime;
 	private long endTime;
 	private long waitTime;
 	private long responseTime;
 	private long turnaroundTime;
+	
+	public boolean preemptedFlag = false;
 	
 	public Process(int id, int arrivalTime, int burstTime, int priority){
 		this.id = id;
@@ -98,12 +101,17 @@ public class Process {
 		return waitTime;
 	}
 	
-	public void setWaitTimePreemptive(long waitTime) {
+	public void setWaitTimePreemptive() {
+		long waitTime = (responseTime - arrivalTime) < 0 ? 0: (responseTime - arrivalTime);
+		
+		for(int i = 0; i < timeResumed.size(); i++) {
+			waitTime += (timeResumed.get(i) - timePreempted.get(i));
+		}
 		this.waitTime = waitTime;
 	}
 
 	public void setWaitTimeNonPreemptive() {
-		this.waitTime = (responseTime - arrivalTime) < 0 ? 0: (responseTime - arrivalTime);
+		this.waitTime = (startTime - arrivalTime) < 0 ? 0: (startTime - arrivalTime);
 	}
 	
 	public long getResponseTime() {
@@ -118,4 +126,7 @@ public class Process {
 		return getWaitTime() + getBurstTime();
 	}
 
+	public void setStartTime(long timeStart) {
+		this.startTime = timeStart;
+	}
 }

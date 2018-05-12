@@ -100,10 +100,26 @@ public class PQueue {
 	Thread PThread = new Thread(){				
 		public void run(){
 			while(running){									
-				if(getSize() > 0 && peekHead() != null){											
+				if(getSize() > 0 && peekHead() != null){
+					
+					long timeNow = Scheduler.clockTime;
+					
 					if(!preempted){
 						currProcess = peekHead();
+						
+						if(currProcess.getResponseTime() < 0) {
+							currProcess.setResponseTime(timeNow-currProcess.getArrivalTime());
+						}
+						
+						if(currProcess.preemptedFlag) {
+							currProcess.setTimeResumed(timeNow);
+							currProcess.preemptedFlag = false;
+						}
+						
 					}else{
+						currProcess.setTimePreempted(timeNow);
+						currProcess.preemptedFlag = true;
+						
 						try {
 							Thread.sleep(5);
 						} catch (InterruptedException e) {
@@ -118,21 +134,19 @@ public class PQueue {
 						preempted = false;
 					}
 					
-					long timeNow = Scheduler.clockTime;
-					currProcess.setStartTime(timeNow);
-					
 					if(prevTime < timeNow){
 						long lapse = timeNow - prevTime;
-						System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
+						//System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
 						int burstLeft = (int)(currProcess.getBurstTime() - lapse);					
 						currProcess.setBurstTime(burstLeft);		
-						System.out.println("   burstLeft: " + burstLeft);												
+						//System.out.println("   burstLeft: " + burstLeft);												
 						
 						if(currProcess.getBurstTime() <= 0){
-							System.out.println("TimeDone: " + (currProcess.getPrevBurstPreempted()));
+							currProcess.setWaitTimePreemptive();
+							//System.out.println("TimeDone: " + (currProcess.getPrevBurstPreempted()));
 							GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);
 							dequeue();													
-							System.out.println("Process p" + currProcess.getId() + " Done executing.");
+							//System.out.println("Process p" + currProcess.getId() + " Done executing.");
 						}													
 					}
 					preempted = false;
@@ -146,6 +160,22 @@ public class PQueue {
 					}		
 					
 					if(numOfProcesses <= 0){
+						int s = Scheduler.processes.length;
+						Process[] p = Scheduler.processes;
+						
+						double totalRT = 0;
+						double totalWT = 0;
+						double totalTT = 0;
+						
+						for(int i = 0; i < s; i++) {
+							GanttChart.addTimesInformation(p[i].getId(), p[i].getResponseTime(), p[i].getWaitTime(), p[i].getTurnaroundTime());
+							totalRT += p[i].getResponseTime();
+							totalWT += p[i].getWaitTime();
+							totalTT += p[i].getTurnaroundTime();
+						}
+						
+						GanttChart.addTimeAverages(totalRT/s, totalWT/s, totalTT/s);
+						
 						simulationDone();
 					}
 				}

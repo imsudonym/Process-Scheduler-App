@@ -58,16 +58,17 @@ public class SJFQueue {
 				if(getSize() > 0 && peekHead() != null){									
 					currProcess = dequeue();
 					
-					if(currProcess.getResponseTime() < 0) {
-						currProcess.setResponseTime(Scheduler.clockTime-currProcess.getArrivalTime());
-					}
-					
 					if(timeEnd != 0){						
 						timeStart = timeEnd;
 					}else{
 						timeStart = Scheduler.clockTime;
 					}
-										
+					
+					currProcess.setStartTime(timeStart);
+					if(currProcess.getResponseTime() < 0) {
+						currProcess.setResponseTime(timeStart-currProcess.getArrivalTime());
+					}
+					
 					int burstTime = currProcess.getBurstTime();																								
 					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.SJF);
 					
