@@ -700,8 +700,8 @@ public class GanttChart extends JFrame{
 	
 	public static void addTimesInformation(int processId, long responseTime, long waitTime, long turnaroundTime) {
 		timesEntry++;
-		if(timesEntry > 10){
-			timesPanelHeight += 25;
+		if(timesEntry > 9){
+			timesPanelHeight += 18;
 			timesPanel.setPreferredSize(new Dimension(575, timesPanelHeight));
 			timesIdPanel.setSize(new Dimension(timesIdPanel.getWidth(), timesPanelHeight));
 			responseTimePanel.setSize(new Dimension(responseTimePanel.getWidth(), timesPanelHeight));
