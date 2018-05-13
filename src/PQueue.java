@@ -55,7 +55,6 @@ public class PQueue {
 
 	private void preempt(Process newProcess) {		
 		preempted = true;
-		System.out.println("p" + currProcess.getId() + " preempted! burst = " + currProcess.getBurstTime());
 		
 		int burstNeeded = currProcess.getBurstNeeded();
 		int burstTime = currProcess.getBurstTime(); 
@@ -63,11 +62,9 @@ public class PQueue {
 			int prevBurst = currProcess.getPrevBurstPreempted();
 			int burst = currProcess.getBurstTime();
 			if(prevBurst-burst == 0){
-				prevProcess = null;
-				System.out.println("prevProcess = null");				
+				prevProcess = null;				
 			}else{
 				prevProcess = currProcess;
-				System.out.println("prevProcess = currProcess");
 			}
 		}else{
 			prevProcess = null;
@@ -117,17 +114,23 @@ public class PQueue {
 							currProcess.preemptedFlag = false;
 						}
 						
-					}else{
-						currProcess.setTimePreempted(timeNow);
-						currProcess.preemptedFlag = true;
+					}else {
 						
 						try {
-							Thread.sleep(5);
+							Thread.sleep(15);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 						
 						if(prevProcess != null){
+							prevProcess.setPreempted();
+							prevProcess.setTimePreempted(timeNow);
+							prevProcess.preemptedFlag = true;
+
+							long startTime = prevProcess.getTimePreempted(prevProcess.getTimesPreempted()-1);
+							currProcess.setStartTime(startTime);
+							currProcess.setResponseTime(startTime-currProcess.getArrivalTime());						
+							
 							int burstPreempted = prevProcess.getBurstTime();
 							prevProcess.setPrevBurstPreempted(burstPreempted);
 							GanttChart.addExecutingProcess(prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.PRIO);
@@ -137,17 +140,13 @@ public class PQueue {
 					
 					if(prevTime < timeNow){
 						long lapse = timeNow - prevTime;
-						//System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
 						int burstLeft = (int)(currProcess.getBurstTime() - lapse);					
-						currProcess.setBurstTime(burstLeft);		
-						//System.out.println("   burstLeft: " + burstLeft);												
+						currProcess.setBurstTime(burstLeft);														
 						
 						if(currProcess.getBurstTime() <= 0){
 							currProcess.setWaitTimePreemptive();
-							//System.out.println("TimeDone: " + (currProcess.getPrevBurstPreempted()));
 							GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);
 							dequeue();													
-							//System.out.println("Process p" + currProcess.getId() + " Done executing.");
 						}													
 					}
 					preempted = false;

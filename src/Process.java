@@ -123,10 +123,14 @@ public class Process {
 	}
 
 	public long getTurnaroundTime() {
-		return getWaitTime() + getBurstTime();
+		return getWaitTime() + getBurstNeeded();
 	}
 
 	public void setStartTime(long timeStart) {
 		this.startTime = timeStart;
+	}
+	
+	public long getStartTime() {
+		return startTime;
 	}
 }
