@@ -108,6 +108,7 @@ public class PQueue {
 						currProcess = peekHead();
 						
 						if(currProcess.getResponseTime() < 0) {
+							currProcess.setStartTime(timeNow);
 							currProcess.setResponseTime(timeNow-currProcess.getArrivalTime());
 						}
 						

@@ -102,7 +102,7 @@ public class Process {
 	}
 	
 	public void setWaitTimePreemptive() {
-		long waitTime = (responseTime - arrivalTime) < 0 ? 0: (responseTime - arrivalTime);
+		long waitTime = (startTime - arrivalTime) < 0 ? 0: (startTime - arrivalTime);
 		
 		for(int i = 0; i < timeResumed.size(); i++) {
 			waitTime += (timeResumed.get(i) - timePreempted.get(i));

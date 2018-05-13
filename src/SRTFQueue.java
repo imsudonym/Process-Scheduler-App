@@ -107,6 +107,8 @@ public class SRTFQueue {
 						currProcess = peekHead();	
 						
 						if(currProcess.getResponseTime() < 0) {
+							//System.out.println("p" + currProcess.getId() + "; start = " + timeNow);
+							currProcess.setStartTime(timeNow);
 							currProcess.setResponseTime(timeNow-currProcess.getArrivalTime());
 						}
 						
