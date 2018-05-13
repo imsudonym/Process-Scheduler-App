@@ -739,7 +739,7 @@ public class GanttChart extends JFrame{
 		con.revalidate();
 	}
 	
-	public static void addTimeAverages(double avgWait, double avgResponse, double avgTurnaround) {
+	public static void addTimeAverages(double avgResponse, double avgWait, double avgTurnaround) {
 		JPanel resLabelPanel = new JPanel();
 		resLabelPanel.setBounds(1, 1, 120, 23);
 		resLabelPanel.add(new JLabel("" + String.format("%.2f", avgResponse)));		

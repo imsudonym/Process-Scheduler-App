@@ -11,7 +11,8 @@ public class RRQueue {
 	private long prevTime;	
 	private long timeStart;
 	private long timeEnd;
-
+	
+	private Process prevProcess;
 	
 	public RRQueue(int quantum){
 		this.quantum = quantum;
@@ -44,7 +45,7 @@ public class RRQueue {
 		array.add(newProcess);		
 		allProcessesDone = 0;
 		numOfProcesses--;
-		System.out.println("numOfProcesses: " +numOfProcesses);
+		//System.out.println("numOfProcesses: " +numOfProcesses);
 	}
 	
 	public void reenqueue(Process newProcess){		
@@ -85,21 +86,55 @@ public class RRQueue {
 						else
 							timeStart = Scheduler.clockTime;						
 					}					
+					
+					if(currProcess.getResponseTime() < 0) {
+						if(prevProcess != null && prevProcess.preemptedFlag) {
+							long startTime = prevProcess.getTimePreempted(prevProcess.getTimesPreempted()-1);
+							currProcess.setStartTime(startTime);
+							currProcess.setResponseTime(startTime-currProcess.getArrivalTime());
+						}else {
+							currProcess.setStartTime(timeStart);
+							currProcess.setResponseTime(timeStart-currProcess.getArrivalTime());
+						}
+					}
+					
+					//System.out.println("p" + currProcess.getId() + " startTime = " + currProcess.getStartTime());
+					//System.out.println("    response = " + currProcess.getResponseTime());
+					
+					if(currProcess.preemptedFlag) {
+						//System.out.println("p" + currProcess.getId() + " resumed @ " + Scheduler.clockTime);
+						currProcess.setTimeResumed(Scheduler.clockTime);
+						currProcess.preemptedFlag = false;
+					}
+					
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
 					long timeNow = Scheduler.clockTime;					
 					
 					if(prevTime < timeNow){
 																		
 						int lapse = (int)(timeNow - prevTime);
-						System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
+						//System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
 						int burstLeft = currProcess.getBurstTime() - lapse;					
 						currProcess.setBurstTime(burstLeft);																	
 						
-						System.out.println("prevTimeQuantum: " + prevTimeQuantum + " timeNow: " + timeNow);
+						//System.out.println("prevTimeQuantum: " + prevTimeQuantum + " timeNow: " + timeNow);
 						if(timeNow == prevTimeQuantum + quantum){
-							System.out.println("Time na!");
-							System.out.println("   burstLeft: " + burstLeft);
+							//System.out.println("Time na!");
+							//System.out.println("   burstLeft: " + burstLeft);
 														
-							System.out.println("burstDone: " + quantum);
+							//System.out.println("burstDone: " + quantum);
+							//System.out.println("p" + currProcess.getId() + " preempted @ " + timeNow);
+							currProcess.setPreempted();
+							currProcess.setTimePreempted(timeNow);
+							currProcess.preemptedFlag = true;
+
+							prevProcess = currProcess;
+							
 							GanttChart.addExecutingProcess(currProcess.getId(), quantum, SchedulingAlgorithm.RR);
 							
 							if(burstLeft > 0){																
@@ -111,12 +146,15 @@ public class RRQueue {
 							prevTimeQuantum = timeNow;
 						}						
 						
-						if(burstLeft <= 0){							
+						if(burstLeft <= 0){		
+							currProcess.setWaitTimePreemptive();
+							int s = currProcess.getTimesPreempted();
+							
 							if(currProcess.getPrevBurstPreempted() < quantum){							
 								GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.RR);								
 							}
 							dequeue();													
-							System.out.println(" Done executing.");
+							//System.out.println(" Done executing.");
 							timeEnd = Scheduler.clockTime;
 							prevTimeQuantum = timeNow;
 							timeStart = -1;							
@@ -131,6 +169,22 @@ public class RRQueue {
 					}		
 					
 					if(numOfProcesses <= 0){
+						int s = Scheduler.processes.length;
+						Process[] p = Scheduler.processes;
+						
+						double totalRT = 0;
+						double totalWT = 0;
+						double totalTT = 0;
+						
+						for(int i = 0; i < s; i++) {
+							GanttChart.addTimesInformation(p[i].getId(), p[i].getResponseTime(), p[i].getWaitTime(), p[i].getTurnaroundTime());
+							totalRT += p[i].getResponseTime();
+							totalWT += p[i].getWaitTime();
+							totalTT += p[i].getTurnaroundTime();
+						}
+						
+						GanttChart.addTimeAverages(totalRT/s, totalWT/s, totalTT/s);
+						
 						simulationDone();
 					}
 				}
