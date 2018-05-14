@@ -56,8 +56,8 @@ public class PseudoArray {
 				if(current.next == null)
 					break;
 				
-				long currBurst = current.getValue().getBurstNeeded();
-				long nextBurst = current.next.getValue().getBurstNeeded();												
+				long currBurst = current.getValue().getBurstTime();
+				long nextBurst = current.next.getValue().getBurstTime();												
 				
 				if(currBurst > nextBurst){					
 					Process temp = current.getValue();
@@ -68,7 +68,7 @@ public class PseudoArray {
 			}			
 		}
 		
-		printContents();
+		//printContents();
 	}
 	
 	public void sortPriority(){

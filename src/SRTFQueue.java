@@ -46,7 +46,7 @@ public class SRTFQueue {
 	private void deterMineIfToPreempt(Process newProcess) {
 		if(currProcess != null){
 			long currBurst = currProcess.getBurstTime();
-			long newBurst = newProcess.getBurstNeeded();			
+			long newBurst = newProcess.getBurstNeeded();
 			if(currBurst > newBurst){
 				preempt(newProcess);
 			}
@@ -55,7 +55,6 @@ public class SRTFQueue {
 
 	private void preempt(Process newProcess) {				
 		preempted = true;				
-		System.out.println("p" + currProcess.getId() + " preempted! burst = " + currProcess.getBurstTime());
 		
 		int burstNeeded = currProcess.getBurstNeeded();
 		int burstTime = currProcess.getBurstTime(); 
@@ -63,16 +62,23 @@ public class SRTFQueue {
 			int prevBurst = currProcess.getPrevBurstPreempted();
 			int burst = currProcess.getBurstTime();
 			if(prevBurst-burst == 0){
-				prevProcess = null;
-				System.out.println("prevProcess = null");				
+				prevProcess = null;				
 			}else{
 				prevProcess = currProcess;
-				System.out.println("prevProcess = currProcess");
 			}
 		}else{
 			prevProcess = null;
+			currProcess.setResponseTime(-1);
+		}	
+		
+		long timeNow = Scheduler.clockTime;
+		currProcess.setTimePreempted(timeNow);
+		currProcess.preemptedFlag = true;
+		
+		if(newProcess.getResponseTime() < 0) {
+			newProcess.setStartTime(timeNow);
+			newProcess.setResponseTime(timeNow-newProcess.getArrivalTime());
 		}
-		currProcess = newProcess;	
 	}
 
 	public Process dequeue(){					
@@ -102,15 +108,9 @@ public class SRTFQueue {
 				if(getSize() > 0 && peekHead() != null){	
 					
 					long timeNow = Scheduler.clockTime;
+					currProcess = peekHead();	
 					
 					if(!preempted){						
-						currProcess = peekHead();	
-						
-						if(currProcess.getResponseTime() < 0) {
-							//System.out.println("p" + currProcess.getId() + "; start = " + timeNow);
-							currProcess.setStartTime(timeNow);
-							currProcess.setResponseTime(timeNow-currProcess.getArrivalTime());
-						}
 						
 						if(currProcess.preemptedFlag) {
 							currProcess.setTimeResumed(timeNow);
@@ -118,15 +118,6 @@ public class SRTFQueue {
 						}
 						
 					}else{
-						
-						currProcess.setTimePreempted(timeNow);
-						currProcess.preemptedFlag = true;
-						
-						try {
-							Thread.sleep(1);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
 												
 						if(prevProcess != null){
 							int burstPreempted = prevProcess.getBurstTime();
@@ -137,18 +128,22 @@ public class SRTFQueue {
 						preempted = false;
 					}
 					
+					if(currProcess.getResponseTime() < 0) {
+						//System.out.println("p" + currProcess.getId() + "; start = " + timeNow);
+						currProcess.setStartTime(timeNow);
+						currProcess.setResponseTime(timeNow-currProcess.getArrivalTime());
+					}
+					
 					if(prevTime < timeNow){
+						
 						long lapse = timeNow - prevTime;
-						//System.out.println("p" + currProcess.getId() + " burst: " + currProcess.getBurstTime() + " lapse: " + lapse);
 						int burstLeft = (int)(currProcess.getBurstTime() - lapse);					
 						currProcess.setBurstTime(burstLeft);		
-						//System.out.println("   burstLeft: " + burstLeft);
 						
 						if(currProcess.getBurstTime() <= 0){
 							currProcess.setWaitTimePreemptive();
 							dequeue();													
 							GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SRTF);
-							//System.out.println("Process p" + currProcess.getId() + " Done executing.");
 						}													
 					}
 					preempted = false;
