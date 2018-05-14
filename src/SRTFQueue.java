@@ -45,7 +45,7 @@ public class SRTFQueue {
 	
 	private void deterMineIfToPreempt(Process newProcess) {
 		if(currProcess != null){
-			long currBurst = currProcess.getBurstNeeded();
+			long currBurst = currProcess.getBurstTime();
 			long newBurst = newProcess.getBurstNeeded();			
 			if(currBurst > newBurst){
 				preempt(newProcess);
