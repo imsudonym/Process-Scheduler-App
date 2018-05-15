@@ -68,8 +68,17 @@ public class PQueue {
 			}
 		}else{
 			prevProcess = null;
+			currProcess.setResponseTime(-1);
+		}		
+		
+		long timeNow = Scheduler.clockTime;
+		currProcess.setTimePreempted(timeNow);
+		currProcess.preemptedFlag = true;
+		
+		if(currProcess.getResponseTime() < 0) {
+			currProcess.setStartTime(timeNow);
+			currProcess.setResponseTime(timeNow-newProcess.getArrivalTime());
 		}
-		currProcess = newProcess;		
 	}
 
 	public Process dequeue(){
@@ -100,15 +109,10 @@ public class PQueue {
 				if(getSize() > 0 && peekHead() != null){
 					
 					long timeNow = Scheduler.clockTime;
+					currProcess = peekHead();
 					
 					if(!preempted){
-						currProcess = peekHead();
-						
-						if(currProcess.getResponseTime() < 0) {
-							currProcess.setStartTime(timeNow);
-							currProcess.setResponseTime(timeNow-currProcess.getArrivalTime());
-						}
-						
+												
 						if(currProcess.preemptedFlag) {
 							currProcess.setTimeResumed(timeNow);
 							currProcess.preemptedFlag = false;
@@ -116,26 +120,19 @@ public class PQueue {
 						
 					}else {
 						
-						try {
-							Thread.sleep(15);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						
 						if(prevProcess != null){
-							prevProcess.setPreempted();
-							prevProcess.setTimePreempted(timeNow);
-							prevProcess.preemptedFlag = true;
-
-							long startTime = prevProcess.getTimePreempted(prevProcess.getTimesPreempted()-1);
-							currProcess.setStartTime(startTime);
-							currProcess.setResponseTime(startTime-currProcess.getArrivalTime());						
-							
 							int burstPreempted = prevProcess.getBurstTime();
 							prevProcess.setPrevBurstPreempted(burstPreempted);
 							GanttChart.addExecutingProcess(prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.PRIO);
 						}
+						
 						preempted = false;
+					}
+					
+					if(currProcess.getResponseTime() < 0) {
+						//System.out.println("p" + currProcess.getId() + "; start = " + timeNow);
+						currProcess.setStartTime(timeNow);
+						currProcess.setResponseTime(timeNow-currProcess.getArrivalTime());
 					}
 					
 					if(prevTime < timeNow){
@@ -145,8 +142,8 @@ public class PQueue {
 						
 						if(currProcess.getBurstTime() <= 0){
 							currProcess.setWaitTimePreemptive();
-							GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);
-							dequeue();													
+							dequeue();
+							GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);													
 						}													
 					}
 					preempted = false;
