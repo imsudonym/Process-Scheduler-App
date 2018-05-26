@@ -67,6 +67,7 @@ public class GanttChart extends JFrame{
 	private static JMenu insProcess, setAlgorithm, mlfq, singleQueue, quantumItem;
 
 	private static JButton startButton;
+	private static JButton setQuantum1, setQuantum2, setQuantum3, setQuantum4;
 	
 	private ArrayList<Integer> PID = new ArrayList<Integer>();
 	private ArrayList<Integer> arrivalTime = new ArrayList<Integer>();
@@ -90,6 +91,8 @@ public class GanttChart extends JFrame{
 	private static int timesEntry;
 	private static int quantum = 2;
 	private static int Offset = -2;
+	
+	private static int quantum1, quantum2, quantum3, quantum4;
 	
 	private static boolean alreadyStarted = false;
 	private static boolean threadStarted = false;
@@ -396,13 +399,8 @@ public class GanttChart extends JFrame{
 	
 	private void initGanttChart(int x, int y, int level /*JComboBox cb,*/) {
 		JPanel panel = null;
-		JLabel title = null;
-		String titleName = "";
 		
-		int titleWidth = 100;
-		
-		if(level == 1) {
-			
+		if(level == 1) {			
 			panel1 = new JPanel();
 			panel1.setLayout(null);
 			panel1.setBackground(Color.LIGHT_GRAY);
@@ -415,13 +413,9 @@ public class GanttChart extends JFrame{
 			timePanel1.setBounds(1, 51, 1145, 20);																								
 			panel1.add(timePanel1);
 			
-			title = title1;
 			panel = panel1;
 			
 		}else if (level == 2) {
-			title2 = new JLabel(titleName);
-			title2.setFont(font);
-			title2.setBounds(title_x/*70*/, title_y/*45*/, titleWidth, 50);
 			
 			panel2 = new JPanel();
 			panel2.setLayout(null);
@@ -435,13 +429,9 @@ public class GanttChart extends JFrame{
 			timePanel2.setBounds(1, 51, 1145, 20);																								
 			panel2.add(timePanel2);
 			
-			title = title2;
 			panel = panel2;
 			
 		}else if (level == 3) {
-			title3 = new JLabel(titleName);
-			title3.setFont(font);
-			title3.setBounds(title_x/*70*/, title_y/*45*/, titleWidth, 50);
 			
 			panel3 = new JPanel();
 			panel3.setLayout(null);
@@ -455,13 +445,9 @@ public class GanttChart extends JFrame{
 			timePanel3.setBounds(1, 51, 1145, 20);																								
 			panel3.add(timePanel3);
 			
-			title = title3;
 			panel = panel3;
 			
 		}else if (level == 4) {
-			title4 = new JLabel(titleName);
-			title4.setFont(font);
-			title4.setBounds(title_x/*70*/, title_y/*45*/, titleWidth, 50);
 			
 			panel4 = new JPanel();
 			panel4.setLayout(null);
@@ -475,16 +461,14 @@ public class GanttChart extends JFrame{
 			timePanel4.setBounds(1, 51, 1145, 20);																								
 			panel4.add(timePanel4);
 			
-			title = title4;
 			panel = panel4;
 		}
 		
 		JScrollPane scrollPane = new JScrollPane(panel);
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-		scrollPane.setBounds(chart_x/*60*/, chart_y/*90*/, panelWidth, 85);
+		scrollPane.setBounds(x, y, panelWidth, 85);
 		
-		mlfqPanel.add(title);
 		mlfqPanel.add(scrollPane);
 
 	}
@@ -493,7 +477,7 @@ public class GanttChart extends JFrame{
 	private void initOneLevel() {	
 		initOneLevelComboBox();
 		
-		initGanttChart(70, 45, 60, 90, 1);
+		initGanttChart(60, 90, 1);
 		initProcessTable(270, 200, 150, 250);
 		initTimesTable(300);
 		initAvgTimeTable(650, 560);
@@ -501,8 +485,8 @@ public class GanttChart extends JFrame{
 	}
 
 	private void initTwoLevel() {
-		initOneLevelComboBox(70, 45);
-		initTwoLevelComboBox(70, 180);
+		initOneLevelComboBox();
+		initTwoLevelComboBox();
 		
 		initGanttChart(60, 90, 1);
 		initGanttChart(60, 225, 2);
@@ -513,9 +497,9 @@ public class GanttChart extends JFrame{
 	}
 	
 	private void initThreeLevel() {
-		initOneLevelComboBox(70, 45);
-		initTwoLevelComboBox(70, 180);
-		initThreeLevelComboBox(70, 320);
+		initOneLevelComboBox();
+		initTwoLevelComboBox();
+		initThreeLevelComboBox();
 		
 		initGanttChart(60, 90, 1);
 		initGanttChart(60, 225, 2);
@@ -528,10 +512,10 @@ public class GanttChart extends JFrame{
 	}
 	
 	private void initFourLevel() {
-		initOneLevelComboBox(70, 45);
-		initTwoLevelComboBox(70, 180);
-		initThreeLevelComboBox(70, 320);
-		initFourLevelComboBox(70, 460);
+		initOneLevelComboBox();
+		initTwoLevelComboBox();
+		initThreeLevelComboBox();
+		initFourLevelComboBox();
 		
 		initGanttChart(60, 90, 1);
 		initGanttChart(60, 225, 2);
@@ -544,8 +528,8 @@ public class GanttChart extends JFrame{
 		initStartButton(1100, 25);
 	}
 	
-	private void initOneLevelComboBox(int x, int y) {
-		algoList1.setBounds(x, y, 80, 20);
+	private void initOneLevelComboBox() {
+		algoList1.setBounds(70, 65, 80, 20);
 		algoList1.setSelectedIndex(0);
 		
 		algoList1.addActionListener(new ActionListener() {
@@ -564,6 +548,7 @@ public class GanttChart extends JFrame{
 					algorithm1 = SchedulingAlgorithm.PRIO;
 				}else if (selected.equals("RR")) {
 					algorithm1 = SchedulingAlgorithm.RR;
+					addSetQuantum(160, 65, 1);
 				}else {
 					algorithm1 = SchedulingAlgorithm.FCFS;
 				}
@@ -573,8 +558,8 @@ public class GanttChart extends JFrame{
 		mlfqPanel.add(algoList1);
 	}
 	
-	private void initTwoLevelComboBox(int x, int y) {
-		algoList2.setBounds(x, y, 80, 20);
+	private void initTwoLevelComboBox() {
+		algoList2.setBounds(70, 200, 80, 20);
 		algoList2.setSelectedIndex(0);
 		
 		algoList2.addActionListener(new ActionListener() {
@@ -593,6 +578,7 @@ public class GanttChart extends JFrame{
 					algorithm2 = SchedulingAlgorithm.PRIO;
 				}else if (selected.equals("RR")) {
 					algorithm2 = SchedulingAlgorithm.RR;
+					addSetQuantum(160, 200, 2);
 				}else {
 					algorithm2 = SchedulingAlgorithm.FCFS;
 				}
@@ -602,8 +588,8 @@ public class GanttChart extends JFrame{
 		mlfqPanel.add(algoList2);
 	}
 	
-	private void initThreeLevelComboBox(int x, int y) {
-		algoList3.setBounds(x, y, 80, 20);
+	private void initThreeLevelComboBox() {
+		algoList3.setBounds(70, 335, 80, 20);
 		algoList3.setSelectedIndex(0);
 		
 		algoList3.addActionListener(new ActionListener() {
@@ -622,6 +608,7 @@ public class GanttChart extends JFrame{
 					algorithm3 = SchedulingAlgorithm.PRIO;
 				}else if (selected.equals("RR")) {
 					algorithm3 = SchedulingAlgorithm.RR;
+					addSetQuantum(160, 335, 3);
 				}else {
 					algorithm3 = SchedulingAlgorithm.FCFS;
 				}
@@ -631,8 +618,8 @@ public class GanttChart extends JFrame{
 		mlfqPanel.add(algoList3);
 	}
 	
-	private void initFourLevelComboBox(int x, int y) {
-		algoList4.setBounds(x, y, 80, 20);
+	private void initFourLevelComboBox() {
+		algoList4.setBounds(70, 475, 80, 20);
 		algoList4.setSelectedIndex(0);
 		
 		algoList4.addActionListener(new ActionListener() {
@@ -651,6 +638,7 @@ public class GanttChart extends JFrame{
 					algorithm4 = SchedulingAlgorithm.PRIO;
 				}else if (selected.equals("RR")) {
 					algorithm4 = SchedulingAlgorithm.RR;
+					addSetQuantum(160, 475, 4);
 				}else {
 					algorithm4 = SchedulingAlgorithm.FCFS;
 				}
@@ -658,6 +646,148 @@ public class GanttChart extends JFrame{
 			
 		});
 		mlfqPanel.add(algoList4);
+	}
+
+	protected void addSetQuantum(int x, int y, int level) {
+		String label = "Quantum = "; 
+		JButton button = null;
+		
+		if(level == 1) {
+			label += quantum1;
+			
+			setQuantum1 = new JButton(label);
+			setQuantum1.setBounds(x, y, 110, 20);
+			setQuantum1.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					while(true){
+						String result = JOptionPane.showInputDialog("Quantum", quantum1);	
+						if(result != null){
+							char[] letters = result.toCharArray();
+							
+							int i;
+							for(i = 0; i < letters.length; i++){
+								if(!Character.isDigit(letters[i])){
+									break;
+								}
+							}
+							
+							if(i == letters.length){
+								quantum1 = Integer.parseInt(result);
+								break;
+							}
+						}else {
+							break;
+						}
+					}
+				}
+			});
+			
+			button = setQuantum1;
+		}
+		
+		if(level == 2) {
+			label += quantum2;
+			
+			setQuantum2 = new JButton(label);
+			setQuantum2.setBounds(x, y, 110, 20);
+			setQuantum2.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					while(true){
+						String result = JOptionPane.showInputDialog("Quantum", quantum2);	
+						if(result != null){
+							char[] letters = result.toCharArray();
+							
+							int i;
+							for(i = 0; i < letters.length; i++){
+								if(!Character.isDigit(letters[i])){
+									break;
+								}
+							}
+							
+							if(i == letters.length){
+								quantum2 = Integer.parseInt(result);
+								break;
+							}
+						}else {
+							break;
+						}
+					}
+				}
+			});
+			
+			button = setQuantum2;
+		}
+		
+		if(level == 3) {
+			label += quantum3;
+			
+			setQuantum3 = new JButton(label);
+			setQuantum3.setBounds(x, y, 110, 20);
+			setQuantum3.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					while(true){
+						String result = JOptionPane.showInputDialog("Quantum", quantum3);	
+						if(result != null){
+							char[] letters = result.toCharArray();
+							
+							int i;
+							for(i = 0; i < letters.length; i++){
+								if(!Character.isDigit(letters[i])){
+									break;
+								}
+							}
+							
+							if(i == letters.length){
+								quantum3 = Integer.parseInt(result);
+								break;
+							}
+						}else {
+							break;
+						}
+					}
+				}
+			});
+			
+			button = setQuantum3;
+		}
+		
+		if(level == 4) {
+			label += quantum4;
+			
+			setQuantum4 = new JButton(label);
+			setQuantum4.setBounds(x, y, 110, 20);
+			setQuantum4.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					while(true){
+						String result = JOptionPane.showInputDialog("Quantum", quantum4);	
+						if(result != null){
+							char[] letters = result.toCharArray();
+							
+							int i;
+							for(i = 0; i < letters.length; i++){
+								if(!Character.isDigit(letters[i])){
+									break;
+								}
+							}
+							
+							if(i == letters.length){
+								quantum4 = Integer.parseInt(result);
+								break;
+							}
+						}else {
+							break;
+						}
+					}
+				}
+			});
+			
+			button = setQuantum4;
+		}
+		
+		mlfqPanel.add(button);
+		mlfqPanel.repaint();
+		mlfqPanel.revalidate();
+		
 	}
 
 	private void initStartButton(int xOffset, int yOffset) {
