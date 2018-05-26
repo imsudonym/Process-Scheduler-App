@@ -20,7 +20,10 @@ public class RRQueue {
 	
 	private Process prevProcess;
 	
-	public RRQueue(int quantum){
+	private byte queuePriority = -1;
+	
+	public RRQueue(int priority, int quantum){
+		this.queuePriority = (byte)priority;
 		this.quantum = quantum;
 		startThread();
 	}	

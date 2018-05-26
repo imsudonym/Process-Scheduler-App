@@ -15,7 +15,10 @@ public class NonPQueue {
 	private long timeStart;
 	private long timeEnd;
 	
-	public NonPQueue(){		
+	private byte queuePriority = -1;
+	
+	public NonPQueue(int priority){
+		this.queuePriority = (byte)priority;
 		startThread();
 	}
 	

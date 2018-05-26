@@ -16,7 +16,10 @@ public class PQueue {
 	private byte allProcessesDone = 1;
 	private long prevTime;
 	
-	public PQueue(){		
+	private byte queuePriority = -1;
+	
+	public PQueue(int priority){
+		this.queuePriority = (byte)priority;
 		startThread();
 	}
 	

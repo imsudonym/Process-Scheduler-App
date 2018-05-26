@@ -16,7 +16,10 @@ public class SRTFQueue {
 	private byte allProcessesDone = 1;	
 	private long prevTime;
 	
-	public SRTFQueue(){		
+	private byte queuePriority = -1;
+	
+	public SRTFQueue(int priority){
+		this.queuePriority = (byte)priority;
 		startThread();
 	}
 	

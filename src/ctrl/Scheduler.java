@@ -22,10 +22,6 @@ public class Scheduler {
 	public static Process[] processes;
 	
 	public Scheduler(int numOfQueues){		
-		if (numOfQueues > MAX_QUEUE){
-			// Raise exception
-		}
-		
 		this.numOfQueues = numOfQueues;		
 		Scheduler.queues = new Object[numOfQueues];
 	}
@@ -86,22 +82,22 @@ public class Scheduler {
 	public void generateQueues(int algorithm, int quantum){
 		for(int i = 0; i < numOfQueues; i++){	
 			if(algorithm == SchedulingAlgorithm.FCFS){
-				queues[0] = new FCFSQueue();
+				queues[0] = new FCFSQueue(0);
 				((FCFSQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}else if (algorithm == SchedulingAlgorithm.RR){
-				queues[0] = new RRQueue(quantum);
+				queues[0] = new RRQueue(0, quantum);
 				((RRQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}else if (algorithm == SchedulingAlgorithm.SJF){
-				queues[0] = new SJFQueue();
+				queues[0] = new SJFQueue(0);
 				((SJFQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}else if (algorithm == SchedulingAlgorithm.NP_PRIO){
-				queues[0] = new NonPQueue();
+				queues[0] = new NonPQueue(0);
 				((NonPQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}else if (algorithm == SchedulingAlgorithm.PRIO){
-				queues[0] = new PQueue();
+				queues[0] = new PQueue(0);
 				((PQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}else if (algorithm == SchedulingAlgorithm.SRTF){
-				queues[0] = new SRTFQueue();
+				queues[0] = new SRTFQueue(0);
 				((SRTFQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}
 			
@@ -111,20 +107,23 @@ public class Scheduler {
 	public void generateQueues(int[] algorithms, int[] quantums){
 		for(int i = 0; i < numOfQueues; i++){	
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
-				queues[i] = new FCFSQueue();
+				queues[i] = new FCFSQueue(i);
 			}else if (algorithms[i] == SchedulingAlgorithm.RR){
-				queues[i] = new RRQueue(quantums[i]);
+				queues[i] = new RRQueue(i, quantums[i]);
 			}else if (algorithms[i] == SchedulingAlgorithm.SJF){
-				queues[i] = new SJFQueue();
+				queues[i] = new SJFQueue(i);
 			}else if (algorithms[i] == SchedulingAlgorithm.NP_PRIO){
-				queues[i] = new NonPQueue();
+				queues[i] = new NonPQueue(i);
 			}else if (algorithms[i] == SchedulingAlgorithm.PRIO){
-				queues[i] = new PQueue();
+				queues[i] = new PQueue(i);
 			}else if (algorithms[i] == SchedulingAlgorithm.SRTF){
-				queues[i] = new SRTFQueue();
+				queues[i] = new SRTFQueue(i);
 			}
+		}	
+		
+		for(int i = 0; i < numOfQueues; i++) {
 			
-		}							
+		}
 	}			
 	
 	private static void insertOnQueue(Process newProcess){				

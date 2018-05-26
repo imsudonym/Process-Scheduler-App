@@ -15,7 +15,10 @@ public class SJFQueue {
 	private long timeStart;
 	private long timeEnd;
 	
-	public SJFQueue(){		
+	private byte queuePriority = -1;
+	
+	public SJFQueue(int priority){
+		this.queuePriority = (byte)priority;
 		startThread();
 	}
 	

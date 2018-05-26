@@ -16,7 +16,10 @@ public class FCFSQueue {
 	private long timeStart;
 	private long timeEnd;
 	
-	public FCFSQueue(){		
+	private byte queuePriority = -1;
+	
+	public FCFSQueue(int priority){
+		this.queuePriority = (byte)priority;
 		startThread();
 	}
 	
