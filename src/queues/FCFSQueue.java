@@ -1,43 +1,44 @@
+package queues;
+import constants.SchedulingAlgorithm;
+import ctrl.Scheduler;
+import gui.GanttChart;
+import utils.Process;
+import utils.PseudoArray;
 
-public class SJFQueue {
+public class FCFSQueue {
 		
 	private PseudoArray array = new PseudoArray(20);
-	private Process currProcess;
-	private boolean running = false;
+	private Process currProcess;	
 	private byte allProcessesDone = 1;
+	private boolean running = false;
 	private int numOfProcesses;
+	
 	private long timeStart;
 	private long timeEnd;
 	
-	public SJFQueue(){		
+	public FCFSQueue(){		
 		startThread();
 	}
 	
 	private void startThread(){
 		running = true;
-		SJFThread.start();
+		FCFSThread.start();
 	}
 	
 	public void stopThread(){
-		SJFThread.interrupt();
-		running = false;
-	}
+		FCFSThread.interrupt();
+		running = false;		
+	}	
 	
 	public void enqueue(Process newProcess){		
 		array.add(newProcess);		
-		sortSJF();
-		allProcessesDone = 0;
+		allProcessesDone = 0;		
 		numOfProcesses--;
 	}	
 	
 	public Process dequeue(){
-					
 		Process prc = array.remove();											
 		return prc;
-	}
-	
-	public void sortSJF(){
-		array.sortSJF();
 	}
 	
 	public Process peekHead(){
@@ -52,9 +53,9 @@ public class SJFQueue {
 		return array.getSize();
 	}
 	
-	Thread SJFThread = new Thread(){				
+	Thread FCFSThread = new Thread(){		
 		public void run(){
-			while(running){					
+			while(running){
 				if(getSize() > 0 && peekHead() != null){									
 					currProcess = dequeue();
 					
@@ -70,7 +71,7 @@ public class SJFQueue {
 					}
 					
 					int burstTime = currProcess.getBurstTime();																								
-					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.SJF);
+					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.FCFS);
 					
 					while(Scheduler.clockTime != (timeStart + burstTime)){					
 						try {
@@ -80,14 +81,15 @@ public class SJFQueue {
 						}				
 					}
 								
-					timeEnd = Scheduler.clockTime;
+					timeEnd = Scheduler.clockTime;			
 					currProcess.setWaitTimeNonPreemptive();
-				
+					
 				}else{				
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.SJF);		
-						allProcessesDone = 1;						
-					}
+						GanttChart.addLastCompletionTime(SchedulingAlgorithm.FCFS);		
+						allProcessesDone = 1;		
+						
+					}	
 					
 					if(numOfProcesses <= 0){
 						int s = Scheduler.processes.length;
@@ -110,9 +112,9 @@ public class SJFQueue {
 					}
 				}
 			}
-		}
-	};
-	
+		}		
+	};	
+
 	public void simulationDone(){
 		GanttChart.simulationDone();
 	}
@@ -120,7 +122,7 @@ public class SJFQueue {
 	public void setNumberOFProcesses(int length) {
 		this.numOfProcesses = length;
 	}
-	
+
 	public void restart() {
 		running = true;
 	}

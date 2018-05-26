@@ -1,3 +1,13 @@
+package ctrl;
+import constants.SchedulingAlgorithm;
+import gui.GanttChart;
+import queues.FCFSQueue;
+import queues.NonPQueue;
+import queues.PQueue;
+import queues.RRQueue;
+import queues.SJFQueue;
+import queues.SRTFQueue;
+import utils.Process;
 
 public class Scheduler {
 	private static final int MAX_QUEUE = 8;	

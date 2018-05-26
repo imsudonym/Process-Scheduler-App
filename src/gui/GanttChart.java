@@ -1,3 +1,4 @@
+package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -24,10 +26,20 @@ import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import constants.SchedulingAlgorithm;
+import ctrl.Scheduler;
+import queues.FCFSQueue;
+import queues.NonPQueue;
+import queues.PQueue;
+import queues.RRQueue;
+import queues.SJFQueue;
+import queues.SRTFQueue;
+import utils.Process;
+
 public class GanttChart extends JFrame{
 
-	private static JPanel panel;	
-	private static JPanel timePanel;
+	private static JPanel panel1, panel2, panel3, panel4;	
+	private static JPanel timePanel1, timePanel2, timePanel3, timePanel4;
 	private static JPanel pcbPanel;
 	private static JPanel pcbIdPanel;	
 	private static JPanel pcbArrivalPanel;
@@ -48,7 +60,7 @@ public class GanttChart extends JFrame{
 	
 	private static JPanel mlfqPanel; 
 	
-	private static JLabel title;
+	private static JLabel title1, title2, title3, title4;
 	private static JLabel[] timeLabel = new JLabel[10000];
 	
 	private static JMenuBar menuBar;
@@ -61,6 +73,7 @@ public class GanttChart extends JFrame{
 	private ArrayList<Integer> burstTime = new ArrayList<Integer>();
 	private ArrayList<Integer> priority = new ArrayList<Integer>();
 	
+	private static int algorithm1, algorithm2, algorithm3, algorithm4, algorithm;
 	private static int procYOffset;
 	private static int timesYOffset;
 	private static int processCount = 0;		
@@ -74,31 +87,28 @@ public class GanttChart extends JFrame{
 	private static int prevFCFSBurstLength = -1;
 	private static int timeCounter = 0;
 	private static int timeLapse = 0;
-	
 	private static int timesEntry;
 	private static int quantum = 2;
-	private static int algorithm = SchedulingAlgorithm.FCFS;
-	
 	private static int Offset = -2;
 	
-	private static boolean MLFQ = false;
 	private static boolean alreadyStarted = false;
 	private static boolean threadStarted = false;
 	
 	private static String fileChosen;
+	private static String[] algorithms = {"FCFS", "SJF", "SRTF", "NP-PRIO", "P-PRIO", "RR"};
 	
 	private static Scheduler scheduler;
-	
 	private static Process[] processes;
-	
 	private static Font font = new Font("Helvetica", Font.BOLD, 20);
 	private static Font timeLabelFont = new Font("Helvetica", Font.BOLD, 12);
-	
 	private static Color darkBlue = new Color(0, 46, 70);
-	
 	private static Border border = BorderFactory.createLineBorder(darkBlue);
-	
 	private static Container con;
+	
+	JComboBox<String> algoList1 = new JComboBox<String>(algorithms);
+	JComboBox<String> algoList2 = new JComboBox<String>(algorithms);
+	JComboBox<String> algoList3 = new JComboBox<String>(algorithms);
+	JComboBox<String> algoList4 = new JComboBox<String>(algorithms);
 	
 	public GanttChart(){
 		super("CPU Scheduling Gantt Chart");		
@@ -384,42 +394,90 @@ public class GanttChart extends JFrame{
 		con.revalidate();					
 	}
 	
-	private void initGanttChart(int algorithm, int title_x, int title_y, int chart_x, int chart_y) {
+	private void initGanttChart(int x, int y, int level /*JComboBox cb,*/) {
+		JPanel panel = null;
+		JLabel title = null;
 		String titleName = "";
+		
 		int titleWidth = 100;
 		
-		if(algorithm == SchedulingAlgorithm.FCFS){
-			titleName = "FCFS";				
-		}else if(algorithm == SchedulingAlgorithm.RR){
-			titleName = "Round robin (quantum = " + (quantum) + ")";
-			titleWidth = 500;
-		}else if(algorithm == SchedulingAlgorithm.SJF){
-			titleName = "SJF";
-		}else if(algorithm == SchedulingAlgorithm.SRTF){
-			titleName = "SRTF";
-		}else if(algorithm == SchedulingAlgorithm.PRIO){
-			titleName = "Preemptive Priority";
-			titleWidth = 300;
-		}else if(algorithm == SchedulingAlgorithm.NP_PRIO){
-			titleName = "Nonpreemptive Priority";
-			titleWidth = 300;
+		if(level == 1) {
+			
+			panel1 = new JPanel();
+			panel1.setLayout(null);
+			panel1.setBackground(Color.LIGHT_GRAY);
+			panel1.setBorder(border);
+			panel1.setPreferredSize(new Dimension(panelWidth-5, 73));	
+			
+			timePanel1 = new JPanel();
+			timePanel1.setLayout(null);
+			timePanel1.setBackground(darkBlue);
+			timePanel1.setBounds(1, 51, 1145, 20);																								
+			panel1.add(timePanel1);
+			
+			title = title1;
+			panel = panel1;
+			
+		}else if (level == 2) {
+			title2 = new JLabel(titleName);
+			title2.setFont(font);
+			title2.setBounds(title_x/*70*/, title_y/*45*/, titleWidth, 50);
+			
+			panel2 = new JPanel();
+			panel2.setLayout(null);
+			panel2.setBackground(Color.LIGHT_GRAY);
+			panel2.setBorder(border);
+			panel2.setPreferredSize(new Dimension(panelWidth-5, 73));	
+			
+			timePanel2 = new JPanel();
+			timePanel2.setLayout(null);
+			timePanel2.setBackground(darkBlue);
+			timePanel2.setBounds(1, 51, 1145, 20);																								
+			panel2.add(timePanel2);
+			
+			title = title2;
+			panel = panel2;
+			
+		}else if (level == 3) {
+			title3 = new JLabel(titleName);
+			title3.setFont(font);
+			title3.setBounds(title_x/*70*/, title_y/*45*/, titleWidth, 50);
+			
+			panel3 = new JPanel();
+			panel3.setLayout(null);
+			panel3.setBackground(Color.LIGHT_GRAY);
+			panel3.setBorder(border);
+			panel3.setPreferredSize(new Dimension(panelWidth-5, 73));	
+			
+			timePanel3 = new JPanel();
+			timePanel3.setLayout(null);
+			timePanel3.setBackground(darkBlue);
+			timePanel3.setBounds(1, 51, 1145, 20);																								
+			panel3.add(timePanel3);
+			
+			title = title3;
+			panel = panel3;
+			
+		}else if (level == 4) {
+			title4 = new JLabel(titleName);
+			title4.setFont(font);
+			title4.setBounds(title_x/*70*/, title_y/*45*/, titleWidth, 50);
+			
+			panel4 = new JPanel();
+			panel4.setLayout(null);
+			panel4.setBackground(Color.LIGHT_GRAY);
+			panel4.setBorder(border);
+			panel4.setPreferredSize(new Dimension(panelWidth-5, 73));	
+			
+			timePanel4 = new JPanel();
+			timePanel4.setLayout(null);
+			timePanel4.setBackground(darkBlue);
+			timePanel4.setBounds(1, 51, 1145, 20);																								
+			panel4.add(timePanel4);
+			
+			title = title4;
+			panel = panel4;
 		}
-		
-		title = new JLabel(titleName);
-		title.setFont(font);
-		title.setBounds(title_x/*70*/, title_y/*45*/, titleWidth, 50);
-		
-		panel = new JPanel();
-		panel.setLayout(null);
-		panel.setBackground(Color.LIGHT_GRAY);
-		panel.setBorder(border);
-		panel.setPreferredSize(new Dimension(panelWidth-5, 73));	
-		
-		timePanel = new JPanel();
-		timePanel.setLayout(null);
-		timePanel.setBackground(darkBlue);
-		timePanel.setBounds(1, 51, 1145, 20);																								
-		panel.add(timePanel);
 		
 		JScrollPane scrollPane = new JScrollPane(panel);
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -431,8 +489,11 @@ public class GanttChart extends JFrame{
 
 	}
 	
-	private void initOneLevel() {
-		initGanttChart(algorithm, 70, 45, 60, 90);
+	//private int algorithm = -1;
+	private void initOneLevel() {	
+		initOneLevelComboBox();
+		
+		initGanttChart(70, 45, 60, 90, 1);
 		initProcessTable(270, 200, 150, 250);
 		initTimesTable(300);
 		initAvgTimeTable(650, 560);
@@ -440,8 +501,11 @@ public class GanttChart extends JFrame{
 	}
 
 	private void initTwoLevel() {
-		initGanttChart(algorithm, 70, 45, 60, 90);
-		initGanttChart(algorithm, 70, 180, 60, 225);
+		initOneLevelComboBox(70, 45);
+		initTwoLevelComboBox(70, 180);
+		
+		initGanttChart(60, 90, 1);
+		initGanttChart(60, 225, 2);
 		initProcessTable(270, 320, 150, 380);
 		initTimesTable(400);
 		initAvgTimeTable(650, 660);
@@ -449,9 +513,14 @@ public class GanttChart extends JFrame{
 	}
 	
 	private void initThreeLevel() {
-		initGanttChart(algorithm, 70, 45, 60, 90);
-		initGanttChart(algorithm, 70, 180, 60, 225);
-		initGanttChart(algorithm, 70, 320, 60, 360);
+		initOneLevelComboBox(70, 45);
+		initTwoLevelComboBox(70, 180);
+		initThreeLevelComboBox(70, 320);
+		
+		initGanttChart(60, 90, 1);
+		initGanttChart(60, 225, 2);
+		initGanttChart(60, 360, 3);
+		
 		initProcessTable(270, 460, 150, 520);
 		initTimesTable(550);
 		initAvgTimeTable(650, 820);
@@ -459,16 +528,138 @@ public class GanttChart extends JFrame{
 	}
 	
 	private void initFourLevel() {
-		initGanttChart(algorithm, 70, 45, 60, 90);
-		initGanttChart(algorithm, 70, 180, 60, 225);
-		initGanttChart(algorithm, 70, 320, 60, 360);
-		initGanttChart(algorithm, 70, 460, 60, 500);
+		initOneLevelComboBox(70, 45);
+		initTwoLevelComboBox(70, 180);
+		initThreeLevelComboBox(70, 320);
+		initFourLevelComboBox(70, 460);
+		
+		initGanttChart(60, 90, 1);
+		initGanttChart(60, 225, 2);
+		initGanttChart(60, 360, 3);
+		initGanttChart(60, 500, 4);
+		
 		initProcessTable(270, 620, 150, 680);
 		initTimesTable(700);
 		initAvgTimeTable(650, 860);
 		initStartButton(1100, 25);
 	}
 	
+	private void initOneLevelComboBox(int x, int y) {
+		algoList1.setBounds(x, y, 80, 20);
+		algoList1.setSelectedIndex(0);
+		
+		algoList1.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
+				
+				if (selected.equals("SJF")) {
+					algorithm1 = SchedulingAlgorithm.SJF;
+				}else if (selected.equals("SRTF")) {
+					algorithm1 = SchedulingAlgorithm.SRTF;
+				}else if (selected.equals("NP-PRIO")) {
+					algorithm1 = SchedulingAlgorithm.NP_PRIO;
+				}else if (selected.equals("P-PRIO")) {
+					algorithm1 = SchedulingAlgorithm.PRIO;
+				}else if (selected.equals("RR")) {
+					algorithm1 = SchedulingAlgorithm.RR;
+				}else {
+					algorithm1 = SchedulingAlgorithm.FCFS;
+				}
+			}
+			
+		});
+		mlfqPanel.add(algoList1);
+	}
+	
+	private void initTwoLevelComboBox(int x, int y) {
+		algoList2.setBounds(x, y, 80, 20);
+		algoList2.setSelectedIndex(0);
+		
+		algoList2.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
+				
+				if (selected.equals("SJF")) {
+					algorithm2 = SchedulingAlgorithm.SJF;
+				}else if (selected.equals("SRTF")) {
+					algorithm2 = SchedulingAlgorithm.SRTF;
+				}else if (selected.equals("NP-PRIO")) {
+					algorithm2 = SchedulingAlgorithm.NP_PRIO;
+				}else if (selected.equals("P-PRIO")) {
+					algorithm2 = SchedulingAlgorithm.PRIO;
+				}else if (selected.equals("RR")) {
+					algorithm2 = SchedulingAlgorithm.RR;
+				}else {
+					algorithm2 = SchedulingAlgorithm.FCFS;
+				}
+			}
+			
+		});
+		mlfqPanel.add(algoList2);
+	}
+	
+	private void initThreeLevelComboBox(int x, int y) {
+		algoList3.setBounds(x, y, 80, 20);
+		algoList3.setSelectedIndex(0);
+		
+		algoList3.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
+				
+				if (selected.equals("SJF")) {
+					algorithm3 = SchedulingAlgorithm.SJF;
+				}else if (selected.equals("SRTF")) {
+					algorithm3 = SchedulingAlgorithm.SRTF;
+				}else if (selected.equals("NP-PRIO")) {
+					algorithm3 = SchedulingAlgorithm.NP_PRIO;
+				}else if (selected.equals("P-PRIO")) {
+					algorithm3 = SchedulingAlgorithm.PRIO;
+				}else if (selected.equals("RR")) {
+					algorithm3 = SchedulingAlgorithm.RR;
+				}else {
+					algorithm3 = SchedulingAlgorithm.FCFS;
+				}
+			}
+			
+		});
+		mlfqPanel.add(algoList3);
+	}
+	
+	private void initFourLevelComboBox(int x, int y) {
+		algoList4.setBounds(x, y, 80, 20);
+		algoList4.setSelectedIndex(0);
+		
+		algoList4.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
+				
+				if (selected.equals("SJF")) {
+					algorithm4 = SchedulingAlgorithm.SJF;
+				}else if (selected.equals("SRTF")) {
+					algorithm4 = SchedulingAlgorithm.SRTF;
+				}else if (selected.equals("NP-PRIO")) {
+					algorithm4 = SchedulingAlgorithm.NP_PRIO;
+				}else if (selected.equals("P-PRIO")) {
+					algorithm4 = SchedulingAlgorithm.PRIO;
+				}else if (selected.equals("RR")) {
+					algorithm4 = SchedulingAlgorithm.RR;
+				}else {
+					algorithm4 = SchedulingAlgorithm.FCFS;
+				}
+			}
+			
+		});
+		mlfqPanel.add(algoList4);
+	}
+
 	private void initStartButton(int xOffset, int yOffset) {
 		JButton startButton = new JButton("START");
 		startButton.setBounds(xOffset, yOffset, 100, 50);
@@ -699,11 +890,11 @@ public class GanttChart extends JFrame{
 		label.setBounds(18, 18, 30, 15);
 		comp.add(label);
 				
-		container = panel;
+		container = panel1;
 			
 		if(timeCounter > 21){
-			panel.setPreferredSize(new Dimension(panelWidth += 50, 73));
-			timePanel.setSize(new Dimension(panelWidth, 73));
+			panel1.setPreferredSize(new Dimension(panelWidth += 50, 73));
+			timePanel1.setSize(new Dimension(panelWidth, 73));
 		}
 			
 		if(prevFCFSBurstLength < 0){
@@ -718,13 +909,13 @@ public class GanttChart extends JFrame{
 		timeLabel[timeCounter].setForeground(Color.WHITE);
 		timeLabel[timeCounter].setBounds(xOffset + 1, 2, 30, 15);
 			
-		timePanel.add(timeLabel[timeCounter++]);
+		timePanel1.add(timeLabel[timeCounter++]);
 									
 		timeLapse += executionTime;
 		prevFCFSBurstLength = 50;					
 		comp.setBounds(xOffset, yOffset, 50, 51);
-		timePanel.repaint();
-		timePanel.revalidate();							
+		timePanel1.repaint();
+		timePanel1.revalidate();							
 										
 		container.add(comp);
 		container.repaint();
@@ -791,8 +982,8 @@ public class GanttChart extends JFrame{
 		timeLabel[timeCounter].setFont(timeLabelFont);
 		timeLabel[timeCounter].setForeground(Color.WHITE);
 		timeLabel[timeCounter].setBounds(xOffset + prevFCFSBurstLength + 1, 2, 30, 15);			
-		timePanel.add(timeLabel[timeCounter++]);
-		timePanel.repaint();
+		timePanel1.add(timeLabel[timeCounter++]);
+		timePanel1.repaint();
 	}
 	
 	public static void addTimesInformation(int processId, long responseTime, long waitTime, long turnaroundTime) {

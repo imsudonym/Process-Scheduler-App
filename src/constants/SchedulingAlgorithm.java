@@ -1,3 +1,4 @@
+package constants;
 
 public interface SchedulingAlgorithm {
 	

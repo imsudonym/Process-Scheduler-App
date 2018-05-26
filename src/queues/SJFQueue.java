@@ -1,4 +1,11 @@
-public class NonPQueue {
+package queues;
+import constants.SchedulingAlgorithm;
+import ctrl.Scheduler;
+import gui.GanttChart;
+import utils.Process;
+import utils.PseudoArray;
+
+public class SJFQueue {
 		
 	private PseudoArray array = new PseudoArray(20);
 	private Process currProcess;
@@ -8,24 +15,24 @@ public class NonPQueue {
 	private long timeStart;
 	private long timeEnd;
 	
-	public NonPQueue(){		
+	public SJFQueue(){		
 		startThread();
 	}
 	
 	private void startThread(){
 		running = true;
-		NonPThread.start();
+		SJFThread.start();
 	}
 	
 	public void stopThread(){
-		NonPThread.interrupt();
+		SJFThread.interrupt();
 		running = false;
 	}
 	
 	public void enqueue(Process newProcess){		
-		array.add(newProcess);
-		array.sortPriority();
-		allProcessesDone = 0;		
+		array.add(newProcess);		
+		sortSJF();
+		allProcessesDone = 0;
 		numOfProcesses--;
 	}	
 	
@@ -33,6 +40,10 @@ public class NonPQueue {
 					
 		Process prc = array.remove();											
 		return prc;
+	}
+	
+	public void sortSJF(){
+		array.sortSJF();
 	}
 	
 	public Process peekHead(){
@@ -47,7 +58,7 @@ public class NonPQueue {
 		return array.getSize();
 	}
 	
-	Thread NonPThread = new Thread(){		
+	Thread SJFThread = new Thread(){				
 		public void run(){
 			while(running){					
 				if(getSize() > 0 && peekHead() != null){									
@@ -58,14 +69,14 @@ public class NonPQueue {
 					}else{
 						timeStart = Scheduler.clockTime;
 					}
-								
+					
 					currProcess.setStartTime(timeStart);
 					if(currProcess.getResponseTime() < 0) {
 						currProcess.setResponseTime(timeStart-currProcess.getArrivalTime());
 					}
 					
 					int burstTime = currProcess.getBurstTime();																								
-					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);
+					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.SJF);
 					
 					while(Scheduler.clockTime != (timeStart + burstTime)){					
 						try {
@@ -75,12 +86,12 @@ public class NonPQueue {
 						}				
 					}
 								
-					timeEnd = Scheduler.clockTime;		
+					timeEnd = Scheduler.clockTime;
 					currProcess.setWaitTimeNonPreemptive();
 				
 				}else{				
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.NP_PRIO);		
+						GanttChart.addLastCompletionTime(SchedulingAlgorithm.SJF);		
 						allProcessesDone = 1;						
 					}
 					
@@ -107,15 +118,15 @@ public class NonPQueue {
 			}
 		}
 	};
-
-	public void simulationDone(){		
+	
+	public void simulationDone(){
 		GanttChart.simulationDone();
 	}
 	
-	public void setNumberOFProcesses(int length) {	
+	public void setNumberOFProcesses(int length) {
 		this.numOfProcesses = length;
 	}
-
+	
 	public void restart() {
 		running = true;
 	}

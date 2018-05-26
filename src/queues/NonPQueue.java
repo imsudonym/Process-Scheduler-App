@@ -1,36 +1,43 @@
+package queues;
+import constants.SchedulingAlgorithm;
+import ctrl.Scheduler;
+import gui.GanttChart;
+import utils.Process;
+import utils.PseudoArray;
 
-public class FCFSQueue {
+public class NonPQueue {
 		
 	private PseudoArray array = new PseudoArray(20);
-	private Process currProcess;	
-	private byte allProcessesDone = 1;
+	private Process currProcess;
 	private boolean running = false;
+	private byte allProcessesDone = 1;
 	private int numOfProcesses;
-	
 	private long timeStart;
 	private long timeEnd;
 	
-	public FCFSQueue(){		
+	public NonPQueue(){		
 		startThread();
 	}
 	
 	private void startThread(){
 		running = true;
-		FCFSThread.start();
+		NonPThread.start();
 	}
 	
 	public void stopThread(){
-		FCFSThread.interrupt();
-		running = false;		
-	}	
+		NonPThread.interrupt();
+		running = false;
+	}
 	
 	public void enqueue(Process newProcess){		
-		array.add(newProcess);		
+		array.add(newProcess);
+		array.sortPriority();
 		allProcessesDone = 0;		
 		numOfProcesses--;
 	}	
 	
 	public Process dequeue(){
+					
 		Process prc = array.remove();											
 		return prc;
 	}
@@ -47,9 +54,9 @@ public class FCFSQueue {
 		return array.getSize();
 	}
 	
-	Thread FCFSThread = new Thread(){		
+	Thread NonPThread = new Thread(){		
 		public void run(){
-			while(running){
+			while(running){					
 				if(getSize() > 0 && peekHead() != null){									
 					currProcess = dequeue();
 					
@@ -58,14 +65,14 @@ public class FCFSQueue {
 					}else{
 						timeStart = Scheduler.clockTime;
 					}
-					
+								
 					currProcess.setStartTime(timeStart);
 					if(currProcess.getResponseTime() < 0) {
 						currProcess.setResponseTime(timeStart-currProcess.getArrivalTime());
 					}
 					
 					int burstTime = currProcess.getBurstTime();																								
-					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.FCFS);
+					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);
 					
 					while(Scheduler.clockTime != (timeStart + burstTime)){					
 						try {
@@ -75,15 +82,14 @@ public class FCFSQueue {
 						}				
 					}
 								
-					timeEnd = Scheduler.clockTime;			
+					timeEnd = Scheduler.clockTime;		
 					currProcess.setWaitTimeNonPreemptive();
-					
+				
 				}else{				
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.FCFS);		
-						allProcessesDone = 1;		
-						
-					}	
+						GanttChart.addLastCompletionTime(SchedulingAlgorithm.NP_PRIO);		
+						allProcessesDone = 1;						
+					}
 					
 					if(numOfProcesses <= 0){
 						int s = Scheduler.processes.length;
@@ -106,14 +112,14 @@ public class FCFSQueue {
 					}
 				}
 			}
-		}		
-	};	
+		}
+	};
 
-	public void simulationDone(){
+	public void simulationDone(){		
 		GanttChart.simulationDone();
 	}
 	
-	public void setNumberOFProcesses(int length) {
+	public void setNumberOFProcesses(int length) {	
 		this.numOfProcesses = length;
 	}
 
