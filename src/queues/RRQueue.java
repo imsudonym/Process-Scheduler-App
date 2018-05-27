@@ -13,9 +13,11 @@ public class RRQueue {
 	private boolean running = false;
 	private int numOfProcesses;
 	private int quantum = 0;
-	private long prevTime = -1;	
+	private static long prevTime;	
 	private long timeStart;
 	private long timeEnd;
+	
+	private static long prevTimeQuantum;
 	
 	private Process prevProcess;
 	private byte level = -1;
@@ -126,7 +128,6 @@ public class RRQueue {
 	}
 	
 	Thread RRThread = new Thread(){				
-		private long prevTimeQuantum;
 		private int prevBurstLeft = -1;
 
 		public void run(){
@@ -160,14 +161,13 @@ public class RRQueue {
 					}
 					
 					long timeNow = Scheduler.clockTime;					
-					if(prevTime == -1) prevTime = timeNow;
 					if(prevTime < timeNow){
 						System.out.println("executing p" + currProcess.getId() + " prevTime = " + prevTime + " timeNow = " + timeNow);		
 						int lapse = (int)(timeNow - prevTime);
 						int burstLeft = currProcess.getBurstTime() - lapse;					
 						currProcess.setBurstTime(burstLeft);																	
 						
-						
+						System.out.println(timeNow + " == " +  (prevTimeQuantum + quantum));
 						if(timeNow == prevTimeQuantum + quantum){
 							currProcess.setPreempted();
 							currProcess.setTimePreempted(timeNow);
@@ -180,8 +180,12 @@ public class RRQueue {
 							if(burstLeft > 0){																
 								int burstPreempted = currProcess.getBurstTime();
 								currProcess.setPrevBurstPreempted(burstPreempted);
-								demote(currProcess);
-								dequeue();
+								if(nextQueue == null) {
+									retain();
+								} else {
+									demote(currProcess);
+									dequeue();
+								}
 							}
 							
 							prevTimeQuantum = timeNow;
@@ -192,12 +196,10 @@ public class RRQueue {
 							currProcess.setWaitTimePreemptive();
 							int s = currProcess.getTimesPreempted();
 							
-							if(currProcess.getPrevBurstPreempted() < quantum){		
-								System.out.println("   Hi I was called. Then what happened?");
+							if(currProcess.getPrevBurstPreempted() < quantum){						
 								GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.RR);								
-							}else{
-								System.out.println("   Hi I wasnt called.\n     " + currProcess.getPrevBurstPreempted() + " <? " + quantum);
 							}
+							
 							dequeue();													
 							System.out.println("p" + currProcess.getId() + " Done executing.");
 							timeEnd = Scheduler.clockTime;
@@ -213,6 +215,12 @@ public class RRQueue {
 					if (allProcessesDone == 0){
 						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.RR);		
 						allProcessesDone = 1;
+						if(nextQueue != null) {
+							if(nextQueue instanceof RRQueue) {
+								((RRQueue)(nextQueue)).startExecution();
+								System.out.println("   I was called. Expect to see 2nd queue start exec.");
+							}
+						}
 					}			
 					
 					//System.out.println("numOfProcess = " + numOfProcesses);
@@ -271,19 +279,27 @@ public class RRQueue {
 		}*/
 	}
 	
+	protected void retain() {
+		enqueue(dequeue());
+	}
+
 	protected void demote(Process process) {
+		
+		if(nextQueue == null) return;
+		
 		System.out.println("level = " + level + " demote p" + process.getId() + " burstLeft = " + process.getBurstTime() + " size = " + getSize() + " np = " + numOfProcesses);
-		if(nextQueueType == QueueType.FCFS) {
+		
+		if(nextQueue instanceof FCFSQueue) {
 			((FCFSQueue)nextQueue).enqueue(process);
-		}else if(nextQueueType == QueueType.SJF) {
+		}else if(nextQueue instanceof SJFQueue) {
 			((SJFQueue)nextQueue).enqueue(process);
-		}else if(nextQueueType == QueueType.SRTF) {
+		}else if(nextQueue instanceof SRTFQueue) {
 			((SRTFQueue)nextQueue).enqueue(process);
-		}else if(nextQueueType == QueueType.NP) {
+		}else if(nextQueue instanceof NonPQueue) {
 			((NonPQueue)nextQueue).enqueue(process);
-		}else if(nextQueueType == QueueType.P) {
+		}else if(nextQueue instanceof PQueue) {
 			((PQueue)nextQueue).enqueue(process);
-		}else if(nextQueueType == QueueType.RR) {
+		}else if(nextQueue instanceof RRQueue) {
 			((RRQueue)nextQueue).enqueue(process);
 		}
 	}
