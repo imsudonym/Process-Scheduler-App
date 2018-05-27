@@ -16,14 +16,33 @@ public class FCFSQueue {
 	private long timeStart;
 	private long timeEnd;
 	
-	private byte queuePriority = -1;
+	private byte level = -1;
+	private Object prevQueue;
+	private Object nextQueue;
 	
-	public FCFSQueue(int priority){
-		this.queuePriority = (byte)priority;
-		startThread();
+	public FCFSQueue(int level){
+		this.level = (byte)level;
+		//startThread();
 	}
 	
-	private void startThread(){
+	public void setPrevQueue(Object prevQueue) {
+		this.prevQueue = prevQueue;
+	}
+	
+	public void setNextQueue(Object nextQueue){
+		this.nextQueue = nextQueue;
+	}
+	
+	public Object getNextQueue(){
+		return nextQueue;
+	}
+	
+	public Object getPrevQueue() {
+		return prevQueue;
+	}
+	
+	public void startThread(){
+		System.out.println("FCFS thread started.");
 		running = true;
 		FCFSThread.start();
 	}
@@ -35,6 +54,7 @@ public class FCFSQueue {
 	
 	public void enqueue(Process newProcess){		
 		array.add(newProcess);		
+		System.out.println("enqueue p" + newProcess.getId());
 		allProcessesDone = 0;		
 		numOfProcesses--;
 	}	
@@ -74,7 +94,7 @@ public class FCFSQueue {
 					}
 					
 					int burstTime = currProcess.getBurstTime();																								
-					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.FCFS);
+					GanttChart.addExecutingProcess(level, currProcess.getId(), burstTime, SchedulingAlgorithm.FCFS);
 					
 					while(Scheduler.clockTime != (timeStart + burstTime)){					
 						try {
@@ -89,7 +109,7 @@ public class FCFSQueue {
 					
 				}else{				
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.FCFS);		
+						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.FCFS);		
 						allProcessesDone = 1;		
 						
 					}	

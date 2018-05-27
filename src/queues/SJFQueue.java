@@ -15,14 +15,32 @@ public class SJFQueue {
 	private long timeStart;
 	private long timeEnd;
 	
-	private byte queuePriority = -1;
+	private byte level = -1;
+	private Object prevQueue;
+	private Object nextQueue;
 	
 	public SJFQueue(int priority){
-		this.queuePriority = (byte)priority;
+		this.level = (byte)level;
 		startThread();
 	}
 	
-	private void startThread(){
+	public void setPrevQueue(Object prevQueue) {
+		this.prevQueue = prevQueue;
+	}
+	
+	public void setNextQueue(Object nextQueue){
+		this.nextQueue = nextQueue;
+	}
+	
+	public Object getNextQueue(){
+		return nextQueue;
+	}
+	
+	public Object getPrevQueue() {
+		return prevQueue;
+	}
+	
+	public void startThread(){
 		running = true;
 		SJFThread.start();
 	}
@@ -79,7 +97,7 @@ public class SJFQueue {
 					}
 					
 					int burstTime = currProcess.getBurstTime();																								
-					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.SJF);
+					GanttChart.addExecutingProcess(level, currProcess.getId(), burstTime, SchedulingAlgorithm.SJF);
 					
 					while(Scheduler.clockTime != (timeStart + burstTime)){					
 						try {
@@ -94,7 +112,7 @@ public class SJFQueue {
 				
 				}else{				
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.SJF);		
+						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.SJF);		
 						allProcessesDone = 1;						
 					}
 					

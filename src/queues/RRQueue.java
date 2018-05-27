@@ -1,4 +1,5 @@
 package queues;
+import constants.QueueType;
 import constants.SchedulingAlgorithm;
 import ctrl.Scheduler;
 import gui.GanttChart;
@@ -9,7 +10,6 @@ public class RRQueue {
 		
 	private PseudoArray array = new PseudoArray(20);
 	private Process currProcess;
-	private Object nextQueue = null;
 	private boolean running = false;
 	private byte allProcessesDone = 1;
 	private int numOfProcesses;
@@ -19,28 +19,70 @@ public class RRQueue {
 	private long timeEnd;
 	
 	private Process prevProcess;
+	private byte level = -1;
 	
-	private byte queuePriority = -1;
+	private Object prevQueue;
+	private Object nextQueue = null;
 	
-	public RRQueue(int priority, int quantum){
-		this.queuePriority = (byte)priority;
+	private int prevQueueType;
+	private int nextQueueType;
+	
+	public RRQueue(int level, int quantum){
+		this.level = (byte)level;
 		this.quantum = quantum;
-		startThread();
+		//startThread();
 	}	
 	
+	public void setPrevQueue(Object prevQueue) {
+		this.prevQueue = prevQueue;
+		
+		if(prevQueue instanceof FCFSQueue) {
+			prevQueueType = QueueType.FCFS;
+		}else if(prevQueue instanceof RRQueue) {
+			prevQueueType = QueueType.RR;
+		}else if(prevQueue instanceof SJFQueue) {
+			prevQueueType = QueueType.SJF;
+		}else if(prevQueue instanceof SRTFQueue) {
+			prevQueueType = QueueType.SRTF;
+		}else if(prevQueue instanceof NonPQueue) {
+			prevQueueType = QueueType.NP;
+		}else if(prevQueue instanceof PQueue) {
+			prevQueueType = QueueType.P;
+		}
+	}
+	
 	public void setNextQueue(Object nextQueue){
+		System.out.println("Setting next queues");
 		this.nextQueue = nextQueue;
+		
+		if(nextQueue instanceof FCFSQueue) {
+			nextQueueType = QueueType.FCFS;
+		}else if(prevQueue instanceof RRQueue) {
+			nextQueueType = QueueType.RR;
+		}else if(prevQueue instanceof SJFQueue) {
+			nextQueueType = QueueType.SJF;
+		}else if(prevQueue instanceof SRTFQueue) {
+			nextQueueType = QueueType.SRTF;
+		}else if(prevQueue instanceof NonPQueue) {
+			nextQueueType = QueueType.NP;
+		}else if(prevQueue instanceof PQueue) {
+			nextQueueType = QueueType.P;
+		}
 	}
 	
 	public Object getNextQueue(){
 		return nextQueue;
 	}
 	
+	public Object getPrevQueue() {
+		return prevQueue;
+	}
+	
 	public long getQuantum(){
 		return quantum;
 	}
 	
-	private void startThread(){
+	public void startThread(){
 		running = true;
 		RRThread.start();
 	}
@@ -51,10 +93,9 @@ public class RRQueue {
 	}
 	
 	public void enqueue(Process newProcess){		
-		array.add(newProcess);		
+		array.add(newProcess);
 		allProcessesDone = 0;
 		numOfProcesses--;
-		//System.out.println("numOfProcesses: " +numOfProcesses);
 	}
 	
 	public void reenqueue(Process newProcess){		
@@ -123,7 +164,6 @@ public class RRQueue {
 					}
 					
 					long timeNow = Scheduler.clockTime;					
-					
 					if(prevTime < timeNow){
 																		
 						int lapse = (int)(timeNow - prevTime);
@@ -141,15 +181,16 @@ public class RRQueue {
 							currProcess.setPreempted();
 							currProcess.setTimePreempted(timeNow);
 							currProcess.preemptedFlag = true;
+							demote(currProcess);
 
 							prevProcess = currProcess;
 							
-							GanttChart.addExecutingProcess(currProcess.getId(), quantum, SchedulingAlgorithm.RR);
+							GanttChart.addExecutingProcess(level, currProcess.getId(), quantum, SchedulingAlgorithm.RR);
 							
 							if(burstLeft > 0){																
 								int burstPreempted = currProcess.getBurstTime();
 								currProcess.setPrevBurstPreempted(burstPreempted);
-								reenqueue(dequeue());
+								dequeue();
 							}
 							
 							prevTimeQuantum = timeNow;
@@ -160,7 +201,7 @@ public class RRQueue {
 							int s = currProcess.getTimesPreempted();
 							
 							if(currProcess.getPrevBurstPreempted() < quantum){							
-								GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.RR);								
+								GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.RR);								
 							}
 							dequeue();													
 							//System.out.println(" Done executing.");
@@ -173,7 +214,7 @@ public class RRQueue {
 				}else{										
 				
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.RR);		
+						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.RR);		
 						allProcessesDone = 1;						
 					}		
 					
@@ -202,9 +243,41 @@ public class RRQueue {
 	};
 	
 	public void simulationDone(){
+		System.out.println("RRQueue done.");
 		GanttChart.simulationDone();
+		System.out.println("next queue type: " + nextQueueType);
+		if(nextQueueType == QueueType.FCFS) {
+			System.out.println("Trying to start thread..");
+			((FCFSQueue)nextQueue).startThread();
+		}else if(nextQueueType == QueueType.SJF){
+			((SJFQueue)nextQueue).startThread();
+		}else if(nextQueueType == QueueType.SRTF){
+			((SRTFQueue)nextQueue).startThread();
+		}else if(nextQueueType == QueueType.NP) {
+			((NonPQueue)nextQueue).startThread();
+		}else if(nextQueueType == QueueType.P) {
+			((PQueue)nextQueue).startThread();
+		}else if(nextQueueType == QueueType.RR){
+			((RRQueue)nextQueue).startThread();
+		}
 	}
 	
+	protected void demote(Process process) {
+		if(nextQueueType == QueueType.FCFS) {
+			((FCFSQueue)nextQueue).enqueue(process);
+		}else if(nextQueueType == QueueType.SJF) {
+			((SJFQueue)nextQueue).enqueue(process);
+		}else if(nextQueueType == QueueType.SRTF) {
+			((SRTFQueue)nextQueue).enqueue(process);
+		}else if(nextQueueType == QueueType.NP) {
+			((NonPQueue)nextQueue).enqueue(process);
+		}else if(nextQueueType == QueueType.P) {
+			((PQueue)nextQueue).enqueue(process);
+		}else if(nextQueueType == QueueType.RR) {
+			((RRQueue)nextQueue).enqueue(process);
+		}
+	}
+
 	public void setNumberOFProcesses(int length) {
 		this.numOfProcesses = length;
 	}

@@ -16,14 +16,32 @@ public class PQueue {
 	private byte allProcessesDone = 1;
 	private long prevTime;
 	
-	private byte queuePriority = -1;
+	private byte level = -1;
+	private Object prevQueue;
+	private Object nextQueue;
 	
-	public PQueue(int priority){
-		this.queuePriority = (byte)priority;
+	public PQueue(int level){
+		this.level = (byte)level;
 		startThread();
 	}
 	
-	private void startThread(){
+	public void setPrevQueue(Object prevQueue) {
+		this.prevQueue = prevQueue;
+	}
+	
+	public void setNextQueue(Object nextQueue){
+		this.nextQueue = nextQueue;
+	}
+	
+	public Object getNextQueue(){
+		return nextQueue;
+	}
+	
+	public Object getPrevQueue() {
+		return prevQueue;
+	}
+	
+	public void startThread(){
 		running = true;
 		PThread.start();
 	}
@@ -132,7 +150,7 @@ public class PQueue {
 						if(prevProcess != null){
 							int burstPreempted = prevProcess.getBurstTime();
 							prevProcess.setPrevBurstPreempted(burstPreempted);
-							GanttChart.addExecutingProcess(prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.PRIO);
+							GanttChart.addExecutingProcess(level, prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.PRIO);
 						}
 						
 						preempted = false;
@@ -152,7 +170,7 @@ public class PQueue {
 						if(currProcess.getBurstTime() <= 0){
 							currProcess.setWaitTimePreemptive();
 							dequeue();
-							GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);													
+							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);													
 						}													
 					}
 					preempted = false;
@@ -161,7 +179,7 @@ public class PQueue {
 				}else{										
 				
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.PRIO);		
+						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.PRIO);		
 						allProcessesDone = 1;						
 					}		
 					

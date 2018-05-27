@@ -80,6 +80,7 @@ public class Scheduler {
 	}
 	
 	public void generateQueues(int algorithm, int quantum){
+		System.out.println("Generating single level queue...");
 		for(int i = 0; i < numOfQueues; i++){	
 			if(algorithm == SchedulingAlgorithm.FCFS){
 				queues[0] = new FCFSQueue(0);
@@ -105,24 +106,94 @@ public class Scheduler {
 	}	
 	
 	public void generateQueues(int[] algorithms, int[] quantums){
+		System.out.println("Generating multilevel queues...");
 		for(int i = 0; i < numOfQueues; i++){	
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
 				queues[i] = new FCFSQueue(i);
+				((FCFSQueue) queues[i]).setNumberOFProcesses(processes.length);
+				if(i == 0) ((FCFSQueue) queues[i]).startThread();
 			}else if (algorithms[i] == SchedulingAlgorithm.RR){
 				queues[i] = new RRQueue(i, quantums[i]);
+				((RRQueue) queues[i]).setNumberOFProcesses(processes.length);
+				if(i == 0) ((RRQueue) queues[i]).startThread();
 			}else if (algorithms[i] == SchedulingAlgorithm.SJF){
 				queues[i] = new SJFQueue(i);
+				((SJFQueue) queues[i]).setNumberOFProcesses(processes.length);
+				if(i == 0) ((SJFQueue) queues[i]).startThread();
 			}else if (algorithms[i] == SchedulingAlgorithm.NP_PRIO){
 				queues[i] = new NonPQueue(i);
+				((NonPQueue) queues[i]).setNumberOFProcesses(processes.length);
+				if(i == 0) ((NonPQueue) queues[i]).startThread();
 			}else if (algorithms[i] == SchedulingAlgorithm.PRIO){
 				queues[i] = new PQueue(i);
+				((PQueue) queues[i]).setNumberOFProcesses(processes.length);
+				if(i == 0) ((PQueue) queues[i]).startThread();
 			}else if (algorithms[i] == SchedulingAlgorithm.SRTF){
 				queues[i] = new SRTFQueue(i);
+				((SRTFQueue) queues[i]).setNumberOFProcesses(processes.length);
+				if(i == 0) ((SRTFQueue) queues[i]).startThread();
 			}
 		}	
 		
 		for(int i = 0; i < numOfQueues; i++) {
-			
+			if(queues[i] instanceof FCFSQueue){
+				if(i == numOfQueues-1) { 
+					((FCFSQueue) queues[i]).setNextQueue(null);
+				}else if(i == 0) {
+					((FCFSQueue) queues[i]).setPrevQueue(null);
+				}else {
+					((FCFSQueue) queues[i]).setPrevQueue(queues[i-1]);
+					((FCFSQueue) queues[i]).setNextQueue(queues[i+1]);
+				}
+			}else if (queues[i] instanceof RRQueue){
+				System.out.println("Queue to set next to: RRQueue");
+				if(i == numOfQueues-1) { 
+					((RRQueue) queues[i]).setPrevQueue(queues[i-1]);
+					((RRQueue) queues[i]).setNextQueue(null);
+				}else if(i == 0) {
+					((RRQueue) queues[i]).setPrevQueue(null);
+					((RRQueue) queues[i]).setNextQueue(queues[i+1]);
+				}else {
+					((RRQueue) queues[i]).setPrevQueue(queues[i-1]);
+					((RRQueue) queues[i]).setNextQueue(queues[i+1]);
+				}
+			}else if (queues[i] instanceof SJFQueue){
+				if(i == numOfQueues-1) { 
+					((SJFQueue) queues[i]).setNextQueue(null);
+				}else if(i == 0) {
+					((SJFQueue) queues[i]).setPrevQueue(null);
+				}else {
+					((SJFQueue) queues[i]).setPrevQueue(queues[i-1]);
+					((SJFQueue) queues[i]).setNextQueue(queues[i+1]);
+				}
+			}else if (queues[i] instanceof NonPQueue){
+				if(i == numOfQueues-1) { 
+					((NonPQueue) queues[i]).setNextQueue(null);
+				}else if(i == 0) {
+					((NonPQueue) queues[i]).setPrevQueue(null);
+				}else {
+					((NonPQueue) queues[i]).setPrevQueue(queues[i-1]);
+					((NonPQueue) queues[i]).setNextQueue(queues[i+1]);
+				}
+			}else if (queues[i] instanceof PQueue){
+				if(i == numOfQueues-1) { 
+					((PQueue) queues[i]).setNextQueue(null);
+				}else if(i == 0) {
+					((PQueue) queues[i]).setPrevQueue(null);
+				}else {
+					((PQueue) queues[i]).setPrevQueue(queues[i-1]);
+					((PQueue) queues[i]).setNextQueue(queues[i+1]);
+				}
+			}else if (queues[i] instanceof SRTFQueue){
+				if(i == numOfQueues-1) { 
+					((FCFSQueue) queues[i]).setNextQueue(null);
+				}else if(i == 0) {
+					((FCFSQueue) queues[i]).setPrevQueue(null);
+				}else {
+					((FCFSQueue) queues[i]).setPrevQueue(queues[i-1]);
+					((FCFSQueue) queues[i]).setNextQueue(queues[i+1]);
+				}
+			}
 		}
 	}			
 	

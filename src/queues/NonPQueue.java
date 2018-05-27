@@ -15,14 +15,32 @@ public class NonPQueue {
 	private long timeStart;
 	private long timeEnd;
 	
-	private byte queuePriority = -1;
+	private byte level = -1;
+	private Object prevQueue;
+	private Object nextQueue;
 	
-	public NonPQueue(int priority){
-		this.queuePriority = (byte)priority;
+	public NonPQueue(int leve){
+		this.level = (byte)level;
 		startThread();
 	}
 	
-	private void startThread(){
+	public void setPrevQueue(Object prevQueue) {
+		this.prevQueue = prevQueue;
+	}
+	
+	public void setNextQueue(Object nextQueue){
+		this.nextQueue = nextQueue;
+	}
+	
+	public Object getNextQueue(){
+		return nextQueue;
+	}
+	
+	public Object getPrevQueue() {
+		return prevQueue;
+	}
+	
+	public void startThread(){
 		running = true;
 		NonPThread.start();
 	}
@@ -75,7 +93,7 @@ public class NonPQueue {
 					}
 					
 					int burstTime = currProcess.getBurstTime();																								
-					GanttChart.addExecutingProcess(currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);
+					GanttChart.addExecutingProcess(level, currProcess.getId(), burstTime, SchedulingAlgorithm.NP_PRIO);
 					
 					while(Scheduler.clockTime != (timeStart + burstTime)){					
 						try {
@@ -90,7 +108,7 @@ public class NonPQueue {
 				
 				}else{				
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.NP_PRIO);		
+						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.NP_PRIO);		
 						allProcessesDone = 1;						
 					}
 					

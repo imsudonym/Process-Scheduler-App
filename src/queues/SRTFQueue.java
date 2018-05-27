@@ -16,14 +16,32 @@ public class SRTFQueue {
 	private byte allProcessesDone = 1;	
 	private long prevTime;
 	
-	private byte queuePriority = -1;
+	private byte level = -1;
+	private Object prevQueue;
+	private Object nextQueue;
 	
-	public SRTFQueue(int priority){
-		this.queuePriority = (byte)priority;
+	public SRTFQueue(int level){
+		this.level = (byte)level;
 		startThread();
 	}
 	
-	private void startThread(){
+	public void setPrevQueue(Object prevQueue) {
+		this.prevQueue = prevQueue;
+	}
+	
+	public void setNextQueue(Object nextQueue){
+		this.nextQueue = nextQueue;
+	}
+	
+	public Object getNextQueue(){
+		return nextQueue;
+	}
+	
+	public Object getPrevQueue() {
+		return prevQueue;
+	}
+	
+	public void startThread(){
 		running = true;
 		SRTFThread.start();
 	}
@@ -131,7 +149,7 @@ public class SRTFQueue {
 						if(prevProcess != null){
 							int burstPreempted = prevProcess.getBurstTime();
 							prevProcess.setPrevBurstPreempted(burstPreempted);
-							GanttChart.addExecutingProcess(prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.SRTF);							
+							GanttChart.addExecutingProcess(level, prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.SRTF);							
 						}
 						
 						preempted = false;
@@ -152,7 +170,7 @@ public class SRTFQueue {
 						if(currProcess.getBurstTime() <= 0){
 							currProcess.setWaitTimePreemptive();
 							dequeue();													
-							GanttChart.addExecutingProcess(currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SRTF);
+							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SRTF);
 						}													
 					}
 					preempted = false;
@@ -161,7 +179,7 @@ public class SRTFQueue {
 				}else{										
 				
 					if (allProcessesDone == 0){
-						GanttChart.addLastCompletionTime(SchedulingAlgorithm.SRTF);		
+						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.SRTF);		
 						allProcessesDone = 1;						
 					}		
 					

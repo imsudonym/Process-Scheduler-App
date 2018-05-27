@@ -152,6 +152,20 @@ public class GanttChart extends JFrame{
 			quantumItem.setEnabled(false);
 		}
 		
+		mlfqPanel = new JPanel();
+		mlfqPanel.setPreferredSize(new Dimension(con.getWidth(), con.getHeight() + Offset));
+		mlfqPanel.setBackground(Color.WHITE);
+		mlfqPanel.setLayout(null);
+			
+		JScrollPane scrollPane = new JScrollPane(mlfqPanel);
+		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scrollPane.setBounds(0, 0, con.getWidth(), con.getHeight());
+			
+		add(scrollPane);
+		
+		initStartButton(1100, 25);
+		
 		importFile = new JMenuItem("Import file");
 		importFile.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
@@ -386,18 +400,6 @@ public class GanttChart extends JFrame{
 		menuBar.add(quantumItem);
 		
 		setJMenuBar(menuBar);
-			
-		mlfqPanel = new JPanel();
-		mlfqPanel.setPreferredSize(new Dimension(con.getWidth(), con.getHeight() + Offset));
-		mlfqPanel.setBackground(Color.WHITE);
-		mlfqPanel.setLayout(null);
-			
-		JScrollPane scrollPane = new JScrollPane(mlfqPanel);
-		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		scrollPane.setBounds(0, 0, con.getWidth(), con.getHeight());
-			
-		add(scrollPane);
 		
 		con.repaint();
 		con.revalidate();					
@@ -488,7 +490,6 @@ public class GanttChart extends JFrame{
 		initProcessTable(270, 200, 150, 250);
 		initTimesTable(300);
 		initAvgTimeTable(650, 560);
-		initStartButton(1100, 25);
 	}
 
 	private void initTwoLevel() {
@@ -502,7 +503,6 @@ public class GanttChart extends JFrame{
 		initProcessTable(270, 320, 150, 380);
 		initTimesTable(400);
 		initAvgTimeTable(650, 660);
-		initStartButton(1100, 25);
 	}
 	
 	private void initThreeLevel() {
@@ -519,7 +519,6 @@ public class GanttChart extends JFrame{
 		initProcessTable(270, 460, 150, 520);
 		initTimesTable(550);
 		initAvgTimeTable(650, 820);
-		initStartButton(1100, 25);
 	}
 	
 	private void initFourLevel() {
@@ -538,7 +537,6 @@ public class GanttChart extends JFrame{
 		initProcessTable(270, 620, 150, 680);
 		initTimesTable(700);
 		initAvgTimeTable(650, 860);
-		initStartButton(1100, 25);		
 	}
 	
 	private void initOneLevelComboBox() {
@@ -850,7 +848,7 @@ public class GanttChart extends JFrame{
 	}
 
 	private void initStartButton(int xOffset, int yOffset) {
-		JButton startButton = new JButton("START");
+		startButton = new JButton("START");
 		startButton.setBounds(xOffset, yOffset, 100, 50);
 		
 		if(processes == null || (algorithm == SchedulingAlgorithm.RR && quantum == 0)){
@@ -889,7 +887,8 @@ public class GanttChart extends JFrame{
 						scheduler.generateQueues(algorithms, quanta);
 					}
 					
-					if(!threadStarted){																		
+					if(!threadStarted){
+						System.out.println("Simulating...");
 						scheduler.simulate();
 						threadStarted = true;						
 					}else{						
@@ -1083,7 +1082,7 @@ public class GanttChart extends JFrame{
 		
 	}
 
-	public static void addExecutingProcess(int processId, int executionTime, int algorithm) {
+	public static void addExecutingProcess(byte level, int processId, int executionTime, int algorithm) {
 							
 		Container container = null;		
 		String processName = "p" + processId;		
@@ -1095,12 +1094,30 @@ public class GanttChart extends JFrame{
 		JLabel label = new JLabel(processName);
 		label.setBounds(18, 18, 30, 15);
 		comp.add(label);
+		
+		JPanel panel = null, timePanel = null;
 				
-		container = panel1;
+		if(level == 0) {
+			container = panel1;
+			panel = panel1;
+			timePanel = timePanel1;
+		}else if(level == 1) {
+			container = panel2;
+			panel = panel2;
+			timePanel = timePanel2;
+		}else if(level == 2) {
+			container = panel3;
+			panel = panel3;
+			timePanel = timePanel3;
+		}else if(level == 3) {
+			container = panel4;
+			panel = panel4;
+			timePanel = timePanel4;
+		}
 			
 		if(timeCounter > 21){
-			panel1.setPreferredSize(new Dimension(panelWidth += 50, 73));
-			timePanel1.setSize(new Dimension(panelWidth, 73));
+			panel.setPreferredSize(new Dimension(panelWidth += 50, 73));
+			timePanel.setSize(new Dimension(panelWidth, 73));
 		}
 			
 		if(prevFCFSBurstLength < 0){
@@ -1115,13 +1132,13 @@ public class GanttChart extends JFrame{
 		timeLabel[timeCounter].setForeground(Color.WHITE);
 		timeLabel[timeCounter].setBounds(xOffset + 1, 2, 30, 15);
 			
-		timePanel1.add(timeLabel[timeCounter++]);
+		timePanel.add(timeLabel[timeCounter++]);
 									
 		timeLapse += executionTime;
 		prevFCFSBurstLength = 50;					
 		comp.setBounds(xOffset, yOffset, 50, 51);
-		timePanel1.repaint();
-		timePanel1.revalidate();							
+		timePanel.repaint();
+		timePanel.revalidate();							
 										
 		container.add(comp);
 		container.repaint();
@@ -1182,14 +1199,25 @@ public class GanttChart extends JFrame{
 		pcbPriorityPanel.revalidate();
 	}
 	
-	public static void addLastCompletionTime(int algorithm){
-					
+	public static void addLastCompletionTime(byte level, int algorithm){
+				
+		JPanel timePanel = null;
+		
+		if(level == 0)
+			timePanel = timePanel1;
+		else if(level == 1)
+			timePanel = timePanel2;
+		else if(level == 2)
+			timePanel = timePanel3;
+		else if(level == 3)
+			timePanel = timePanel4;
+			
 		timeLabel[timeCounter] = new JLabel("" + timeLapse);
 		timeLabel[timeCounter].setFont(timeLabelFont);
 		timeLabel[timeCounter].setForeground(Color.WHITE);
 		timeLabel[timeCounter].setBounds(xOffset + prevFCFSBurstLength + 1, 2, 30, 15);			
-		timePanel1.add(timeLabel[timeCounter++]);
-		timePanel1.repaint();
+		timePanel.add(timeLabel[timeCounter++]);
+		timePanel.repaint();
 	}
 	
 	public static void addTimesInformation(int processId, long responseTime, long waitTime, long turnaroundTime) {
