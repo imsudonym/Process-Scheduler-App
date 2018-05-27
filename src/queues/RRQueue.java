@@ -56,10 +56,10 @@ public class RRQueue {
 		
 		if(prevQueue != null) {
 			System.out.println("prevQueue was not null");
-			System.out.println(prevQueue);
+			// TODO: Apply the same with other scheduling algorithms;
 			if(prevQueue instanceof RRQueue) {
 				System.out.println("============");
-				if(((RRQueue)(prevQueue)).allProcessesDone == 1) {
+				if(((RRQueue)(prevQueue)).getSize() <= 0) {
 					System.out.println("	apparently all processes were done.");
 					startExecution();
 				}else {
@@ -70,9 +70,10 @@ public class RRQueue {
 		}else {
 			System.out.println("prevQueue was null");
 			startExecution();
-		}/*
+		}
+		
 		if(nextQueue != null) {
-			if(nextQueue instanceof FCFSQueue)
+			/*if(nextQueue instanceof FCFSQueue)
 				//((FCFSQueue)(nextQueue)).startExecution();
 			if(nextQueue instanceof SJFQueue) 
 				//((FCFSQueue)(nextQueue)).startExecution();
@@ -81,13 +82,15 @@ public class RRQueue {
 			if(nextQueue instanceof NonPQueue)
 				//((NonPQueue)(nextQueue)).startExecution();
 			if(nextQueue instanceof PQueue)
-				//((PQueue)(nextQueue)).startExecution();
+				//((PQueue)(nextQueue)).startExecution();*/
 			if(nextQueue instanceof RRQueue) {
 				((RRQueue)(nextQueue)).stopExecution();
-				System.out.println("started next execution...");
+				System.out.println("    We presumably preempted the lower prio queue. Expect that only this queue is executing.");
 			}
-		}*/
-		simulationDone();
+		}
+		
+		System.out.print("level = " + level);
+		simulationDone(level);	// This just prints the contents of this queue.
 	}
 	
 	public void reenqueue(Process newProcess){		
@@ -118,13 +121,28 @@ public class RRQueue {
 	}
 	
 	public void startExecution() {
-		System.out.println("level = " + level + " starting execution...");
-		prevQueueDone = 1;
+		if(prevQueue != null) {
+			if(prevQueue instanceof RRQueue) {
+				if(((RRQueue)(prevQueue)).getSize() > 0) return;
+			}
+			// TODO: Apply the same to other scheduling algorithms
+		}
+		
+		if(getSize() > 0) {
+			System.out.println("level = " + level + " starting execution...");
+			prevQueueDone = 1;
+		}
 	}
 	
 	public void stopExecution() {
 		System.out.println("	level = " + level + " stopping execution...");
 		prevQueueDone = 0;
+		
+		if(nextQueue != null) {
+			if(nextQueue instanceof RRQueue) {
+				((RRQueue)(nextQueue)).stopExecution();
+			}
+		}
 	}
 	
 	Thread RRThread = new Thread(){				
@@ -162,12 +180,12 @@ public class RRQueue {
 					
 					long timeNow = Scheduler.clockTime;					
 					if(prevTime < timeNow){
-						System.out.println("executing p" + currProcess.getId() + " prevTime = " + prevTime + " timeNow = " + timeNow);		
+						System.out.println("level = " + level + " executing p" + currProcess.getId() + " prevTime = " + prevTime + " timeNow = " + timeNow);		
 						int lapse = (int)(timeNow - prevTime);
 						int burstLeft = currProcess.getBurstTime() - lapse;					
 						currProcess.setBurstTime(burstLeft);																	
 						
-						System.out.println(timeNow + " == " +  (prevTimeQuantum + quantum));
+						//System.out.println(timeNow + " == " +  (prevTimeQuantum + quantum));
 						if(timeNow == prevTimeQuantum + quantum){
 							currProcess.setPreempted();
 							currProcess.setTimePreempted(timeNow);
@@ -192,7 +210,7 @@ public class RRQueue {
 						}						
 						
 						if(burstLeft <= 0){		
-							System.out.println("burstLeft = " + burstLeft);
+							//System.out.println("burstLeft = " + burstLeft);
 							currProcess.setWaitTimePreemptive();
 							int s = currProcess.getTimesPreempted();
 							
@@ -218,15 +236,15 @@ public class RRQueue {
 						if(nextQueue != null) {
 							if(nextQueue instanceof RRQueue) {
 								((RRQueue)(nextQueue)).startExecution();
-								System.out.println("   I was called. Expect to see 2nd queue start exec.");
+								System.out.println("   level = " + level + " I was called. Expect to see next queue start exec.");
 							}
 						}
 					}			
 					
-					//System.out.println("numOfProcess = " + numOfProcesses);
 					if(numOfProcesses <= 0){						
 						if(nextQueue != null) {
 							if(nextQueue instanceof RRQueue) {
+								allProcessesDone = 1;
 								((RRQueue)(nextQueue)).startExecution();
 							}
 						}
@@ -251,9 +269,9 @@ public class RRQueue {
 		}
 	};
 	
-	public void simulationDone(){
+	public void simulationDone(int level){
 
-		RRQueue q = (RRQueue) Scheduler.queues[1];
+		RRQueue q = (RRQueue) Scheduler.queues[level];
 		q.array.printContents();
 		
 		//GanttChart.simulationDone();

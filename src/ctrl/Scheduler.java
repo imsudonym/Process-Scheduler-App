@@ -138,6 +138,7 @@ public class Scheduler {
 		}	
 		
 		for(int i = 0; i < numOfQueues; i++) {
+		
 			if(queues[i] instanceof FCFSQueue){
 				if(i == numOfQueues-1) { 
 					((FCFSQueue) queues[i]).setNextQueue(null);
