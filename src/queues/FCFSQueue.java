@@ -54,7 +54,7 @@ public class FCFSQueue {
 	
 	public void enqueue(Process newProcess){		
 		array.add(newProcess);		
-		System.out.println("enqueue p" + newProcess.getId());
+		//System.out.println("enqueue p" + newProcess.getId());
 		allProcessesDone = 0;		
 		numOfProcesses--;
 	}	
@@ -148,5 +148,10 @@ public class FCFSQueue {
 
 	public void restart() {
 		running = true;
+	}
+
+	public void preemptQueue() {
+		System.out.println("Stopping FCFS thread...");
+		stopThread();
 	}
 }
