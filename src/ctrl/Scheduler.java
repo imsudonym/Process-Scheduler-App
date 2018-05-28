@@ -149,7 +149,6 @@ public class Scheduler {
 					((FCFSQueue) queues[i]).setNextQueue(queues[i+1]);
 				}
 			}else if (queues[i] instanceof RRQueue){
-				System.out.println("Queue to set next to: RRQueue");
 				if(i == numOfQueues-1) { 
 					System.out.println("  if");
 					if(numOfQueues != 1)
@@ -196,12 +195,17 @@ public class Scheduler {
 				}
 			}else if (queues[i] instanceof SRTFQueue){
 				if(i == numOfQueues-1) { 
-					((FCFSQueue) queues[i]).setNextQueue(null);
+					if(numOfQueues != 1)
+						((SRTFQueue) queues[i]).setPrevQueue(queues[i-1]);
+					else
+						((SRTFQueue) queues[i]).setPrevQueue(null);
+					((SRTFQueue) queues[i]).setNextQueue(null);
 				}else if(i == 0) {
-					((FCFSQueue) queues[i]).setPrevQueue(null);
+					((SRTFQueue) queues[i]).setPrevQueue(null);
+					((SRTFQueue) queues[i]).setNextQueue(queues[i+1]);
 				}else {
-					((FCFSQueue) queues[i]).setPrevQueue(queues[i-1]);
-					((FCFSQueue) queues[i]).setNextQueue(queues[i+1]);
+					((SRTFQueue) queues[i]).setPrevQueue(queues[i-1]);
+					((SRTFQueue) queues[i]).setNextQueue(queues[i+1]);
 				}
 			}
 		}

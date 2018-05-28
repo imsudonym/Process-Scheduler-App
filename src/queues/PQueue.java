@@ -20,6 +20,8 @@ public class PQueue {
 	private Object prevQueue;
 	private Object nextQueue;
 	
+	public byte prevQueueDone = 1;
+	
 	public PQueue(int level){
 		this.level = (byte)level;
 		startThread();
@@ -128,6 +130,47 @@ public class PQueue {
 	
 	public int getSize(){
 		return array.getSize();
+	}
+	
+	public void startExecution() {
+		if(prevQueue != null) {
+			int size = 0;
+			if(prevQueue instanceof RRQueue) {
+				size = ((RRQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof FCFSQueue) {
+				size = ((FCFSQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SJFQueue) {
+				size = ((SJFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SRTFQueue) {
+				size = ((SRTFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof NonPQueue) {
+				size = ((NonPQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof PQueue) {
+				size = ((PQueue)(prevQueue)).getSize();
+			}
+			
+			if(size > 0) return;
+		}
+		
+		if(getSize() > 0) {
+			//System.out.println("level = " + level + " starting execution...");
+			prevQueueDone = 1;
+		}
+	}
+	
+	public void stopExecution() {
+		//System.out.println("	level = " + level + " stopping execution...");
+		prevQueueDone = 0;
+		
+		if(nextQueue != null) {
+			if(nextQueue instanceof RRQueue) {
+				((RRQueue)(nextQueue)).stopExecution();
+			}else if(prevQueue instanceof SRTFQueue) {
+				((SRTFQueue)(prevQueue)).stopExecution();
+			}else if(prevQueue instanceof PQueue) {
+				((PQueue)(prevQueue)).stopExecution();
+			}
+		}
 	}
 	
 	Thread PThread = new Thread(){				

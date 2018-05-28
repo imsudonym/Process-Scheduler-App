@@ -879,23 +879,19 @@ public class GanttChart extends JFrame{
 					
 					scheduler.initProcesses(processes);
 					
-					if(!MLFQ) {
-						scheduler.generateQueues(algorithm, quantum);
-					}else {
-						int[] algorithms = {algorithm1, algorithm2, algorithm3, algorithm4};
-						int[] quanta = {quantum1, quantum2, quantum3, quantum4};
-						scheduler.generateQueues(algorithms, quanta);
-					}
-					
+					int[] algorithms = {algorithm1, algorithm2, algorithm3, algorithm4};
+					int[] quanta = {quantum1, quantum2, quantum3, quantum4};
+					scheduler.generateQueues(algorithms, quanta);
+									
 					if(!threadStarted){
 						System.out.println("Simulating...");
 						scheduler.simulate();
 						threadStarted = true;						
 					}else{						
 						reset();
-						con.removeAll();						
+						//con.removeAll();						
 						
-						init();
+						//init();
 						scheduler.restart();			
 						
 						if(Scheduler.queues[0] instanceof FCFSQueue){
@@ -1097,49 +1093,53 @@ public class GanttChart extends JFrame{
 		
 		JPanel panel = null, timePanel = null;
 				
+		//System.out.println("========== Gantt: level = " + level);
 		if(level == 0) {
 			container = panel1;
 			panel = panel1;
 			timePanel = timePanel1;
+			//System.out.println("========== Gantt: panel1");
 		}else if(level == 1) {
 			container = panel2;
 			panel = panel2;
 			timePanel = timePanel2;
+			//System.out.println("========== Gantt: panel2");
 		}else if(level == 2) {
 			container = panel3;
 			panel = panel3;
 			timePanel = timePanel3;
+			//System.out.println("========== Gantt: panel3");
 		}else if(level == 3) {
 			container = panel4;
 			panel = panel4;
 			timePanel = timePanel4;
+			//System.out.println("========== Gantt: panel4");
 		}
 			
 		if(timeCounter > 21){
 			panel.setPreferredSize(new Dimension(panelWidth += 50, 73));
 			timePanel.setSize(new Dimension(panelWidth, 73));
 		}
-			
+		
 		if(prevFCFSBurstLength < 0){
 			xOffset = 0;
 			yOffset = 0;				
 		}else{							
 			xOffset += prevFCFSBurstLength;											
 		}
-		
-		/*
+				
 		timeLabel[timeCounter] = new JLabel("" + timeLapse);
 		timeLabel[timeCounter].setFont(timeLabelFont);
 		timeLabel[timeCounter].setForeground(Color.WHITE);
 		timeLabel[timeCounter].setBounds(xOffset + 1, 2, 30, 15);
-			*/
-		//timePanel.add(timeLabel[timeCounter++]);
+			
+		timePanel.add(timeLabel[timeCounter++]);
 									
 		timeLapse += executionTime;
 		prevFCFSBurstLength = 50;					
 		comp.setBounds(xOffset, yOffset, 50, 51);
-		//timePanel.repaint();
-		//timePanel.revalidate();							
+		timePanel.repaint();
+		timePanel.revalidate();			
 										
 		container.add(comp);
 		container.repaint();
@@ -1213,12 +1213,12 @@ public class GanttChart extends JFrame{
 		else if(level == 3)
 			timePanel = timePanel4;
 			
-		/*timeLabel[timeCounter] = new JLabel("" + timeLapse);
+		timeLabel[timeCounter] = new JLabel("" + timeLapse);
 		timeLabel[timeCounter].setFont(timeLabelFont);
 		timeLabel[timeCounter].setForeground(Color.WHITE);
 		timeLabel[timeCounter].setBounds(xOffset + prevFCFSBurstLength + 1, 2, 30, 15);			
 		timePanel.add(timeLabel[timeCounter++]);
-		timePanel.repaint();*/
+		timePanel.repaint();
 	}
 	
 	public static void addTimesInformation(int processId, long responseTime, long waitTime, long turnaroundTime) {
@@ -1288,6 +1288,7 @@ public class GanttChart extends JFrame{
 		insProcess.setEnabled(true);
 		setAlgorithm.setEnabled(true);		
 		singleQueue.setEnabled(true);
+		mlfq.setEnabled(true);
 		
 		if(algorithm == SchedulingAlgorithm.RR)
 			quantumItem.setEnabled(true);
@@ -1308,6 +1309,7 @@ public class GanttChart extends JFrame{
 			((NonPQueue) Scheduler.queues[0]).stopThread();
 		}else if(Scheduler.queues[0] instanceof RRQueue){
 			((RRQueue) Scheduler.queues[0]).stopThread();
+			System.out.println("RRThread stopped.");
 		}
 		
 	}

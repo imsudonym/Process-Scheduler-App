@@ -15,7 +15,7 @@ public class SJFQueue {
 	private long timeStart;
 	private long timeEnd;
 	
-	private byte level = -1;
+	byte level = -1;
 	private Object prevQueue;
 	private Object nextQueue;
 	

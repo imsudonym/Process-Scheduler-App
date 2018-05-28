@@ -1,33 +1,25 @@
 package queues;
-import constants.QueueType;
 import constants.SchedulingAlgorithm;
 import ctrl.Scheduler;
 import gui.GanttChart;
 import utils.Process;
 import utils.PseudoArray;
 
-public class RRQueue {
+public class RRQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
 	private Process currProcess;
 	private boolean running = false;
 	private int numOfProcesses;
 	private int quantum = 0;
-	private static long prevTime;	
 	private long timeStart;
 	private long timeEnd;
-	
-	private static long prevTimeQuantum;
-	
 	private Process prevProcess;
 	private byte level = -1;
 	
 	private Object prevQueue;
 	private Object nextQueue = null;
-	
-	private int prevQueueType;
-	private int nextQueueType;
-	
+
 	public byte allProcessesDone = 1;
 	public byte prevQueueDone = 1;
 
@@ -49,48 +41,54 @@ public class RRQueue {
 	}
 	
 	public void enqueue(Process newProcess){
-		System.out.println("level = " + level + " enter p" + newProcess.getId());
+		//System.out.println("level = " + level + " enter p" + newProcess.getId());
+		
 		array.add(newProcess);
 		allProcessesDone = 0;
 		numOfProcesses--;
 		
 		if(prevQueue != null) {
-			System.out.println("prevQueue was not null");
-			// TODO: Apply the same with other scheduling algorithms;
+			int queueSize = 0;
+	
 			if(prevQueue instanceof RRQueue) {
-				System.out.println("============");
-				if(((RRQueue)(prevQueue)).getSize() <= 0) {
-					System.out.println("	apparently all processes were done.");
-					startExecution();
-				}else {
-					stopExecution();
-				}
-				System.out.println("	level = " + level + " started next execution...");
+				queueSize = ((RRQueue)(prevQueue)).getSize();		
+			}else if(prevQueue instanceof FCFSQueue) {
+				queueSize = ((FCFSQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SJFQueue) {
+				queueSize = ((SJFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SRTFQueue) {
+				queueSize = ((SRTFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof NonPQueue) {
+				queueSize = ((NonPQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof PQueue) {
+				queueSize = ((PQueue)(prevQueue)).getSize();
 			}
+			
+			if(queueSize <= 0) {
+				startExecution();
+			}else {
+				stopExecution();
+			}
+			
 		}else {
-			System.out.println("prevQueue was null");
 			startExecution();
 		}
 		
 		if(nextQueue != null) {
-			/*if(nextQueue instanceof FCFSQueue)
-				//((FCFSQueue)(nextQueue)).startExecution();
-			if(nextQueue instanceof SJFQueue) 
-				//((FCFSQueue)(nextQueue)).startExecution();
-			if(nextQueue instanceof SRTFQueue)
-				//((SRTFQueue)(nextQueue)).startExecution();
-			if(nextQueue instanceof NonPQueue)
-				//((NonPQueue)(nextQueue)).startExecution();
-			if(nextQueue instanceof PQueue)
-				//((PQueue)(nextQueue)).startExecution();*/
 			if(nextQueue instanceof RRQueue) {
 				((RRQueue)(nextQueue)).stopExecution();
-				System.out.println("    We presumably preempted the lower prio queue. Expect that only this queue is executing.");
+			}else if(nextQueue instanceof SRTFQueue) {
+				((SRTFQueue)(nextQueue)).stopExecution();
+			}else if(nextQueue instanceof PQueue) {
+				((PQueue)(nextQueue)).stopExecution();
 			}
+			
+			//System.out.println("    We presumably preempted the lower prio queue. Expect that only this queue is executing.");
 		}
 		
-		System.out.print("level = " + level);
-		simulationDone(level);	// This just prints the contents of this queue.
+		running = true;
+		//System.out.print("level = " + level + " ");
+		array.printContents();
 	}
 	
 	public void reenqueue(Process newProcess){		
@@ -122,25 +120,41 @@ public class RRQueue {
 	
 	public void startExecution() {
 		if(prevQueue != null) {
+			int size = 0;
 			if(prevQueue instanceof RRQueue) {
-				if(((RRQueue)(prevQueue)).getSize() > 0) return;
+				size = ((RRQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof FCFSQueue) {
+				size = ((FCFSQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SJFQueue) {
+				size = ((SJFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SRTFQueue) {
+				size = ((SRTFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof NonPQueue) {
+				size = ((NonPQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof PQueue) {
+				size = ((PQueue)(prevQueue)).getSize();
 			}
-			// TODO: Apply the same to other scheduling algorithms
+			
+			if(size > 0) return;
 		}
-		
+
 		if(getSize() > 0) {
-			System.out.println("level = " + level + " starting execution...");
+			//System.out.println("---level = " + level + " starting execution...");
 			prevQueueDone = 1;
 		}
 	}
 	
 	public void stopExecution() {
-		System.out.println("	level = " + level + " stopping execution...");
+		//System.out.println("	level = " + level + " stopping execution...");
 		prevQueueDone = 0;
 		
 		if(nextQueue != null) {
 			if(nextQueue instanceof RRQueue) {
 				((RRQueue)(nextQueue)).stopExecution();
+			}else if(prevQueue instanceof SRTFQueue) {
+				((SRTFQueue)(nextQueue)).stopExecution();
+			}else if(prevQueue instanceof PQueue) {
+				((PQueue)(nextQueue)).stopExecution();
 			}
 		}
 	}
@@ -150,7 +164,7 @@ public class RRQueue {
 
 		public void run(){
 			while(running){
-				
+
 				if(getSize() > 0 &&  prevQueueDone == 1){
 					currProcess = peekHead();
 					if(timeStart < 0){
@@ -179,13 +193,12 @@ public class RRQueue {
 					}
 					
 					long timeNow = Scheduler.clockTime;					
-					if(prevTime < timeNow){
-						System.out.println("level = " + level + " executing p" + currProcess.getId() + " prevTime = " + prevTime + " timeNow = " + timeNow);		
+					if(prevTime < timeNow){						
 						int lapse = (int)(timeNow - prevTime);
 						int burstLeft = currProcess.getBurstTime() - lapse;					
 						currProcess.setBurstTime(burstLeft);																	
 						
-						//System.out.println(timeNow + " == " +  (prevTimeQuantum + quantum));
+						
 						if(timeNow == prevTimeQuantum + quantum){
 							currProcess.setPreempted();
 							currProcess.setTimePreempted(timeNow);
@@ -210,16 +223,18 @@ public class RRQueue {
 						}						
 						
 						if(burstLeft <= 0){		
-							//System.out.println("burstLeft = " + burstLeft);
 							currProcess.setWaitTimePreemptive();
 							int s = currProcess.getTimesPreempted();
 							
+							//System.out.println(currProcess.getPrevBurstPreempted() + " < " + quantum);
 							if(currProcess.getPrevBurstPreempted() < quantum){						
 								GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.RR);								
-							}
+							}//else {
+//								System.out.println("  Ganttchart not called to add p" + currProcess.getId());
+//							}
 							
 							dequeue();													
-							System.out.println("p" + currProcess.getId() + " Done executing.");
+							//System.out.println("p" + currProcess.getId() + " Done executing.");
 							timeEnd = Scheduler.clockTime;
 							prevTimeQuantum = timeNow;
 							timeStart = -1;							
@@ -236,16 +251,20 @@ public class RRQueue {
 						if(nextQueue != null) {
 							if(nextQueue instanceof RRQueue) {
 								((RRQueue)(nextQueue)).startExecution();
-								System.out.println("   level = " + level + " I was called. Expect to see next queue start exec.");
+								//System.out.println("   level = " + level + " I was called. Expect to see next queue start exec.");
+							}else if (nextQueue instanceof SRTFQueue) {
+								((SRTFQueue)(nextQueue)).startExecution();								
 							}
 						}
 					}			
 					
 					if(numOfProcesses <= 0){						
 						if(nextQueue != null) {
+							allProcessesDone = 1;
 							if(nextQueue instanceof RRQueue) {
-								allProcessesDone = 1;
 								((RRQueue)(nextQueue)).startExecution();
+							}else if (nextQueue instanceof SRTFQueue) {
+								((SRTFQueue)(nextQueue)).startExecution();								
 							}
 						}
 						
@@ -260,41 +279,19 @@ public class RRQueue {
 							GanttChart.addTimesInformation(p[i].getId(), p[i].getResponseTime(), p[i].getWaitTime(), p[i].getTurnaroundTime());
 							totalRT += p[i].getResponseTime();
 							totalWT += p[i].getWaitTime();
+					
 							totalTT += p[i].getTurnaroundTime();
 						}						
 						GanttChart.addTimeAverages(totalRT/s, totalWT/s, totalTT/s);
+						//simulationDone();
 					}
 				}
 			}
 		}
 	};
 	
-	public void simulationDone(int level){
-
-		RRQueue q = (RRQueue) Scheduler.queues[level];
-		q.array.printContents();
-		
-		//GanttChart.simulationDone();
-		/*
-		if(nextQueueType == QueueType.FCFS) {
-			if(((FCFSQueue)nextQueue).getSize() > 0)
-				((FCFSQueue)nextQueue).startThread();
-		}else if(nextQueueType == QueueType.SJF){
-			if(((SJFQueue)nextQueue).getSize() > 0)
-				((SJFQueue)nextQueue).startThread();
-		}else if(nextQueueType == QueueType.SRTF){
-			if(((SRTFQueue)nextQueue).getSize() > 0)
-				((SRTFQueue)nextQueue).startThread();
-		}else if(nextQueueType == QueueType.NP) {
-			if(((NonPQueue)nextQueue).getSize() > 0)
-				((NonPQueue)nextQueue).startThread();
-		}else if(nextQueueType == QueueType.P) {
-			if(((PQueue)nextQueue).getSize() > 0)
-				((PQueue)nextQueue).startThread();
-		}else if(nextQueueType == QueueType.RR){
-			if(((RRQueue)nextQueue).getSize() > 0)
-				((RRQueue)nextQueue).startThread();
-		}*/
+	public void simulationDone(/*int level*/){
+		GanttChart.simulationDone();
 	}
 	
 	protected void retain() {
@@ -305,7 +302,7 @@ public class RRQueue {
 		
 		if(nextQueue == null) return;
 		
-		System.out.println("level = " + level + " demote p" + process.getId() + " burstLeft = " + process.getBurstTime() + " size = " + getSize() + " np = " + numOfProcesses);
+		//System.out.println("level = " + level + " demote p" + process.getId() + " burstLeft = " + process.getBurstTime() + " size = " + getSize() + " np = " + numOfProcesses);
 		
 		if(nextQueue instanceof FCFSQueue) {
 			((FCFSQueue)nextQueue).enqueue(process);
@@ -322,33 +319,6 @@ public class RRQueue {
 		}
 	}
 	
-	/*
-	public void preemptLowerQueue() {
-		if(nextQueue == null) return;
-		if(nextQueueType == QueueType.FCFS) {
-			((FCFSQueue)nextQueue).preemptQueue();
-		}/*else if(nextQueueType == QueueType.SJF) {
-			((SJFQueue)nextQueue).preemptQueue();
-		}else if(nextQueueType == QueueType.SRTF) {
-			((SRTFQueue)nextQueue).preemptQueue();
-		}else if(nextQueueType == QueueType.NP) {
-			((NonPQueue)nextQueue).preemptQueue();
-		}else if(nextQueueType == QueueType.P) {
-			((PQueue)nextQueue).preemptQueue();
-		}else if(nextQueueType == QueueType.RR) {
-			((RRQueue)nextQueue).preemptQueue();
-		}
-	}
-
-	private void preemptQueue() {
-		stopExecution();
-		if(executing) {
-			System.out.println("p" + currProcess.getId() + " preempted.");
-			enqueue(dequeue());
-			executing = false;
-		}
-	}*/
-
 	public void setNumberOFProcesses(int length) {
 		this.numOfProcesses = length;
 	}
@@ -359,46 +329,16 @@ public class RRQueue {
 	
 	public void setPrevQueue(Object prevQueue) {
 		this.prevQueue = prevQueue;
-		if(prevQueue == null) prevQueueDone = 1;
-		System.out.println("prevQueueDone = " + prevQueueDone);
-		if(prevQueue instanceof FCFSQueue) {
-			prevQueueType = QueueType.FCFS;
-		}else if(prevQueue instanceof RRQueue) {
-			prevQueueType = QueueType.RR;
-		}else if(prevQueue instanceof SJFQueue) {
-			prevQueueType = QueueType.SJF;
-		}else if(prevQueue instanceof SRTFQueue) {
-			prevQueueType = QueueType.SRTF;
-		}else if(prevQueue instanceof NonPQueue) {
-			prevQueueType = QueueType.NP;
-		}else if(prevQueue instanceof PQueue) {
-			prevQueueType = QueueType.P;
+		if(prevQueue == null) {
+			prevQueueDone = 1;
+			//System.out.println("level = " + level + " prevQueue = NULL");
 		}
+		
 	}
 	
 	public void setNextQueue(Object nextQueue){
 		//System.out.println("Setting next queues");
 		this.nextQueue = nextQueue;
-		
-		if(nextQueue instanceof FCFSQueue) {
-			nextQueueType = QueueType.FCFS;
-			//System.out.println("	next queue = FCFS");
-		}else if(nextQueue instanceof RRQueue) {
-			nextQueueType = QueueType.RR;
-			//System.out.println("	next queue = RR");
-		}else if(nextQueue instanceof SJFQueue) {
-			nextQueueType = QueueType.SJF;
-			System.out.println("	next queue = SJF");
-		}else if(nextQueue instanceof SRTFQueue) {
-			nextQueueType = QueueType.SRTF;
-			System.out.println("	next queue = SRTF");
-		}else if(nextQueue instanceof NonPQueue) {
-			nextQueueType = QueueType.NP;
-			System.out.println("	next queue = NP");
-		}else if(nextQueue instanceof PQueue) {
-			nextQueueType = QueueType.P;
-			System.out.println("	next queue = P");
-		}
 	}
 	
 	public Object getNextQueue(){
