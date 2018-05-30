@@ -49,7 +49,6 @@ public class SRTFQueue extends Queue{
 	public void stopThread(){
 		SRTFThread.interrupt();
 		running = false;
-		reset();
 	}
 	
 	private void reset(){
@@ -335,9 +334,14 @@ public class SRTFQueue extends Queue{
 					if (allProcessesDone == 0 && getSize() == 0){
 						System.out.println("level = " + level + " we called addlastcompletion");
 						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.SRTF);		
-						allProcessesDone = 1;						
+						allProcessesDone = 1;
+						
+						if(level == Scheduler.getMaxLevelOfQueues()) {
+							simulationDone();
+						}
 					}		
 					
+					/*
 					if(numOfProcesses <= 0){
 						int s = Scheduler.processes.length;
 						Process[] p = Scheduler.processes;
@@ -354,16 +358,15 @@ public class SRTFQueue extends Queue{
 						}
 						
 						GanttChart.addTimeAverages(totalRT/s, totalWT/s, totalTT/s);
-						
-						//simulationDone();
-					}
+					}*/
+					
 				}				
 			}
 		}
 	};
 	
 	public void simulationDone(){
-		GanttChart.simulationDone();
+		GanttChart.simulationDone(this);
 	}
 	
 	public void setNumberOFProcesses(int length) {

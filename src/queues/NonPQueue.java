@@ -106,10 +106,15 @@ public class NonPQueue {
 					timeEnd = Scheduler.clockTime;		
 					currProcess.setWaitTimeNonPreemptive();
 				
-				}else{				
-					if (allProcessesDone == 0){
+				}else{		
+					
+					if (allProcessesDone == 0 && getSize() == 0){
 						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.NP_PRIO);		
-						allProcessesDone = 1;						
+						allProcessesDone = 1;				
+						
+						if(level == Scheduler.getMaxLevelOfQueues()) {
+							simulationDone();
+						}
 					}
 					
 					if(numOfProcesses <= 0){
@@ -137,7 +142,7 @@ public class NonPQueue {
 	};
 
 	public void simulationDone(){		
-		GanttChart.simulationDone();
+		GanttChart.simulationDone(this);
 	}
 	
 	public void setNumberOFProcesses(int length) {	

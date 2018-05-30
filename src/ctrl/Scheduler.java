@@ -10,23 +10,18 @@ import queues.SRTFQueue;
 import utils.Process;
 
 public class Scheduler {
-	private static final int MAX_QUEUE = 8;	
-	private int numOfQueues = 0;
-	
 	private static int itr = 0;
 	public static long clockTime = 0;	
-	private long prevArrivalTime = 0;
 	private static boolean running = false;
 	
 	public static Object[] queues;
 	public static Process[] processes;
-	
-	public Scheduler(int numOfQueues){		
-		this.numOfQueues = numOfQueues;		
-		Scheduler.queues = new Object[numOfQueues];
-	}
+	private static int numOfQueues = 0;
 		
-	public void initProcesses(Process[] processes){
+	public static void initProcesses(int numOfQueues, Process[] processes){
+		Scheduler.numOfQueues = numOfQueues;
+		Scheduler.queues = new Object[numOfQueues];
+		
 		Scheduler.processes = processes;
 		sortByArrivalTime();
 		if(queues[0] instanceof PQueue){
@@ -34,7 +29,7 @@ public class Scheduler {
 		}				
 	}
 	
-	private void sortByArrivalTime() {
+	private static void sortByArrivalTime() {
 		for(int i = 0; i < processes.length; i++){
 			for(int j = i; j < processes.length; j++){
 				if(processes[i].getArrivalTime() > processes[j].getArrivalTime()){
@@ -47,7 +42,7 @@ public class Scheduler {
 		printContents(processes);
 	}
 
-	private void preSortSameArrivalTime() {
+	private static void preSortSameArrivalTime() {
 		for(int i = 0; i < processes.length; i++){
 			for(int j = i; j < processes.length; j++){
 				if(processes[i].getArrivalTime() == processes[j].getArrivalTime() && processes[i].getPriority() > processes[j].getPriority()){
@@ -61,7 +56,7 @@ public class Scheduler {
 		printContents(processes);
 	}
 
-	private void printContents(Process[] processes2) {
+	private static void printContents(Process[] processes2) {
 		System.out.print("[");
 		for(int i = 0; i < processes2.length; i++){
 			System.out.print("p" + processes2[i].getId());
@@ -141,28 +136,29 @@ public class Scheduler {
 		
 			if(queues[i] instanceof FCFSQueue){
 				if(i == numOfQueues-1) { 
+					if(numOfQueues != 1)
+						((FCFSQueue) queues[i]).setPrevQueue(queues[i-1]);
+					else
+						((FCFSQueue) queues[i]).setPrevQueue(null);
 					((FCFSQueue) queues[i]).setNextQueue(null);
 				}else if(i == 0) {
 					((FCFSQueue) queues[i]).setPrevQueue(null);
-				}else {
-					((FCFSQueue) queues[i]).setPrevQueue(queues[i-1]);
 					((FCFSQueue) queues[i]).setNextQueue(queues[i+1]);
+				}else {
+					((RRQueue) queues[i]).setPrevQueue(queues[i-1]);
+					((RRQueue) queues[i]).setNextQueue(queues[i+1]);
 				}
 			}else if (queues[i] instanceof RRQueue){
 				if(i == numOfQueues-1) { 
-					System.out.println("  if");
 					if(numOfQueues != 1)
 						((RRQueue) queues[i]).setPrevQueue(queues[i-1]);
 					else
 						((RRQueue) queues[i]).setPrevQueue(null);
 					((RRQueue) queues[i]).setNextQueue(null);
 				}else if(i == 0) {
-					System.out.println("  elseif");
 					((RRQueue) queues[i]).setPrevQueue(null);
-					//System.out.println("queue = " + queues[i+1]);
 					((RRQueue) queues[i]).setNextQueue(queues[i+1]);
 				}else {
-					System.out.println("  else");
 					((RRQueue) queues[i]).setPrevQueue(queues[i-1]);
 					((RRQueue) queues[i]).setNextQueue(queues[i+1]);
 				}
@@ -264,5 +260,8 @@ public class Scheduler {
 		clockTime = 0;
 		running = true;		
 	}
-									
+						
+	public static int getMaxLevelOfQueues() {
+		return numOfQueues-1;
+	}
 }

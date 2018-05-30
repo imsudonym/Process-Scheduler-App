@@ -5,24 +5,26 @@ import gui.GanttChart;
 import utils.Process;
 import utils.PseudoArray;
 
-public class FCFSQueue {
+public class FCFSQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
 	private Process currProcess;	
-	private byte allProcessesDone = 1;
 	private boolean running = false;
 	private int numOfProcesses;
 	
-	private long timeStart;
+	private byte allProcessesDone = 1;
+	
+	private long timeStart = -1;
 	private long timeEnd;
 	
 	byte level = -1;
 	private Object prevQueue;
 	private Object nextQueue;
 	
+	public byte prevQueueDone = 1;
+	
 	public FCFSQueue(int level){
 		this.level = (byte)level;
-		//startThread();
 	}
 	
 	public void setPrevQueue(Object prevQueue) {
@@ -42,7 +44,6 @@ public class FCFSQueue {
 	}
 	
 	public void startThread(){
-		System.out.println("FCFS thread started.");
 		running = true;
 		FCFSThread.start();
 	}
@@ -54,10 +55,104 @@ public class FCFSQueue {
 	
 	public void enqueue(Process newProcess){		
 		array.add(newProcess);		
-		//System.out.println("enqueue p" + newProcess.getId());
 		allProcessesDone = 0;		
 		numOfProcesses--;
+		
+		/* 
+		 * Start executing (this queue) if 
+		 * previous higher priority queue 
+		 * is NOT executing or null.
+		 * 
+		 * */
+		if(prevQueue != null) {
+			System.out.println("level = " + level + " prevQueue is NOT NULL.");
+			System.out.println("    instanceof " + prevQueue);
+			int queueSize = 0;
+			
+			if(prevQueue instanceof RRQueue) {
+				queueSize = ((RRQueue)(prevQueue)).getSize();		
+			}else if(prevQueue instanceof FCFSQueue) {
+				queueSize = ((FCFSQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SJFQueue) {
+				queueSize = ((SJFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SRTFQueue) {
+				queueSize = ((SRTFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof NonPQueue) {
+				queueSize = ((NonPQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof PQueue) {
+				queueSize = ((PQueue)(prevQueue)).getSize();
+			}
+			
+			if(queueSize <= 0) {
+				System.out.println("Queue size = " + queueSize);
+				startExecution();
+			}else {
+				stopExecution();
+			}
+			
+		}else {
+			System.out.println("level = " + level + " prevQueue is NULL.");
+			startExecution();
+		}
+		
+		System.out.print("level = " + level + " ");
+		array.printContents();
 	}	
+	
+	public void startExecution() {
+		System.out.println("level = " + level + " starting exec...");
+		if(prevQueue != null) {
+			System.out.println("     PrevQueue Not null");
+			int size = 0;
+			if(prevQueue instanceof RRQueue) {
+				size = ((RRQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof FCFSQueue) {
+				size = ((FCFSQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SJFQueue) {
+				size = ((SJFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SRTFQueue) {
+				size = ((SRTFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof NonPQueue) {
+				size = ((NonPQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof PQueue) {
+				size = ((PQueue)(prevQueue)).getSize();
+			}
+			
+			if(size > 0) return;
+		}
+		
+		if(getSize() > 0) {
+			System.out.println("   preQueue is null and size > 0");
+			running = true;
+			prevQueueDone = 1;
+		}
+	}
+	
+	public void stopExecution() {		
+		prevQueueDone = 0;
+		
+		/*
+		 * Conditional below determines if this Queue is preempted
+		 * by a higher priority queue.
+		 * 
+		 * allProcessesDone == 0 indicates that this queue was executing when
+		 * a new process arrive at a higher queue, thus preempting the process.
+		 * We update the prevQuantumTime to the time the process is preempted
+		 * so the timer starts counting at the time the new process preempted
+		 * the now previously executing process.
+		 * 
+		 * */
+		if(currProcess != null  && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
+			prevTimeQuantum = Scheduler.clockTime; 	
+		
+			GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.FCFS);
+			GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.FCFS);
+			currProcess.setPrevBurstPreempted(currProcess.getBurstTime());
+		}
+		
+		System.out.println("level = " + level + " stopping execution...");
+		System.out.println("****updated prevTimeQuantum = " + prevTimeQuantum);
+	}
 	
 	public Process dequeue(){
 		Process prc = array.remove();											
@@ -79,41 +174,63 @@ public class FCFSQueue {
 	Thread FCFSThread = new Thread(){		
 		public void run(){
 			while(running){
-				if(getSize() > 0 && peekHead() != null){									
-					currProcess = dequeue();
-					
-					if(timeEnd != 0){						
-						timeStart = timeEnd;
-					}else{
-						timeStart = Scheduler.clockTime;
+				if(getSize() > 0 && prevQueueDone == 1 && (currProcess = peekHead()) != null){									
+					//currProcess = peekHead();
+					if(timeStart < 0) {
+						if(timeEnd != 0){						
+							timeStart = timeEnd;
+						}else{
+							timeStart = Scheduler.clockTime;
+						}
 					}
-					
 					currProcess.setStartTime(timeStart);
 					if(currProcess.getResponseTime() < 0) {
 						currProcess.setResponseTime(timeStart-currProcess.getArrivalTime());
 					}
 					
-					int burstTime = currProcess.getBurstTime();																								
-					GanttChart.addExecutingProcess(level, currProcess.getId(), burstTime, SchedulingAlgorithm.FCFS);
+					long timeNow = Scheduler.clockTime;	
+					if(prevTime < timeNow) {
+						System.out.println("level = " + level + " exec p" + currProcess.getId() + " timeNow = " + timeNow);
+						int lapse = (int)(timeNow - prevTime);
+						int burstLeft = currProcess.getBurstTime() - lapse;					
+						currProcess.setBurstTime(burstLeft);
+						
+						if(burstLeft <= 0){								
+							dequeue();									
+							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.FCFS);
+
+							System.out.println("p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
+							timeEnd = Scheduler.clockTime;
+							prevTimeQuantum = timeNow;
+							timeStart = -1;							
+						}					
+					}
 					
+					prevTime = timeNow;
+					
+					/*
 					while(Scheduler.clockTime != (timeStart + burstTime)){					
 						try {
 							Thread.sleep(5);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}				
-					}
+					}*/
 								
-					timeEnd = Scheduler.clockTime;			
-					currProcess.setWaitTimeNonPreemptive();
+					//timeEnd = Scheduler.clockTime;			
+					//currProcess.setWaitTimeNonPreemptive();
 					
 				}else{				
-					if (allProcessesDone == 0){
+					if (allProcessesDone == 0 && getSize() == 0){
 						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.FCFS);		
 						allProcessesDone = 1;		
 						
+						if(level == Scheduler.getMaxLevelOfQueues()) {
+							simulationDone();
+						}
 					}	
 					
+					/*
 					if(numOfProcesses <= 0){
 						int s = Scheduler.processes.length;
 						Process[] p = Scheduler.processes;
@@ -130,16 +247,14 @@ public class FCFSQueue {
 						}
 						
 						GanttChart.addTimeAverages(totalRT/s, totalWT/s, totalTT/s);
-						
-						simulationDone();
-					}
+					}*/
 				}
 			}
 		}		
 	};	
 
 	public void simulationDone(){
-		GanttChart.simulationDone();
+		GanttChart.simulationDone(this);
 	}
 	
 	public void setNumberOFProcesses(int length) {

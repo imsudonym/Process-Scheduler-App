@@ -870,14 +870,14 @@ public class GanttChart extends JFrame{
 						queues_num = 4;
 					}
 					
-					scheduler = new Scheduler(queues_num);					
+					scheduler = new Scheduler();					
 					
 					int size = PID.size();
 					for(int i = 0; i < size; i++){
 						processes[i] = new Process(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
 					}
 					
-					scheduler.initProcesses(processes);
+					scheduler.initProcesses(queues_num, processes);
 					
 					int[] algorithms = {algorithm1, algorithm2, algorithm3, algorithm4};
 					int[] quanta = {quantum1, quantum2, quantum3, quantum4};
@@ -1135,6 +1135,7 @@ public class GanttChart extends JFrame{
 			
 		timePanel.add(timeLabel[timeCounter++]);
 									
+		System.out.println("timeLapse = " + timeLapse);
 		timeLapse += executionTime;
 		prevFCFSBurstLength = 50;					
 		comp.setBounds(xOffset, yOffset, 50, 51);
@@ -1282,7 +1283,7 @@ public class GanttChart extends JFrame{
 		con.revalidate();
 	}
 
-	public static void simulationDone() {
+	public static void simulationDone(Object queue) {
 				
 		startButton.setEnabled(true);
 		insProcess.setEnabled(true);
@@ -1295,20 +1296,21 @@ public class GanttChart extends JFrame{
 		
 		alreadyStarted = false;
 		
-		//Scheduler.stop();
-		
-		if(Scheduler.queues[0] instanceof FCFSQueue){
-			((FCFSQueue) Scheduler.queues[0]).stopThread();
-		}else if(Scheduler.queues[0] instanceof SJFQueue){
-			((SJFQueue) Scheduler.queues[0]).stopThread();
-		}else if(Scheduler.queues[0] instanceof SRTFQueue){
-			((SRTFQueue) Scheduler.queues[0]).stopThread();
-		}else if(Scheduler.queues[0] instanceof PQueue){
-			((PQueue) Scheduler.queues[0]).stopThread();
-		}else if(Scheduler.queues[0] instanceof NonPQueue){			
-			((NonPQueue) Scheduler.queues[0]).stopThread();
-		}else if(Scheduler.queues[0] instanceof RRQueue){
-			((RRQueue) Scheduler.queues[0]).stopThread();
+		if(queue instanceof FCFSQueue){
+			((FCFSQueue) queue).stopThread();
+			System.out.println("FCFSThread stopped.");
+		}else if(queue instanceof SJFQueue){
+			((SJFQueue) queue).stopThread();
+		}else if(queue instanceof SRTFQueue){
+			((SRTFQueue) queue).stopThread();
+			System.out.println("SRTFThread stopped.");
+		}else if(queue instanceof PQueue){
+			System.out.println("PThread stopped.");
+			((PQueue) queue).stopThread();
+		}else if(queue instanceof NonPQueue){			
+			((NonPQueue) queue).stopThread();
+		}else if(queue instanceof RRQueue){
+			((RRQueue) queue).stopThread();
 			System.out.println("RRThread stopped.");
 		}
 		

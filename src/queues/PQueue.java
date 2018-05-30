@@ -13,12 +13,12 @@ public class PQueue extends Queue{
 	private boolean running = false;
 	private boolean preempted = false;
 	private int numOfProcesses;
-	private byte allProcessesDone = 1;
 	
-	byte level = -1;
 	private Object prevQueue;
 	private Object nextQueue;
 	
+	private byte level = -1;
+	private byte allProcessesDone = 1;
 	public byte prevQueueDone = 1;
 	
 	public PQueue(int level){
@@ -95,14 +95,12 @@ public class PQueue extends Queue{
 			}
 			
 			if(queueSize <= 0) {
-				System.out.println("I'm here..");
 				startExecution();
 			}else {
 				stopExecution();
 			}
 			
 		}else {
-			System.out.println("level = " + level + " prevQueue is NULL.");
 			startExecution();
 		}
 		
@@ -190,8 +188,7 @@ public class PQueue extends Queue{
 			if(size > 0) return;
 		}
 		
-		if(getSize() > 0) {
-			//System.out.println("level = " + level + " starting execution...");
+		if(getSize() > 0) {		
 			prevQueueDone = 1;
 		}
 	}
@@ -310,9 +307,14 @@ public class PQueue extends Queue{
 					
 					if (allProcessesDone == 0 && getSize() == 0){
 						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.PRIO);		
-						allProcessesDone = 1;						
+						allProcessesDone = 1;
+						
+						if(level == Scheduler.getMaxLevelOfQueues()) {
+							simulationDone();
+						}
 					}		
 					
+					/*
 					if(numOfProcesses <= 0){
 						int s = Scheduler.processes.length;
 						Process[] p = Scheduler.processes;
@@ -329,16 +331,14 @@ public class PQueue extends Queue{
 						}
 						
 						GanttChart.addTimeAverages(totalRT/s, totalWT/s, totalTT/s);
-						
-						//simulationDone();
-					}
+					}*/
 				}
 			}
 		}
 	};
 	
 	public void simulationDone(){
-		GanttChart.simulationDone();
+		GanttChart.simulationDone(this);
 	}
 	
 	public void setNumberOFProcesses(int length) {
