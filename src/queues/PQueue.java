@@ -5,7 +5,7 @@ import gui.GanttChart;
 import utils.Process;
 import utils.PseudoArray;
 
-public class PQueue {
+public class PQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
 	private Process currProcess;
@@ -14,9 +14,8 @@ public class PQueue {
 	private boolean preempted = false;
 	private int numOfProcesses;
 	private byte allProcessesDone = 1;
-	private long prevTime;
 	
-	private byte level = -1;
+	byte level = -1;
 	private Object prevQueue;
 	private Object nextQueue;
 	
@@ -24,7 +23,6 @@ public class PQueue {
 	
 	public PQueue(int level){
 		this.level = (byte)level;
-		startThread();
 	}
 	
 	public void setPrevQueue(Object prevQueue) {
@@ -70,6 +68,46 @@ public class PQueue {
 		array.add(newProcess);				
 		sortPriority();
 		allProcessesDone = 0;		
+		
+		/* 
+		 * Start executing (this queue) if 
+		 * previous higher priority queue 
+		 * is NOT executing or null.
+		 * 
+		 * */
+		if(prevQueue != null) {
+			System.out.println("level = " + level + " prevQueue is NOT NULL.");
+			System.out.println("    instanceof " + prevQueue);
+			int queueSize = 0;
+			
+			if(prevQueue instanceof RRQueue) {
+				queueSize = ((RRQueue)(prevQueue)).getSize();		
+			}else if(prevQueue instanceof FCFSQueue) {
+				queueSize = ((FCFSQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SJFQueue) {
+				queueSize = ((SJFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof SRTFQueue) {
+				queueSize = ((SRTFQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof NonPQueue) {
+				queueSize = ((NonPQueue)(prevQueue)).getSize();
+			}else if(prevQueue instanceof PQueue) {
+				queueSize = ((PQueue)(prevQueue)).getSize();
+			}
+			
+			if(queueSize <= 0) {
+				System.out.println("I'm here..");
+				startExecution();
+			}else {
+				stopExecution();
+			}
+			
+		}else {
+			System.out.println("level = " + level + " prevQueue is NULL.");
+			startExecution();
+		}
+		
+		System.out.print("level = " + level + " ");
+		array.printContents();
 	}	
 	
 	private void deterMineIfToPreempt(Process newProcess) {
@@ -158,17 +196,58 @@ public class PQueue {
 		}
 	}
 	
-	public void stopExecution() {
-		//System.out.println("	level = " + level + " stopping execution...");
-		prevQueueDone = 0;
+	public void stopExecution() {		
+		System.out.println("level = " + level + " stopping execution...");
 		
-		if(nextQueue != null) {
-			if(nextQueue instanceof RRQueue) {
-				((RRQueue)(nextQueue)).stopExecution();
-			}else if(prevQueue instanceof SRTFQueue) {
-				((SRTFQueue)(prevQueue)).stopExecution();
-			}else if(prevQueue instanceof PQueue) {
-				((PQueue)(prevQueue)).stopExecution();
+		prevQueueDone = 0;
+		prevTimeQuantum = Scheduler.clockTime; // Update quantum base for RR
+		System.out.println("****updated prevTimeQuantum = " + prevTimeQuantum);
+		
+		// TODO: Determine if a process needs to be promoted. If yes, promote then.
+		if(currProcess != null) {
+			System.out.println("level = " + level + " p" + currProcess.getId() + " was executing when queue preempted.");
+			System.out.println("    burstExecuted = " + (currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()));
+			if(currProcess.getBurstTime() > 0 && (currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()) > 0) {
+				System.out.println("    p" + currProcess.getId() + " should be promoted.");
+				promote((currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()));
+			}else {
+				System.out.println("    p" + currProcess.getId() + " need not be promoted.");
+			}
+		}
+	}
+	
+	/*
+	 * Promotes the preempted process to an
+	 * immediate higher priority queue.
+	 * 
+	 * */
+	private void promote(int timeElapsed) {
+		if(prevQueue != null) {
+			
+			/*
+			 * We might not need to implement promotion up to other scheduling
+			 * algorithms other than RR. This is because the other scheduling algorithms
+			 * cannot demote. Consequently, this means that any queue following the 
+			 * non-demoting queue don't execute any process at all and therefore have nothing
+			 * to promote. 
+			 * 
+			 * This makes sense because if a process needs to go one queue up (to be promoted), it needs
+			 * to be at least one queue down first.
+			 * 
+			 * */
+			if(prevQueue instanceof RRQueue) {
+				System.out.println("Promoted p" + currProcess.getId());		
+				prevProcess = currProcess;
+				currProcess = null;
+				
+				if(prevProcess != null){
+					int burstPreempted = prevProcess.getBurstTime();
+					int prevBurstPreempted = prevProcess.getPrevBurstPreempted();
+					System.out.println("   burstPreempted = " + burstPreempted + " exec = " + (prevBurstPreempted-burstPreempted));
+					prevProcess.setPrevBurstPreempted(burstPreempted);
+					GanttChart.addExecutingProcess(level, prevProcess.getId(), (prevBurstPreempted-burstPreempted), SchedulingAlgorithm.SRTF);							
+				}
+				((RRQueue)(prevQueue)).enqueue(dequeue());
 			}
 		}
 	}
@@ -221,7 +300,15 @@ public class PQueue {
 					
 				}else{										
 				
-					if (allProcessesDone == 0){
+					/* 
+					 * Add the last completion time only if
+					 * allProcessesDone = 0 (execution not done) 
+					 * but there may be no more processes in 
+					 * the queue to execute.
+					 * 
+					 * */
+					
+					if (allProcessesDone == 0 && getSize() == 0){
 						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.PRIO);		
 						allProcessesDone = 1;						
 					}		
@@ -243,7 +330,7 @@ public class PQueue {
 						
 						GanttChart.addTimeAverages(totalRT/s, totalWT/s, totalTT/s);
 						
-						simulationDone();
+						//simulationDone();
 					}
 				}
 			}

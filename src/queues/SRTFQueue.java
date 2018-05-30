@@ -14,7 +14,6 @@ public class SRTFQueue extends Queue{
 	private boolean preempted = false;
 	private int numOfProcesses;
 	private byte allProcessesDone = 1;	
-	//private long prevTime;
 	
 	byte level = -1;
 	private Object prevQueue;
@@ -28,8 +27,6 @@ public class SRTFQueue extends Queue{
 	
 	public void setPrevQueue(Object prevQueue) {
 		this.prevQueue = prevQueue;
-		System.out.println("Setting prevQueue..");
-		System.out.println("  level = " + level + " prevQueue = " + prevQueue);
 	}
 	
 	public void setNextQueue(Object nextQueue){
@@ -322,10 +319,6 @@ public class SRTFQueue extends Queue{
 							System.out.println("p" + currProcess.getId() + " Done executing.");
 							array.printContents();
 							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SRTF);
-							// TODO: After "done executing", check if simulation is done.
-							/*if(getSize() == 0) {
-								simulationDone();
-							}*/
 						}													
 					}
 					preempted = false;
