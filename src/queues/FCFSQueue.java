@@ -1,14 +1,14 @@
 package queues;
+import Process.CPUBoundProcess;
 import constants.SchedulingAlgorithm;
 import ctrl.Scheduler;
 import gui.GanttChart;
-import utils.Process;
 import utils.PseudoArray;
 
 public class FCFSQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
-	private Process currProcess;	
+	private CPUBoundProcess currProcess;	
 	private boolean running = false;
 	private int numOfProcesses;
 	
@@ -53,7 +53,7 @@ public class FCFSQueue extends Queue{
 		running = false;		
 	}	
 	
-	public void enqueue(Process newProcess){		
+	public void enqueue(CPUBoundProcess newProcess){		
 		array.add(newProcess);		
 		allProcessesDone = 0;		
 		numOfProcesses--;
@@ -153,16 +153,16 @@ public class FCFSQueue extends Queue{
 		System.out.println("****updated prevTimeQuantum = " + prevTimeQuantum);
 	}
 	
-	public Process dequeue(){
-		Process prc = array.remove();											
+	public CPUBoundProcess dequeue(){
+		CPUBoundProcess prc = array.remove();											
 		return prc;
 	}
 	
-	public Process peekHead(){
+	public CPUBoundProcess peekHead(){
 		return array.getHead().getValue(); 
 	}
 	
-	public Process peekTail(){
+	public CPUBoundProcess peekTail(){
 		return array.get(getSize()-1).getValue(); 		
 	}
 	

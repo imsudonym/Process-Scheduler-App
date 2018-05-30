@@ -1,28 +1,28 @@
-package utils;
+package Process;
 import java.util.ArrayList;
 
-public class Process {
-	private int id;
-	private int arrivalTime;
-	private int burstNeeded;
-	private int burstTime;
-	private int priority;
+public class CPUBoundProcess {
+	protected int id;
+	protected int arrivalTime;
+	protected int burstNeeded;
+	protected int burstTime;
+	protected int priority;
 	
-	private int timesPreempted = 0;
-	private int prevBurstPreempted;
+	protected int timesPreempted = 0;
+	protected int prevBurstPreempted;
 	
-	private ArrayList<Long> timePreempted = new ArrayList<Long>();
-	private ArrayList<Long> timeResumed = new ArrayList<Long>();
+	protected ArrayList<Long> timePreempted = new ArrayList<Long>();
+	protected ArrayList<Long> timeResumed = new ArrayList<Long>();
 	
-	private long startTime;
-	private long endTime;
-	private long waitTime;
-	private long responseTime;
-	private long turnaroundTime;
+	protected long startTime;
+	protected long endTime;
+	protected long waitTime;
+	protected long responseTime;
+	protected long turnaroundTime;
 	
 	public boolean preemptedFlag = false;
 	
-	public Process(int id, int arrivalTime, int burstTime, int priority){
+	public CPUBoundProcess(int id, int arrivalTime, int burstTime, int priority){
 		this.id = id;
 		this.arrivalTime = arrivalTime;
 		this.burstTime = burstTime;		

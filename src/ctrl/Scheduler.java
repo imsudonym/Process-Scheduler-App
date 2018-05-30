@@ -1,4 +1,5 @@
 package ctrl;
+import Process.CPUBoundProcess;
 import constants.SchedulingAlgorithm;
 import gui.GanttChart;
 import queues.FCFSQueue;
@@ -7,7 +8,6 @@ import queues.PQueue;
 import queues.RRQueue;
 import queues.SJFQueue;
 import queues.SRTFQueue;
-import utils.Process;
 
 public class Scheduler {
 	private static int itr = 0;
@@ -15,10 +15,10 @@ public class Scheduler {
 	private static boolean running = false;
 	
 	public static Object[] queues;
-	public static Process[] processes;
+	public static CPUBoundProcess[] processes;
 	private static int numOfQueues = 0;
 		
-	public static void initProcesses(int numOfQueues, Process[] processes){
+	public static void initProcesses(int numOfQueues, CPUBoundProcess[] processes){
 		Scheduler.numOfQueues = numOfQueues;
 		Scheduler.queues = new Object[numOfQueues];
 		
@@ -33,7 +33,7 @@ public class Scheduler {
 		for(int i = 0; i < processes.length; i++){
 			for(int j = i; j < processes.length; j++){
 				if(processes[i].getArrivalTime() > processes[j].getArrivalTime()){
-					Process temp = processes[i];
+					CPUBoundProcess temp = processes[i];
 					processes[i] = processes[j];
 					processes[j] = temp; 
 				}
@@ -47,7 +47,7 @@ public class Scheduler {
 			for(int j = i; j < processes.length; j++){
 				if(processes[i].getArrivalTime() == processes[j].getArrivalTime() && processes[i].getPriority() > processes[j].getPriority()){
 					//System.out.println("Swapping p" + processes[i].getId() + " and p" + processes[j].getId());
-					Process temp = processes[i];
+					CPUBoundProcess temp = processes[i];
 					processes[i] = processes[j];
 					processes[j] = temp; 
 				}
@@ -56,7 +56,7 @@ public class Scheduler {
 		printContents(processes);
 	}
 
-	private static void printContents(Process[] processes2) {
+	private static void printContents(CPUBoundProcess[] processes2) {
 		System.out.print("[");
 		for(int i = 0; i < processes2.length; i++){
 			System.out.print("p" + processes2[i].getId());
@@ -222,7 +222,7 @@ public class Scheduler {
 		}
 	}			
 	
-	private static void insertOnQueue(Process newProcess){				
+	private static void insertOnQueue(CPUBoundProcess newProcess){				
 		//timeArrive = System.currentTimeMillis();	
 		
 		if(queues[0] instanceof FCFSQueue){

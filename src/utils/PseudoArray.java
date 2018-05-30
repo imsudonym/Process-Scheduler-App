@@ -1,4 +1,7 @@
 package utils;
+
+import Process.CPUBoundProcess;
+
 public class PseudoArray {		
 	private int size;	
 	public int ctr = 0;
@@ -12,7 +15,7 @@ public class PseudoArray {
 		return list.isEmpty();
 	}
 	
-	public void add(Process value){		
+	public void add(CPUBoundProcess value){		
 		if(ctr <= size){
 			
 			Link newLink = new Link(value, ctr);
@@ -35,8 +38,8 @@ public class PseudoArray {
 		return list.get(index);
 	}
 	
-	public Process remove(){		
-		Process prc = list.remove(); 
+	public CPUBoundProcess remove(){		
+		CPUBoundProcess prc = list.remove(); 
 		if(prc != null){			
 			ctr--;			
 		}
@@ -60,7 +63,7 @@ public class PseudoArray {
 				long nextBurst = current.next.getValue().getBurstTime();												
 				
 				if(currBurst > nextBurst){					
-					Process temp = current.getValue();
+					CPUBoundProcess temp = current.getValue();
 					current.setValue(current.next.getValue());
 					current.next.setValue(temp);
 				}
@@ -83,7 +86,7 @@ public class PseudoArray {
 				int nextPriority = current.next.getValue().getPriority();												
 				
 				if(currPriority > nextPriority){					
-					Process temp = current.getValue();
+					CPUBoundProcess temp = current.getValue();
 					current.setValue(current.next.getValue());
 					current.next.setValue(temp);
 				}
@@ -104,7 +107,7 @@ public class PseudoArray {
 					continue;
 				}else if(current.next.getValue().getArrivalTime() == current.getValue().getArrivalTime()){
 					if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority						
-						Process temp = current.getValue();
+						CPUBoundProcess temp = current.getValue();
 						current.setValue(current.next.getValue());
 						current.next.setValue(temp);
 						timeEnd += current.getValue().getBurstTime();
@@ -112,7 +115,7 @@ public class PseudoArray {
 				}else if(current.next.getValue().getArrivalTime() > current.getValue().getArrivalTime() &&
 					current.next.getValue().getArrivalTime() <= timeEnd && current.getValue().getArrivalTime() <= timeEnd){
 					if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority						
-						Process temp = current.getValue();
+						CPUBoundProcess temp = current.getValue();
 						current.setValue(current.next.getValue());
 						current.next.setValue(temp);
 						timeEnd += current.getValue().getBurstTime();

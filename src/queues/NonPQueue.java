@@ -1,14 +1,14 @@
 package queues;
+import Process.CPUBoundProcess;
 import constants.SchedulingAlgorithm;
 import ctrl.Scheduler;
 import gui.GanttChart;
-import utils.Process;
 import utils.PseudoArray;
 
 public class NonPQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
-	private Process currProcess;
+	private CPUBoundProcess currProcess;
 	private boolean running = false;
 	private byte allProcessesDone = 1;
 	private int numOfProcesses;
@@ -52,7 +52,7 @@ public class NonPQueue extends Queue{
 		running = false;
 	}
 	
-	public void enqueue(Process newProcess){		
+	public void enqueue(CPUBoundProcess newProcess){		
 		array.add(newProcess);
 		array.sortPriority();
 		allProcessesDone = 0;		
@@ -153,17 +153,17 @@ public class NonPQueue extends Queue{
 		System.out.println("****updated prevTimeQuantum = " + prevTimeQuantum);
 	}
 	
-	public Process dequeue(){
+	public CPUBoundProcess dequeue(){
 					
-		Process prc = array.remove();											
+		CPUBoundProcess prc = array.remove();											
 		return prc;
 	}
 	
-	public Process peekHead(){
+	public CPUBoundProcess peekHead(){
 		return array.getHead().getValue(); 
 	}
 	
-	public Process peekTail(){
+	public CPUBoundProcess peekTail(){
 		return array.get(getSize()-1).getValue(); 		
 	}
 	

@@ -1,20 +1,20 @@
 package queues;
+import Process.CPUBoundProcess;
 import constants.SchedulingAlgorithm;
 import ctrl.Scheduler;
 import gui.GanttChart;
-import utils.Process;
 import utils.PseudoArray;
 
 public class RRQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
-	private Process currProcess;
+	private CPUBoundProcess currProcess;
 	private boolean running = false;
 	private int numOfProcesses;
 	private int quantum = 0;
 	private long timeStart;
 	private long timeEnd;
-	private Process prevProcess;
+	private CPUBoundProcess prevProcess;
 	private byte level = -1;
 	
 	private Object prevQueue;
@@ -40,7 +40,7 @@ public class RRQueue extends Queue{
 		running = false;
 	}
 	
-	public void enqueue(Process newProcess){
+	public void enqueue(CPUBoundProcess newProcess){
 		//System.out.println("level = " + level + " enter p" + newProcess.getId());
 		
 		array.add(newProcess);
@@ -96,18 +96,18 @@ public class RRQueue extends Queue{
 		array.printContents();
 	}
 	
-	public void reenqueue(Process newProcess){		
+	public void reenqueue(CPUBoundProcess newProcess){		
 		array.add(newProcess);		
 		allProcessesDone = 0;		
 	}	
 	
-	public Process dequeue(){
+	public CPUBoundProcess dequeue(){
 					
-		Process prc = array.remove();											
+		CPUBoundProcess prc = array.remove();											
 		return prc;
 	}
 	
-	public Process peekHead(){
+	public CPUBoundProcess peekHead(){
 		if(array.getHead() == null) {
 			return null;
 		}else {
@@ -115,7 +115,7 @@ public class RRQueue extends Queue{
 		}
 	}
 	
-	public Process peekTail(){
+	public CPUBoundProcess peekTail(){
 		return array.get(getSize()-1).getValue(); 		
 	}
 	
@@ -335,7 +335,7 @@ public class RRQueue extends Queue{
 		enqueue(dequeue());
 	}
 
-	protected void demote(Process process) {
+	protected void demote(CPUBoundProcess process) {
 		
 		if(nextQueue == null) return;
 		

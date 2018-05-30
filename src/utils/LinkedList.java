@@ -1,4 +1,7 @@
 package utils;
+
+import Process.CPUBoundProcess;
+
 public class LinkedList{
 	
 	public static String stringTemp = "";
@@ -50,9 +53,9 @@ public class LinkedList{
 		return null;
 	}	
 	
-	public Process remove(){
+	public CPUBoundProcess remove(){
 		Link temp = null;						
-		Process process = null;
+		CPUBoundProcess process = null;
 		
 		if(!isEmpty()){
 			temp = first;

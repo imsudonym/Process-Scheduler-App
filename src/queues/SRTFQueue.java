@@ -1,15 +1,15 @@
 package queues;
+import Process.CPUBoundProcess;
 import constants.SchedulingAlgorithm;
 import ctrl.Scheduler;
 import gui.GanttChart;
-import utils.Process;
 import utils.PseudoArray;
 
 public class SRTFQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
-	private Process currProcess;
-	private Process prevProcess;
+	private CPUBoundProcess currProcess;
+	private CPUBoundProcess prevProcess;
 	private boolean running = false;
 	private boolean preempted = false;
 	private int numOfProcesses;
@@ -61,7 +61,7 @@ public class SRTFQueue extends Queue{
 		prevTime = 0;
 	}
 	
-	public void enqueue(Process newProcess){		
+	public void enqueue(CPUBoundProcess newProcess){		
 		deterMineIfToPreempt(newProcess);
 		array.add(newProcess);			
 		sortSJF();
@@ -109,7 +109,7 @@ public class SRTFQueue extends Queue{
 		array.printContents();
 	}	
 	
-	private void deterMineIfToPreempt(Process newProcess) {
+	private void deterMineIfToPreempt(CPUBoundProcess newProcess) {
 		if(currProcess != null){
 			long currBurst = currProcess.getBurstTime();
 			long newBurst = newProcess.getBurstNeeded();
@@ -119,7 +119,7 @@ public class SRTFQueue extends Queue{
 		}
 	}
 
-	private void preempt(Process newProcess) {				
+	private void preempt(CPUBoundProcess newProcess) {				
 		preempted = true;				
 		
 		int burstNeeded = currProcess.getBurstNeeded();
@@ -147,8 +147,8 @@ public class SRTFQueue extends Queue{
 		}
 	}
 
-	public Process dequeue(){					
-		Process prc = array.remove();											
+	public CPUBoundProcess dequeue(){					
+		CPUBoundProcess prc = array.remove();											
 		return prc;
 	}
 	
@@ -156,11 +156,11 @@ public class SRTFQueue extends Queue{
 		array.sortSJF();
 	}
 	
-	public Process peekHead(){
+	public CPUBoundProcess peekHead(){
 		return array.getHead().getValue(); 
 	}
 	
-	public Process peekTail(){
+	public CPUBoundProcess peekTail(){
 		return array.get(getSize()-1).getValue(); 		
 	}
 	

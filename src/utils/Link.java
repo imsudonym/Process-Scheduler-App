@@ -1,22 +1,25 @@
 package utils;
+
+import Process.CPUBoundProcess;
+
 public class Link {
 	
-	private Process value;
+	private CPUBoundProcess value;
 	public Link next;
 	public Link previous;
 	public int key;
 	
-	public Link(Process value, int i){
+	public Link(CPUBoundProcess value, int i){
 		this.value = value;
 		this.next = null;
 		key = i;
 	}
 	
-	public Process getValue(){
+	public CPUBoundProcess getValue(){
 		return value;
 	}
 
-	public void setValue(Process newValue) {
+	public void setValue(CPUBoundProcess newValue) {
 		this.value = newValue;
 	}
 }

@@ -1,14 +1,14 @@
 package queues;
+import Process.CPUBoundProcess;
 import constants.SchedulingAlgorithm;
 import ctrl.Scheduler;
 import gui.GanttChart;
-import utils.Process;
 import utils.PseudoArray;
 
 public class SJFQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
-	private Process currProcess;
+	private CPUBoundProcess currProcess;
 	private boolean running = false;
 	private long timeStart;
 	private long timeEnd;	
@@ -51,7 +51,7 @@ public class SJFQueue extends Queue{
 		running = false;
 	}
 	
-	public void enqueue(Process newProcess){		
+	public void enqueue(CPUBoundProcess newProcess){		
 		array.add(newProcess);		
 		sortSJF();
 		allProcessesDone = 0;
@@ -160,9 +160,9 @@ public class SJFQueue extends Queue{
 		}
 	}
 	
-	public Process dequeue(){
+	public CPUBoundProcess dequeue(){
 					
-		Process prc = array.remove();											
+		CPUBoundProcess prc = array.remove();											
 		return prc;
 	}
 	
@@ -170,11 +170,11 @@ public class SJFQueue extends Queue{
 		array.sortSJF();
 	}
 	
-	public Process peekHead(){
+	public CPUBoundProcess peekHead(){
 		return array.getHead().getValue(); 
 	}
 	
-	public Process peekTail(){
+	public CPUBoundProcess peekTail(){
 		return array.get(getSize()-1).getValue(); 		
 	}
 	

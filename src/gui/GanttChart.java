@@ -26,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import Process.CPUBoundProcess;
 import constants.SchedulingAlgorithm;
 import ctrl.Scheduler;
 import queues.FCFSQueue;
@@ -34,7 +35,6 @@ import queues.PQueue;
 import queues.RRQueue;
 import queues.SJFQueue;
 import queues.SRTFQueue;
-import utils.Process;
 
 public class GanttChart extends JFrame{
 
@@ -103,7 +103,7 @@ public class GanttChart extends JFrame{
 	private static String[] algorithms = {"FCFS", "SJF", "SRTF", "NP-PRIO", "P-PRIO", "RR"};
 	
 	private static Scheduler scheduler;
-	private static Process[] processes;
+	private static CPUBoundProcess[] processes;
 	private static Font font = new Font("Helvetica", Font.BOLD, 20);
 	private static Font timeLabelFont = new Font("Helvetica", Font.BOLD, 12);
 	private static Color darkBlue = new Color(0, 46, 70);
@@ -198,9 +198,9 @@ public class GanttChart extends JFrame{
 						in.close();
 						
 						int size = PID.size();
-						processes = new Process[size];						
+						processes = new CPUBoundProcess[size];						
 						for(int i = 0; i < size; i++){
-							processes[i] = new Process(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
+							processes[i] = new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
 						}
 						
 						if(algorithm == SchedulingAlgorithm.RR && quantum < 0)
@@ -874,7 +874,7 @@ public class GanttChart extends JFrame{
 					
 					int size = PID.size();
 					for(int i = 0; i < size; i++){
-						processes[i] = new Process(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
+						processes[i] = new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
 					}
 					
 					scheduler.initProcesses(queues_num, processes);
