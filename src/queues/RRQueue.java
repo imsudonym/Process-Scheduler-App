@@ -273,6 +273,8 @@ public class RRQueue extends Queue{
 								((SRTFQueue)(nextQueue)).startExecution();								
 							}else if (nextQueue instanceof FCFSQueue) {
 								((FCFSQueue)(nextQueue)).startExecution();								
+							}else if (nextQueue instanceof PQueue) {
+								((PQueue)(nextQueue)).startExecution();								
 							}
 						}
 						
@@ -354,13 +356,11 @@ public class RRQueue extends Queue{
 		this.prevQueue = prevQueue;
 		if(prevQueue == null) {
 			prevQueueDone = 1;
-			//System.out.println("level = " + level + " prevQueue = NULL");
 		}
 		
 	}
 	
 	public void setNextQueue(Object nextQueue){
-		//System.out.println("Setting next queues");
 		this.nextQueue = nextQueue;
 	}
 	

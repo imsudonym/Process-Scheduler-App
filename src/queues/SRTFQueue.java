@@ -204,6 +204,7 @@ public class SRTFQueue extends Queue{
 		 * If yes, promote then.
 		 * 
 		 * */
+		
 		if(currProcess != null) {
 			System.out.println("level = " + level + " p" + currProcess.getId() + " was executing when queue preempted.");
 			System.out.println("    burstExecuted = " + (currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()));

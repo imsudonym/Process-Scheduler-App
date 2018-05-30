@@ -27,6 +27,9 @@ public class PQueue extends Queue{
 	
 	public void setPrevQueue(Object prevQueue) {
 		this.prevQueue = prevQueue;
+		if(prevQueue == null) {
+			prevQueueDone = 1;
+		}
 	}
 	
 	public void setNextQueue(Object nextQueue){
@@ -171,9 +174,9 @@ public class PQueue extends Queue{
 	public void startExecution() {
 		if(prevQueue != null) {
 			int size = 0;
-			if(prevQueue instanceof RRQueue) {
-				size = ((RRQueue)(prevQueue)).getSize();
-			}else if(prevQueue instanceof FCFSQueue) {
+			size = ((RRQueue)(prevQueue)).getSize();
+			
+			/*}else if(prevQueue instanceof FCFSQueue) {
 				size = ((FCFSQueue)(prevQueue)).getSize();
 			}else if(prevQueue instanceof SJFQueue) {
 				size = ((SJFQueue)(prevQueue)).getSize();
@@ -183,7 +186,7 @@ public class PQueue extends Queue{
 				size = ((NonPQueue)(prevQueue)).getSize();
 			}else if(prevQueue instanceof PQueue) {
 				size = ((PQueue)(prevQueue)).getSize();
-			}
+			}*/
 			
 			if(size > 0) return;
 		}
@@ -195,22 +198,26 @@ public class PQueue extends Queue{
 	
 	public void stopExecution() {		
 		System.out.println("level = " + level + " stopping execution...");
-		
 		prevQueueDone = 0;
-		prevTimeQuantum = Scheduler.clockTime; // Update quantum base for RR
-		System.out.println("****updated prevTimeQuantum = " + prevTimeQuantum);
 		
-		// TODO: Determine if a process needs to be promoted. If yes, promote then.
+		/*
+		 * Code below determines if a process needs to be promoted. 
+		 * If yes, promote then.
+		 * 
+		 * */
+		
 		if(currProcess != null) {
 			System.out.println("level = " + level + " p" + currProcess.getId() + " was executing when queue preempted.");
 			System.out.println("    burstExecuted = " + (currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()));
 			if(currProcess.getBurstTime() > 0 && (currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()) > 0) {
+				prevTimeQuantum = Scheduler.clockTime; 
 				System.out.println("    p" + currProcess.getId() + " should be promoted.");
 				promote((currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()));
 			}else {
 				System.out.println("    p" + currProcess.getId() + " need not be promoted.");
 			}
 		}
+		System.out.println("****updated prevTimeQuantum = " + prevTimeQuantum);
 	}
 	
 	/*
@@ -252,10 +259,9 @@ public class PQueue extends Queue{
 	Thread PThread = new Thread(){				
 		public void run(){
 			while(running){									
-				if(getSize() > 0 && peekHead() != null){
+				if(getSize() > 0 && prevQueueDone == 1 && (currProcess = peekHead()) != null){
 					
 					long timeNow = Scheduler.clockTime;
-					currProcess = peekHead();
 					
 					if(!preempted){
 												
@@ -288,8 +294,11 @@ public class PQueue extends Queue{
 						
 						if(currProcess.getBurstTime() <= 0){
 							currProcess.setWaitTimePreemptive();
+							prevTimeQuantum = timeNow;
 							dequeue();
-							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);													
+							
+							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);
+							System.out.println("p" + currProcess.getId() + " Done executing.");
 						}													
 					}
 					preempted = false;
