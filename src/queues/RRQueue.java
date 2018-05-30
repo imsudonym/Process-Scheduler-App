@@ -85,6 +85,8 @@ public class RRQueue extends Queue{
 				((FCFSQueue)(nextQueue)).stopExecution();
 			}else if(nextQueue instanceof SJFQueue) {
 				((SJFQueue)(nextQueue)).stopExecution();
+			}else if(nextQueue instanceof NonPQueue) {
+				((NonPQueue)(nextQueue)).stopExecution();
 			}
 			//System.out.println("    We presumably preempted the lower prio queue. Expect that only this queue is executing.");
 		}
@@ -160,6 +162,10 @@ public class RRQueue extends Queue{
 				((PQueue)(nextQueue)).stopExecution();
 			}else if(nextQueue instanceof FCFSQueue) {
 				((FCFSQueue)(nextQueue)).stopExecution();
+			}else if(nextQueue instanceof SJFQueue) {
+				((SJFQueue)(nextQueue)).stopExecution();
+			}else if(nextQueue instanceof NonPQueue) {
+				((NonPQueue)(nextQueue)).stopExecution();
 			}			
 		}
 		
@@ -279,9 +285,9 @@ public class RRQueue extends Queue{
 								((PQueue)(nextQueue)).startExecution();								
 							}else if (nextQueue instanceof SJFQueue) {
 								((SJFQueue)(nextQueue)).startExecution();								
-							}/*else if (nextQueue instanceof NonPQueue) {
-								//((NonPQueue)(nextQueue)).startExecution();								
-							}*/
+							}else if (nextQueue instanceof NonPQueue) {
+								((NonPQueue)(nextQueue)).startExecution();								
+							}
 						}
 						
 						if(level == Scheduler.getMaxLevelOfQueues()) {

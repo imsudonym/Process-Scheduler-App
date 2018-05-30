@@ -178,9 +178,14 @@ public class Scheduler {
 				}
 			}else if (queues[i] instanceof NonPQueue){
 				if(i == numOfQueues-1) { 
+					if(numOfQueues != 1)
+						((NonPQueue) queues[i]).setPrevQueue(queues[i-1]);
+					else
+						((NonPQueue) queues[i]).setPrevQueue(null);
 					((NonPQueue) queues[i]).setNextQueue(null);
 				}else if(i == 0) {
 					((NonPQueue) queues[i]).setPrevQueue(null);
+					((NonPQueue) queues[i]).setNextQueue(queues[i+1]);
 				}else {
 					((NonPQueue) queues[i]).setPrevQueue(queues[i-1]);
 					((NonPQueue) queues[i]).setNextQueue(queues[i+1]);
