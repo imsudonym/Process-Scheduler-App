@@ -197,12 +197,13 @@ public class SRTFQueue extends Queue{
 	
 	public void stopExecution() {
 		System.out.println("level = " + level + " stopping execution...");
-		
 		prevQueueDone = 0;
-		prevTimeQuantum = Scheduler.clockTime; // Update quantum base for RR
-		System.out.println("****updated prevTimeQuantum = " + prevTimeQuantum);
 		
-		// TODO: Determine if a process needs to be promoted. If yes, promote then.
+		/*
+		 * Code below determines if a process needs to be promoted. 
+		 * If yes, promote then.
+		 * 
+		 * */
 		if(currProcess != null) {
 			System.out.println("level = " + level + " p" + currProcess.getId() + " was executing when queue preempted.");
 			System.out.println("    burstExecuted = " + (currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()));
@@ -215,21 +216,24 @@ public class SRTFQueue extends Queue{
 		}
 		
 		/*
-		 * We may not need the code below since SRTF cannot demote. 
-		 * This consequently means there is no way for all the queues
-		 * that are lower than SRTF queues to receive processes
-		 * to execute. 
+		 * Conditional below determines if this Queue is preempted
+		 * by a higher priority queue.
+		 * 
+		 * It indicates that this queue was executing when
+		 * a new process arrive at a higher queue, thus preempting the process.
+		 * We update the prevQuantumTime to the time the process is preempted
+		 * so the timer starts counting at that time.
 		 * 
 		 * */
-		if(nextQueue != null) {
-			if(nextQueue instanceof RRQueue) {
-				((RRQueue)(nextQueue)).stopExecution();
-			}else if(prevQueue instanceof SRTFQueue) {
-				((SRTFQueue)(prevQueue)).stopExecution();
-			}else if(prevQueue instanceof PQueue) {
-				((PQueue)(prevQueue)).stopExecution();
-			}
+		if(currProcess != null  && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
+			prevTimeQuantum = Scheduler.clockTime; 	
+		
+			GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.FCFS);
+			GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.FCFS);
+			currProcess.setPrevBurstPreempted(currProcess.getBurstTime());
 		}
+		
+		System.out.println("****updated prevTimeQuantum = " + prevTimeQuantum);
 	}
 	
 	/*
@@ -271,10 +275,9 @@ public class SRTFQueue extends Queue{
 	Thread SRTFThread = new Thread(){				
 		public void run(){
 			while(running){
-				if(getSize() > 0 &&  prevQueueDone == 1 && peekHead() != null){	
+				if(getSize() > 0 &&  prevQueueDone == 1 && (currProcess = peekHead()) != null){	
 					
 					long timeNow = Scheduler.clockTime;
-					currProcess = peekHead();	
 					
 					if(!preempted){						
 						
@@ -300,12 +303,6 @@ public class SRTFQueue extends Queue{
 						currProcess.setResponseTime(timeNow-currProcess.getArrivalTime());
 					}
 					
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					
 					if(prevTime < timeNow){
 						System.out.println("level = " + level + " executing p" + currProcess.getId() + " prevTime = " + prevTime + " timeNow = " + timeNow);
 						long lapse = timeNow - prevTime;
@@ -314,10 +311,13 @@ public class SRTFQueue extends Queue{
 						
 						if(currProcess.getBurstTime() <= 0){
 							currProcess.setWaitTimePreemptive();
+							prevTimeQuantum = timeNow;
 							dequeue();						
-							System.out.println("p" + currProcess.getId() + " Done executing.");
+							
 							array.printContents();
-							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SRTF);
+							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SRTF);					
+							
+							System.out.println("p" + currProcess.getId() + " Done executing.");
 						}													
 					}
 					preempted = false;
