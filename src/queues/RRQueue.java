@@ -161,6 +161,16 @@ public class RRQueue extends Queue{
 			}			
 		}
 		
+		/*
+		 * Conditional below determines if this Queue is preempted
+		 * by a higher priority queue.
+		 * 
+		 * It indicates that this queue was executing when
+		 * a new process arrive at a higher queue, thus preempting the process.
+		 * We update the prevQuantumTime to the time the process is preempted
+		 * so the timer starts counting at that time.
+		 * 
+		 * */
 		if(currProcess != null  && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
 			prevTimeQuantum = Scheduler.clockTime; 	
 		

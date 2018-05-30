@@ -135,11 +135,10 @@ public class FCFSQueue extends Queue{
 		 * Conditional below determines if this Queue is preempted
 		 * by a higher priority queue.
 		 * 
-		 * allProcessesDone == 0 indicates that this queue was executing when
+		 * It indicates that this queue was executing when
 		 * a new process arrive at a higher queue, thus preempting the process.
 		 * We update the prevQuantumTime to the time the process is preempted
-		 * so the timer starts counting at the time the new process preempted
-		 * the now previously executing process.
+		 * so the timer starts counting at that time.
 		 * 
 		 * */
 		if(currProcess != null  && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
