@@ -26,15 +26,16 @@ import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import Process.CPUBoundProcess;
 import constants.SchedulingAlgorithm;
-import ctrl.Scheduler;
+import process.CPUBoundProcess;
+import process.IOBoundProcess;
 import queues.FCFSQueue;
 import queues.NonPQueue;
 import queues.PQueue;
 import queues.RRQueue;
 import queues.SJFQueue;
 import queues.SRTFQueue;
+import scheduler.Scheduler;
 
 public class GanttChart extends JFrame{
 
@@ -74,6 +75,7 @@ public class GanttChart extends JFrame{
 	private ArrayList<Integer> arrivalTime = new ArrayList<Integer>();
 	private ArrayList<Integer> burstTime = new ArrayList<Integer>();
 	private ArrayList<Integer> priority = new ArrayList<Integer>();
+	private ArrayList<Integer> iOBoundFlag = new ArrayList<Integer>();
 	
 	private static int algorithm1, algorithm2, algorithm3, algorithm4, algorithm;
 	private static int procYOffset;
@@ -194,6 +196,7 @@ public class GanttChart extends JFrame{
 						    arrivalTime.add(Integer.parseInt(token[1]));
 						    burstTime.add(Integer.parseInt(token[2]));
 						    priority.add(Integer.parseInt(token[3]));
+						    iOBoundFlag.add(Integer.parseInt(token[4]));
 						}
 						in.close();
 						
@@ -874,7 +877,11 @@ public class GanttChart extends JFrame{
 					
 					int size = PID.size();
 					for(int i = 0; i < size; i++){
-						processes[i] = new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
+						if(iOBoundFlag.get(i) == 1) {
+							processes[i] = new IOBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
+						}else {
+							processes[i] = new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
+						}
 					}
 					
 					scheduler.initProcesses(queues_num, processes);

@@ -1,6 +1,6 @@
-package utils;
+package datastructure;
 
-import Process.CPUBoundProcess;
+import process.CPUBoundProcess;
 
 public class PseudoArray {		
 	private int size;	

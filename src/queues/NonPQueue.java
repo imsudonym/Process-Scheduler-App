@@ -1,9 +1,9 @@
 package queues;
-import Process.CPUBoundProcess;
 import constants.SchedulingAlgorithm;
-import ctrl.Scheduler;
+import datastructure.PseudoArray;
 import gui.GanttChart;
-import utils.PseudoArray;
+import process.CPUBoundProcess;
+import scheduler.Scheduler;
 
 public class NonPQueue extends Queue{
 		

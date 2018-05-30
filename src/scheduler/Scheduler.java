@@ -1,7 +1,7 @@
-package ctrl;
-import Process.CPUBoundProcess;
+package scheduler;
 import constants.SchedulingAlgorithm;
 import gui.GanttChart;
+import process.CPUBoundProcess;
 import queues.FCFSQueue;
 import queues.NonPQueue;
 import queues.PQueue;
@@ -18,7 +18,7 @@ public class Scheduler {
 	public static CPUBoundProcess[] processes;
 	private static int numOfQueues = 0;
 		
-	public static void initProcesses(int numOfQueues, CPUBoundProcess[] processes){
+	public void initProcesses(int numOfQueues, CPUBoundProcess[] processes){
 		Scheduler.numOfQueues = numOfQueues;
 		Scheduler.queues = new Object[numOfQueues];
 		

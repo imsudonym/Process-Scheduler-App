@@ -1,4 +1,4 @@
-package Process;
+package process;
 
 public class IOBoundProcess extends CPUBoundProcess{
 	
@@ -6,6 +6,10 @@ public class IOBoundProcess extends CPUBoundProcess{
 	
 	public IOBoundProcess(int id, int arrivalTime, int burstTime, int priority) {
 		super(id, arrivalTime, burstTime, priority);
+	}
+
+	public static int getIoSpeed() {
+		return IOSPEED;
 	}
 
 }
