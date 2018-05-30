@@ -204,17 +204,7 @@ public class FCFSQueue extends Queue{
 							timeStart = -1;							
 						}					
 					}
-					
 					prevTime = timeNow;
-					
-					/*
-					while(Scheduler.clockTime != (timeStart + burstTime)){					
-						try {
-							Thread.sleep(5);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}				
-					}*/
 								
 					//timeEnd = Scheduler.clockTime;			
 					//currProcess.setWaitTimeNonPreemptive();

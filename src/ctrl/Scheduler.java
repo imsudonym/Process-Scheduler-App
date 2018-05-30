@@ -164,9 +164,14 @@ public class Scheduler {
 				}
 			}else if (queues[i] instanceof SJFQueue){
 				if(i == numOfQueues-1) { 
+					if(numOfQueues != 1)
+						((SJFQueue) queues[i]).setPrevQueue(queues[i-1]);
+					else
+						((SJFQueue) queues[i]).setPrevQueue(null);
 					((SJFQueue) queues[i]).setNextQueue(null);
 				}else if(i == 0) {
 					((SJFQueue) queues[i]).setPrevQueue(null);
+					((SJFQueue) queues[i]).setNextQueue(queues[i+1]);
 				}else {
 					((SJFQueue) queues[i]).setPrevQueue(queues[i-1]);
 					((SJFQueue) queues[i]).setNextQueue(queues[i+1]);

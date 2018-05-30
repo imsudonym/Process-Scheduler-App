@@ -62,11 +62,11 @@ public class SRTFQueue extends Queue{
 	}
 	
 	public void enqueue(Process newProcess){		
-		numOfProcesses--;
 		deterMineIfToPreempt(newProcess);
 		array.add(newProcess);			
 		sortSJF();
 		allProcessesDone = 0;
+		numOfProcesses--;
 		
 		/* 
 		 * Start executing (this queue) if 
@@ -210,31 +210,12 @@ public class SRTFQueue extends Queue{
 			System.out.println("    burstExecuted = " + (currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()));
 			if(currProcess.getBurstTime() > 0 && (currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()) > 0) {
 				System.out.println("    p" + currProcess.getId() + " should be promoted.");
+				prevTimeQuantum = Scheduler.clockTime; 	
 				promote((currProcess.getPrevBurstPreempted()-currProcess.getBurstTime()));
 			}else {
 				System.out.println("    p" + currProcess.getId() + " need not be promoted.");
 			}
 		}
-		
-		/*
-		 * Conditional below determines if this Queue is preempted
-		 * by a higher priority queue.
-		 * 
-		 * It indicates that this queue was executing when
-		 * a new process arrive at a higher queue, thus preempting the process.
-		 * We update the prevQuantumTime to the time the process is preempted
-		 * so the timer starts counting at that time.
-		 * 
-		 * */
-		if(currProcess != null  && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
-			prevTimeQuantum = Scheduler.clockTime; 	
-		
-			GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.FCFS);
-			GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.FCFS);
-			currProcess.setPrevBurstPreempted(currProcess.getBurstTime());
-		}
-		
-		System.out.println("****updated prevTimeQuantum = " + prevTimeQuantum);
 	}
 	
 	/*
