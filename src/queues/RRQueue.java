@@ -3,11 +3,12 @@ import constants.SchedulingAlgorithm;
 import datastructure.PseudoArray;
 import gui.GanttChart;
 import process.CPUBoundProcess;
+import process.IOBoundProcess;
 import scheduler.Scheduler;
 
 public class RRQueue extends Queue{
 		
-	private PseudoArray array = new PseudoArray(20);
+	private PseudoArray array = new PseudoArray(1000);
 	private CPUBoundProcess currProcess;
 	private boolean running = false;
 	private int numOfProcesses;
@@ -44,34 +45,59 @@ public class RRQueue extends Queue{
 		//System.out.println("level = " + level + " enter p" + newProcess.getId());
 		
 		array.add(newProcess);
-		allProcessesDone = 0;
-		numOfProcesses--;
 		
-		if(prevQueue != null) {
-			int queueSize = 0;
-	
-			if(prevQueue instanceof RRQueue) {
-				queueSize = ((RRQueue)(prevQueue)).getSize();		
-			}else if(prevQueue instanceof FCFSQueue) {
-				queueSize = ((FCFSQueue)(prevQueue)).getSize();
-			}else if(prevQueue instanceof SJFQueue) {
-				queueSize = ((SJFQueue)(prevQueue)).getSize();
-			}else if(prevQueue instanceof SRTFQueue) {
-				queueSize = ((SRTFQueue)(prevQueue)).getSize();
-			}else if(prevQueue instanceof NonPQueue) {
-				queueSize = ((NonPQueue)(prevQueue)).getSize();
-			}else if(prevQueue instanceof PQueue) {
-				queueSize = ((PQueue)(prevQueue)).getSize();
+		allProcessesDone = 0;
+		numOfProcesses--;		
+		
+		if(newProcess instanceof IOBoundProcess && level == 0) {
+			System.out.println("| Level = " + level + " p" + newProcess.getId() + " instanceof IOBoundProcess.");
+			/*
+			 * Code block below is Case 1, where a CPU-bound process is executing when 
+			 * the IO-bound process arrived.
+			 *  
+			 * */
+			if(currProcess != null  && currProcess instanceof CPUBoundProcess && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
+				System.out.println("| !! p" + currProcess.getId() + " was executing when p" + newProcess.getId() + " burstLeft = " + currProcess.getBurstTime());
+				prevTimeQuantum = Scheduler.clockTime; 	
+			
+				GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.RR);
+				GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.RR);
+				currProcess.setPrevBurstPreempted(currProcess.getBurstTime());			
 			}
 			
-			if(queueSize <= 0) {
-				startExecution();
-			}else {
-				stopExecution();
+			if(getSize() > 1) {
+				shiftIoBoundsToFront();
 			}
+			
+			startExecution();	
 			
 		}else {
-			startExecution();
+			if(prevQueue != null) {
+				int queueSize = 0;
+		
+				if(prevQueue instanceof RRQueue) {
+					queueSize = ((RRQueue)(prevQueue)).getSize();		
+				}else if(prevQueue instanceof FCFSQueue) {
+					queueSize = ((FCFSQueue)(prevQueue)).getSize();
+				}else if(prevQueue instanceof SJFQueue) {
+					queueSize = ((SJFQueue)(prevQueue)).getSize();
+				}else if(prevQueue instanceof SRTFQueue) {
+					queueSize = ((SRTFQueue)(prevQueue)).getSize();
+				}else if(prevQueue instanceof NonPQueue) {
+					queueSize = ((NonPQueue)(prevQueue)).getSize();
+				}else if(prevQueue instanceof PQueue) {
+					queueSize = ((PQueue)(prevQueue)).getSize();
+				}
+				
+				if(queueSize <= 0) {
+					startExecution();
+				}else {
+					stopExecution();
+				}
+			
+			}else {
+				startExecution();
+			}
 		}
 		
 		if(nextQueue != null) {
@@ -91,11 +117,18 @@ public class RRQueue extends Queue{
 			//System.out.println("    We presumably preempted the lower prio queue. Expect that only this queue is executing.");
 		}
 		
-		running = true;
-		//System.out.print("level = " + level + " ");
+		if(running == false) {
+			running = true;
+		}
+		
+		System.out.print("level = " + level + " ");
 		array.printContents();
 	}
 	
+	private void shiftIoBoundsToFront() {
+		array.givePriorityToIoBounds();
+	}
+
 	public void reenqueue(CPUBoundProcess newProcess){		
 		array.add(newProcess);		
 		allProcessesDone = 0;		
@@ -115,9 +148,10 @@ public class RRQueue extends Queue{
 		}
 	}
 	
+	/*
 	public CPUBoundProcess peekTail(){
 		return array.get(getSize()-1).getValue(); 		
-	}
+	}*/
 	
 	public int getSize(){
 		return array.getSize();
@@ -144,7 +178,7 @@ public class RRQueue extends Queue{
 		}
 
 		if(getSize() > 0) {
-			//System.out.println("---level = " + level + " starting execution...");
+			System.out.println("| Level = " + level + " starting execution...");
 			prevQueueDone = 1;
 		}
 	}
@@ -193,17 +227,13 @@ public class RRQueue extends Queue{
 
 		public void run(){
 			while(running){
-
-				if(getSize() > 0 &&  prevQueueDone == 1){
-					currProcess = peekHead();
+				if(getSize() > 0 &&  prevQueueDone == 1 && (currProcess = peekHead()) != null){
 					if(timeStart < 0){
 						if(timeEnd != 0)						
 							timeStart = timeEnd;
 						else
 							timeStart = Scheduler.clockTime;						
 					}					
-					
-					//executing = true;
 					
 					if(currProcess != null && currProcess.getResponseTime() < 0) {
 						if(prevProcess != null && prevProcess.preemptedFlag) {
@@ -218,18 +248,43 @@ public class RRQueue extends Queue{
 					
 					if(currProcess.preemptedFlag) {
 						currProcess.setTimeResumed(Scheduler.clockTime);
+						
 						currProcess.preemptedFlag = false;
 					}
 					
 					long timeNow = Scheduler.clockTime;	
 					if(prevTime < timeNow){				
-						System.out.println("level = " + level + " exec p" + currProcess.getId() + " timeNow = " + timeNow);
+						System.out.println("| Level = " + level + " executing p" + currProcess.getId() + " timeNow = " + timeNow);
+						
 						int lapse = (int)(timeNow - prevTime);
 						int burstLeft = currProcess.getBurstTime() - lapse;					
 						currProcess.setBurstTime(burstLeft);																	
 											
-						System.out.println("====> prevTimeQuantum = " + prevTimeQuantum + " <=> quantum = " + quantum);
+						/*
+						 * Conditional immediately below relinquishes IOBound process
+						 * for IO operation.
+						 * 
+						 * */
+						if(currProcess instanceof IOBoundProcess) {							
+							if(timeNow == prevTimeQuantum + (quantum-1)){
+								System.out.println("Just before quantum expires....");
+								prevProcess = currProcess;							
+								GanttChart.addExecutingProcess(level, currProcess.getId(), quantum, SchedulingAlgorithm.RR);
+								currProcess.setArrivalTime(timeNow + ((IOBoundProcess)(currProcess)).getIoSpeed());
+								
+								if(burstLeft > 0){						
+									insertToReadyQueue((IOBoundProcess)currProcess);
+									dequeue();
+									System.out.print("THISISAHELLOFAMESS ");
+									array.printContents();
+								}
+							
+								prevTimeQuantum = timeNow;
+							}							
+						}
+						
 						if(timeNow == prevTimeQuantum + quantum){
+							System.out.println("| -- Quantum time is done timeNow = " + timeNow);
 							currProcess.setPreempted();
 							currProcess.setTimePreempted(timeNow);
 							currProcess.preemptedFlag = true;
@@ -250,7 +305,7 @@ public class RRQueue extends Queue{
 							}
 							
 							prevTimeQuantum = timeNow;
-						}						
+						}
 						
 						if(burstLeft <= 0){		
 							currProcess.setWaitTimePreemptive();
@@ -261,16 +316,26 @@ public class RRQueue extends Queue{
 							}
 							
 							dequeue();													
-							//System.out.println("p" + currProcess.getId() + " Done executing.");
+							System.out.println("p" + currProcess.getId() + " Done executing.");
 							timeEnd = Scheduler.clockTime;
 							prevTimeQuantum = timeNow;
 							timeStart = -1;							
-						}													
+						}
+																			
 					}					
 					prevTime = timeNow;					
 					
 				}else{										
 				
+//					/System.out.println("======================");
+					/*if(getSize() < 0) {
+						System.out.println("size was zero");
+					}else if (prevQueueDone != 1) {
+						System.out.println("prevQueeue not done");
+					}else if(peekHead() == null) {
+						System.out.println("peekhead is null");
+					}*/
+					
 					if (allProcessesDone == 0 && getSize() == 0){
 						GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.RR);		
 						allProcessesDone = 1;
@@ -290,7 +355,8 @@ public class RRQueue extends Queue{
 							}
 						}
 						
-						if(level == Scheduler.getMaxLevelOfQueues()) {
+						if(level == Scheduler.getMaxLevelOfQueues() && Scheduler.processes.size() == 0) {
+							System.out.println("Allprocessdon size zero.. stopping simulation...");
 							simulationDone();
 						}
 					}			
@@ -331,6 +397,11 @@ public class RRQueue extends Queue{
 		GanttChart.simulationDone(this);
 	}
 	
+	protected void insertToReadyQueue(IOBoundProcess process) {
+		System.out.println("Insert p" + process.getId() + " with new arrival time = " + process.getArrivalTime());
+		Scheduler.enqueue(process);
+	}
+
 	protected void retain() {
 		enqueue(dequeue());
 	}

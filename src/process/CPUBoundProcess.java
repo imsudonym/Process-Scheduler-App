@@ -134,4 +134,8 @@ public class CPUBoundProcess {
 	public long getStartTime() {
 		return startTime;
 	}
+
+	public void setArrivalTime(long time) {
+		this.arrivalTime = (int)time;
+	}
 }

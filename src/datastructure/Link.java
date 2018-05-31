@@ -7,12 +7,12 @@ public class Link {
 	private CPUBoundProcess value;
 	public Link next;
 	public Link previous;
-	public int key;
+	public String key;
 	
-	public Link(CPUBoundProcess value, int i){
+	public Link(CPUBoundProcess value, String key){
 		this.value = value;
 		this.next = null;
-		key = i;
+		this.key = key;
 	}
 	
 	public CPUBoundProcess getValue(){
@@ -21,5 +21,9 @@ public class Link {
 
 	public void setValue(CPUBoundProcess newValue) {
 		this.value = newValue;
+	}
+
+	public String getKey() {
+		return key;
 	}
 }

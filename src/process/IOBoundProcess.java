@@ -8,7 +8,7 @@ public class IOBoundProcess extends CPUBoundProcess{
 		super(id, arrivalTime, burstTime, priority);
 	}
 
-	public static int getIoSpeed() {
+	public int getIoSpeed() {
 		return IOSPEED;
 	}
 

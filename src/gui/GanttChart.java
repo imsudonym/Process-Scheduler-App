@@ -105,12 +105,13 @@ public class GanttChart extends JFrame{
 	private static String[] algorithms = {"FCFS", "SJF", "SRTF", "NP-PRIO", "P-PRIO", "RR"};
 	
 	private static Scheduler scheduler;
-	private static CPUBoundProcess[] processes;
 	private static Font font = new Font("Helvetica", Font.BOLD, 20);
 	private static Font timeLabelFont = new Font("Helvetica", Font.BOLD, 12);
 	private static Color darkBlue = new Color(0, 46, 70);
 	private static Border border = BorderFactory.createLineBorder(darkBlue);
 	private static Container con;
+	
+	private static ArrayList<CPUBoundProcess> processes = new ArrayList<CPUBoundProcess>();
 	
 	JComboBox<String> algoList1 = new JComboBox<String>(algorithms);
 	JComboBox<String> algoList2 = new JComboBox<String>(algorithms);
@@ -199,11 +200,10 @@ public class GanttChart extends JFrame{
 						    iOBoundFlag.add(Integer.parseInt(token[4]));
 						}
 						in.close();
-						
+											
 						int size = PID.size();
-						processes = new CPUBoundProcess[size];						
 						for(int i = 0; i < size; i++){
-							processes[i] = new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
+							processes.add(new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
 						}
 						
 						if(algorithm == SchedulingAlgorithm.RR && quantum < 0)
@@ -874,13 +874,14 @@ public class GanttChart extends JFrame{
 					}
 					
 					scheduler = new Scheduler();					
+					processes.removeAll(processes);
 					
 					int size = PID.size();
 					for(int i = 0; i < size; i++){
 						if(iOBoundFlag.get(i) == 1) {
-							processes[i] = new IOBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
+							processes.add(new IOBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
 						}else {
-							processes[i] = new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
+							processes.add(new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
 						}
 					}
 					
