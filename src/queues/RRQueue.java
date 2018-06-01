@@ -124,7 +124,9 @@ public class RRQueue extends Queue{
 
 		if(nextQueue != null) {
 			if(nextQueue instanceof RRQueue) {
-				((RRQueue)(nextQueue)).stopExecution();
+				if(((RRQueue)(nextQueue)).getSize() > 0) {
+					((RRQueue)(nextQueue)).stopExecution();
+				}
 			}else if(nextQueue instanceof SRTFQueue) {
 				((SRTFQueue)(nextQueue)).stopExecution();
 			}else if(nextQueue instanceof PQueue) {
@@ -206,7 +208,9 @@ public class RRQueue extends Queue{
 		
 		if(nextQueue != null) {
 			if(nextQueue instanceof RRQueue) {
-				((RRQueue)(nextQueue)).stopExecution();
+				if(((RRQueue)(nextQueue)).getSize() > 0) {
+					((RRQueue)(nextQueue)).stopExecution();
+				}
 			}else if(nextQueue instanceof SRTFQueue) {
 				((SRTFQueue)(nextQueue)).stopExecution();
 			}else if(nextQueue instanceof PQueue) {
@@ -461,11 +465,12 @@ public class RRQueue extends Queue{
 			avgWait += temp.get(i).getWaitTime();
 			avgTurnaround += temp.get(i).getTurnaroundTime();
 			
-			//int c = temp.get(i).getTimesPreempted();			
-			/*for(int j = 0; j < c; j++) {
-				System.out.print(temp.get(i).timePreempted.get(j) + " -> ");
-				System.out.print(temp.get(i).timeResumed.get(j) + " | ");
-			}*/
+			int c = temp.get(i).getTimesPreempted();			
+			for(int j = 0; j < c; j++) {
+				System.out.print(temp.get(i).timePreempted.get(j) + "-");
+				System.out.print(temp.get(i).timeResumed.get(j) + "|");
+			}
+			System.out.println();
 		}
 		
 		avgResponse = avgResponse/count;
