@@ -1,29 +1,28 @@
-package process;
+package utils;
 import java.util.ArrayList;
 
-public class CPUBoundProcess {
-	protected int id;
-	protected int arrivalTime;
-	protected int burstNeeded;
-	protected int burstTime;
-	protected int priority;
+public class Process {
+	private int id;
+	private int arrivalTime;
+	private int burstNeeded;
+	private int burstTime;
+	private int priority;
 	
-	protected int timesPreempted = 0;
-	protected int prevBurstPreempted;
+	private int timesPreempted = 0;
+	private int prevBurstPreempted;
 	
-	public ArrayList<Long> timePreempted = new ArrayList<Long>();
-	public ArrayList<Long> timeResumed = new ArrayList<Long>();
+	private ArrayList<Long> timePreempted = new ArrayList<Long>();
+	private ArrayList<Long> timeResumed = new ArrayList<Long>();
 	
-	protected long firstStartTime;
-	protected long startTime;
-	protected long endTime;
-	protected long waitTime;
-	protected long responseTime;
-	protected long turnaroundTime;
+	private long startTime;
+	private long endTime;
+	private long waitTime;
+	private long responseTime;
+	private long turnaroundTime;
 	
 	public boolean preemptedFlag = false;
 	
-	public CPUBoundProcess(int id, int arrivalTime, int burstTime, int priority){
+	public Process(int id, int arrivalTime, int burstTime, int priority){
 		this.id = id;
 		this.arrivalTime = arrivalTime;
 		this.burstTime = burstTime;		
@@ -104,7 +103,7 @@ public class CPUBoundProcess {
 	}
 	
 	public void setWaitTimePreemptive() {
-		long waitTime = (firstStartTime - arrivalTime) < 0 ? 0: (firstStartTime - arrivalTime);
+		long waitTime = (startTime - arrivalTime) < 0 ? 0: (startTime - arrivalTime);
 		
 		for(int i = 0; i < timeResumed.size(); i++) {
 			waitTime += (timeResumed.get(i) - timePreempted.get(i));
@@ -113,7 +112,7 @@ public class CPUBoundProcess {
 	}
 
 	public void setWaitTimeNonPreemptive() {
-		this.waitTime = (firstStartTime - arrivalTime) < 0 ? 0: (firstStartTime - arrivalTime);
+		this.waitTime = (startTime - arrivalTime) < 0 ? 0: (startTime - arrivalTime);
 	}
 	
 	public long getResponseTime() {
@@ -132,15 +131,7 @@ public class CPUBoundProcess {
 		this.startTime = timeStart;
 	}
 	
-	public void setFirstStartTime(long firstStartTime) {
-		this.firstStartTime = firstStartTime;
-	}
-	
 	public long getStartTime() {
 		return startTime;
-	}
-
-	public void setArrivalTime(long time) {
-		this.arrivalTime = (int)time;
 	}
 }

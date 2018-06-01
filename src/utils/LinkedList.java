@@ -1,8 +1,4 @@
-package datastructure;
-
-import process.CPUBoundProcess;
-import process.IOBoundProcess;
-
+package utils;
 public class LinkedList{
 	
 	public static String stringTemp = "";
@@ -18,48 +14,34 @@ public class LinkedList{
 		if(isEmpty()){
 			
 			last = newLink;			
-			last.next = null;
-			last.previous = null;
-			first = last;
-		}else{
+			newLink.next = null;
+			first = newLink;
+		}
+		else{
 			
 			last.next = newLink;
-			last.next.previous = last;
 			last = last.next;
 		}						
 	}
 	
-	public void addToFront(Link newLink) {
-		if(isEmpty()){			
-			last = newLink;			
-			last.next = null;
-			last.previous = null;
-			first = last;
-		}else {
-			newLink.next = first;
-			first.previous = newLink;
-			first = newLink;
-		}
-	}
-	
-	public Link get(String key){		
+	public Link get(int index){		
 		if(!isEmpty()){
 			Link current = first;
 						
-			String currKey = current.key;
+			int key = current.key;
 			
-			while(!currKey.equals(key)){			
+			while(key != index){			
 				if(current.next == null){
 					current = null;
 					break;
-				}else if(current.key.equals(last.key)){
+				}else if(current.key == last.key){
 					current = null;
 					break;
 				}else{
 					current = current.next;
 				}
 				
-				currKey = current.key;
+				key = current.key;
 			}
 			
 			return current;
@@ -68,25 +50,9 @@ public class LinkedList{
 		return null;
 	}	
 	
-	public Link remove(String index){		
-		
-		Link element = get(index);
-		
-		if(element == first) {
-			remove();
-		} else if(element == last){
-			element.previous.next = null;
-			last = element.previous;			
-		} else {
-			element.previous.next = element.next;
-			element.next.previous = element.previous;
-		}		
-		return null;
-	}	
-	
-	public CPUBoundProcess remove(){
+	public Process remove(){
 		Link temp = null;						
-		CPUBoundProcess process = null;
+		Process process = null;
 		
 		if(!isEmpty()){
 			temp = first;

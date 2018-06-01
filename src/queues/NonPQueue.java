@@ -1,14 +1,14 @@
 package queues;
 import constants.SchedulingAlgorithm;
-import datastructure.PseudoArray;
+import ctrl.Scheduler;
 import gui.GanttChart;
-import process.CPUBoundProcess;
-import scheduler.Scheduler;
+import utils.Process;
+import utils.PseudoArray;
 
 public class NonPQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
-	private CPUBoundProcess currProcess;
+	private Process currProcess;
 	private boolean running = false;
 	private byte allProcessesDone = 1;
 	private int numOfProcesses;
@@ -52,7 +52,7 @@ public class NonPQueue extends Queue{
 		running = false;
 	}
 	
-	public void enqueue(CPUBoundProcess newProcess){		
+	public void enqueue(Process newProcess){		
 		array.add(newProcess);
 		array.sortPriority();
 		allProcessesDone = 0;		
@@ -144,7 +144,7 @@ public class NonPQueue extends Queue{
 		if(currProcess != null  && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
 			prevTimeQuantum = Scheduler.clockTime; 	
 		
-			//GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.FCFS);
+			GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.FCFS);
 			GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.FCFS);
 			currProcess.setPrevBurstPreempted(currProcess.getBurstTime());
 		}
@@ -153,19 +153,19 @@ public class NonPQueue extends Queue{
 		System.out.println("****updated prevTimeQuantum = " + prevTimeQuantum);
 	}
 	
-	public CPUBoundProcess dequeue(){
+	public Process dequeue(){
 					
-		CPUBoundProcess prc = array.remove();											
+		Process prc = array.remove();											
 		return prc;
 	}
 	
-	public CPUBoundProcess peekHead(){
+	public Process peekHead(){
 		return array.getHead().getValue(); 
 	}
 	
-	/*public CPUBoundProcess peekTail(){
+	public Process peekTail(){
 		return array.get(getSize()-1).getValue(); 		
-	}*/
+	}
 	
 	public int getSize(){
 		return array.getSize();
@@ -196,7 +196,7 @@ public class NonPQueue extends Queue{
 						
 						if(burstLeft <= 0){								
 							dequeue();									
-							//GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.FCFS);
+							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.FCFS);
 
 							System.out.println("p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 							timeEnd = Scheduler.clockTime;

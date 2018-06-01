@@ -1,10 +1,4 @@
-package datastructure;
-
-import java.util.ArrayList;
-
-import process.CPUBoundProcess;
-import process.IOBoundProcess;
-
+package utils;
 public class PseudoArray {		
 	private int size;	
 	public int ctr = 0;
@@ -18,11 +12,18 @@ public class PseudoArray {
 		return list.isEmpty();
 	}
 	
-	public void add(CPUBoundProcess value){		
-		Link newLink = new Link(value, value.toString());
-		list.add(newLink);
-		ctr++;
+	public void add(Process value){		
+		if(ctr <= size){
 			
+			Link newLink = new Link(value, ctr);
+			list.add(newLink);
+			ctr++;
+			
+			
+		}else{
+			throw new java.lang.RuntimeException("ArrayIndexOutOfBounds.");
+		}	
+		
 		//printContents();
 	}
 	
@@ -30,12 +31,12 @@ public class PseudoArray {
 		return list.first;
 	}
 	
-	public Link get(String index){
+	public Link get(int index){
 		return list.get(index);
 	}
 	
-	public CPUBoundProcess remove(){		
-		CPUBoundProcess prc = list.remove(); 
+	public Process remove(){		
+		Process prc = list.remove(); 
 		if(prc != null){			
 			ctr--;			
 		}
@@ -43,6 +44,7 @@ public class PseudoArray {
 	}
 	
 	public int getSize(){		
+		System.out.print("");
 		return ctr;
 	}	
 	
@@ -58,7 +60,7 @@ public class PseudoArray {
 				long nextBurst = current.next.getValue().getBurstTime();												
 				
 				if(currBurst > nextBurst){					
-					CPUBoundProcess temp = current.getValue();
+					Process temp = current.getValue();
 					current.setValue(current.next.getValue());
 					current.next.setValue(temp);
 				}
@@ -81,7 +83,7 @@ public class PseudoArray {
 				int nextPriority = current.next.getValue().getPriority();												
 				
 				if(currPriority > nextPriority){					
-					CPUBoundProcess temp = current.getValue();
+					Process temp = current.getValue();
 					current.setValue(current.next.getValue());
 					current.next.setValue(temp);
 				}
@@ -102,7 +104,7 @@ public class PseudoArray {
 					continue;
 				}else if(current.next.getValue().getArrivalTime() == current.getValue().getArrivalTime()){
 					if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority						
-						CPUBoundProcess temp = current.getValue();
+						Process temp = current.getValue();
 						current.setValue(current.next.getValue());
 						current.next.setValue(temp);
 						timeEnd += current.getValue().getBurstTime();
@@ -110,7 +112,7 @@ public class PseudoArray {
 				}else if(current.next.getValue().getArrivalTime() > current.getValue().getArrivalTime() &&
 					current.next.getValue().getArrivalTime() <= timeEnd && current.getValue().getArrivalTime() <= timeEnd){
 					if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority						
-						CPUBoundProcess temp = current.getValue();
+						Process temp = current.getValue();
 						current.setValue(current.next.getValue());
 						current.next.setValue(temp);
 						timeEnd += current.getValue().getBurstTime();
@@ -119,38 +121,12 @@ public class PseudoArray {
 				
 				current = current.next;
 			}
+			
+			//printContents();
 		}
 	}
 	
 	public void printContents(){
 		list.printContents();
-	}
-
-	public void givePriorityToIoBounds() {
-		ArrayList<Link> tempArray = new ArrayList<Link>();
-		
-		Link current = list.first;						
-		while(true){
-				
-			CPUBoundProcess currProcess = current.getValue();												
-				
-			if(currProcess instanceof IOBoundProcess){	
-				tempArray.add(current); 
-				list.remove(current.getKey());
-				ctr--;
-			}
-			
-			if(current.next == null)
-				break;
-			
-			current = current.next;
-		}			
-		
-				
-		for(int i = tempArray.size()-1; i >= 0; i--) {
-			Link newLink = new Link(tempArray.get(i).getValue(), tempArray.get(i).getKey());
-			list.addToFront(newLink);
-			ctr++;
-		}
 	}
 }

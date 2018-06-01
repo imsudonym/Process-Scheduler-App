@@ -1,14 +1,14 @@
 package queues;
 import constants.SchedulingAlgorithm;
-import datastructure.PseudoArray;
+import ctrl.Scheduler;
 import gui.GanttChart;
-import process.CPUBoundProcess;
-import scheduler.Scheduler;
+import utils.Process;
+import utils.PseudoArray;
 
 public class SJFQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
-	private CPUBoundProcess currProcess;
+	private Process currProcess;
 	private boolean running = false;
 	private long timeStart;
 	private long timeEnd;	
@@ -51,7 +51,7 @@ public class SJFQueue extends Queue{
 		running = false;
 	}
 	
-	public void enqueue(CPUBoundProcess newProcess){		
+	public void enqueue(Process newProcess){		
 		array.add(newProcess);		
 		sortSJF();
 		allProcessesDone = 0;
@@ -154,15 +154,15 @@ public class SJFQueue extends Queue{
 		if(currProcess != null  && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
 			prevTimeQuantum = Scheduler.clockTime; 	
 		
-			//GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.RR);
+			GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.RR);
 			GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.RR);
 			currProcess.setPrevBurstPreempted(currProcess.getBurstTime());
 		}
 	}
 	
-	public CPUBoundProcess dequeue(){
+	public Process dequeue(){
 					
-		CPUBoundProcess prc = array.remove();											
+		Process prc = array.remove();											
 		return prc;
 	}
 	
@@ -170,13 +170,13 @@ public class SJFQueue extends Queue{
 		array.sortSJF();
 	}
 	
-	public CPUBoundProcess peekHead(){
+	public Process peekHead(){
 		return array.getHead().getValue(); 
 	}
 	
-	/*public CPUBoundProcess peekTail(){
+	public Process peekTail(){
 		return array.get(getSize()-1).getValue(); 		
-	}*/
+	}
 	
 	public int getSize(){
 		return array.getSize();
@@ -207,7 +207,7 @@ public class SJFQueue extends Queue{
 						
 						if(burstLeft <= 0){								
 							dequeue();									
-							//GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SJF);
+							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SJF);
 
 							System.out.println("p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 							timeEnd = Scheduler.clockTime;

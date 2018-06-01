@@ -1,16 +1,13 @@
-package scheduler;
-import java.util.ArrayList;
-
+package ctrl;
 import constants.SchedulingAlgorithm;
 import gui.GanttChart;
-import process.CPUBoundProcess;
-import process.IOBoundProcess;
 import queues.FCFSQueue;
 import queues.NonPQueue;
 import queues.PQueue;
 import queues.RRQueue;
 import queues.SJFQueue;
 import queues.SRTFQueue;
+import utils.Process;
 
 public class Scheduler {
 	private static int itr = 0;
@@ -18,16 +15,14 @@ public class Scheduler {
 	private static boolean running = false;
 	
 	public static Object[] queues;
+	public static Process[] processes;
 	private static int numOfQueues = 0;
 		
-	public static ArrayList<CPUBoundProcess> processes = new ArrayList<CPUBoundProcess>();
-	
-	public void initProcesses(int numOfQueues, ArrayList<CPUBoundProcess> processes){
+	public static void initProcesses(int numOfQueues, Process[] processes){
 		Scheduler.numOfQueues = numOfQueues;
 		Scheduler.queues = new Object[numOfQueues];
 		
 		Scheduler.processes = processes;
-		
 		sortByArrivalTime();
 		if(queues[0] instanceof PQueue){
 			preSortSameArrivalTime();
@@ -35,47 +30,38 @@ public class Scheduler {
 	}
 	
 	private static void sortByArrivalTime() {
-		/*System.out.println("Before sort by arrival...");
-		//printContents(processes);
-		System.out.println("Sorting by Arrival Time");*/
-		int psize = processes.size();
-		for(int i = 0; i < psize; i++){
-			for(int j = i; j < psize; j++){
-				if(processes.get(i).getArrivalTime() > processes.get(j).getArrivalTime()){
-					CPUBoundProcess temp = processes.get(i);
-					processes.set(i, processes.get(j));
-					processes.set(j, temp); 
+		for(int i = 0; i < processes.length; i++){
+			for(int j = i; j < processes.length; j++){
+				if(processes[i].getArrivalTime() > processes[j].getArrivalTime()){
+					Process temp = processes[i];
+					processes[i] = processes[j];
+					processes[j] = temp; 
 				}
 			}			
 		}
-		//printContents(processes);
+		printContents(processes);
 	}
 
 	private static void preSortSameArrivalTime() {
-		int psize = processes.size();
-		for(int i = 0; i < psize; i++){
-			for(int j = i; j < psize; j++){
-				if(processes.get(i).getArrivalTime() == processes.get(j).getArrivalTime() && processes.get(i).getPriority() > processes.get(j).getPriority()){
-					CPUBoundProcess temp = processes.get(i);
-					processes.set(i, processes.get(j));
-					processes.set(j, temp);
+		for(int i = 0; i < processes.length; i++){
+			for(int j = i; j < processes.length; j++){
+				if(processes[i].getArrivalTime() == processes[j].getArrivalTime() && processes[i].getPriority() > processes[j].getPriority()){
+					//System.out.println("Swapping p" + processes[i].getId() + " and p" + processes[j].getId());
+					Process temp = processes[i];
+					processes[i] = processes[j];
+					processes[j] = temp; 
 				}
 			}			
 		}
-		//printContents(processes);
+		printContents(processes);
 	}
 
-	private static void printContents(ArrayList<CPUBoundProcess> processes2) {
+	private static void printContents(Process[] processes2) {
 		System.out.print("[");
-		for(int i = 0; i < processes2.size(); i++){
-			System.out.print("p" + processes2.get(i).getId());
+		for(int i = 0; i < processes2.length; i++){
+			System.out.print("p" + processes2[i].getId());
 		}
 		System.out.println("]");		
-	}
-	
-	public static void enqueue(IOBoundProcess process) {
-		processes.add(process);
-		sortByArrivalTime();
 	}
 
 	public void simulate(){
@@ -88,62 +74,60 @@ public class Scheduler {
 		clockTime = 0;
 	}
 	
-	/*
 	public void generateQueues(int algorithm, int quantum){
 		System.out.println("Generating single level queue...");
 		for(int i = 0; i < numOfQueues; i++){	
 			if(algorithm == SchedulingAlgorithm.FCFS){
 				queues[0] = new FCFSQueue(0);
-				((FCFSQueue) queues[0]).setNumberOFProcesses(processes.size());
+				((FCFSQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}else if (algorithm == SchedulingAlgorithm.RR){
 				queues[0] = new RRQueue(0, quantum);
-				((RRQueue) queues[0]).setNumberOFProcesses(processes.size());
+				((RRQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}else if (algorithm == SchedulingAlgorithm.SJF){
 				queues[0] = new SJFQueue(0);
-				((SJFQueue) queues[0]).setNumberOFProcesses(processes.size());
+				((SJFQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}else if (algorithm == SchedulingAlgorithm.NP_PRIO){
 				queues[0] = new NonPQueue(0);
-				((NonPQueue) queues[0]).setNumberOFProcesses(processes.size());
+				((NonPQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}else if (algorithm == SchedulingAlgorithm.PRIO){
 				queues[0] = new PQueue(0);
-				((PQueue) queues[0]).setNumberOFProcesses(processes.size());
+				((PQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}else if (algorithm == SchedulingAlgorithm.SRTF){
 				queues[0] = new SRTFQueue(0);
-				((SRTFQueue) queues[0]).setNumberOFProcesses(processes.size());
+				((SRTFQueue) queues[0]).setNumberOFProcesses(processes.length);
 			}
 			
 		}							
-	}	*/
+	}	
 	
 	public void generateQueues(int[] algorithms, int[] quantums){
 		System.out.println("Generating multilevel queues...");
 		for(int i = 0; i < numOfQueues; i++){	
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
 				queues[i] = new FCFSQueue(i);
-				//((FCFSQueue) queues[i]).setNumberOFProcesses(processes.size());
+				((FCFSQueue) queues[i]).setNumberOFProcesses(processes.length);
 				((FCFSQueue) queues[i]).startThread();
 				//if(i == 0) ((FCFSQueue) queues[i]).startExecution();
 			}else if (algorithms[i] == SchedulingAlgorithm.RR){
 				queues[i] = new RRQueue(i, quantums[i]);
-				//((RRQueue) queues[i]).setNumberOFProcesses(processes.size());
-				System.out.println("Starting RRThread immediately after its generation.");
+				((RRQueue) queues[i]).setNumberOFProcesses(processes.length);
 				((RRQueue) queues[i]).startThread();
 				if(i == 0) ((RRQueue) queues[i]).startExecution();
 			}else if (algorithms[i] == SchedulingAlgorithm.SJF){
 				queues[i] = new SJFQueue(i);
-				((SJFQueue) queues[i]).setNumberOFProcesses(processes.size());
+				((SJFQueue) queues[i]).setNumberOFProcesses(processes.length);
 				((SJFQueue) queues[i]).startThread();
 			}else if (algorithms[i] == SchedulingAlgorithm.NP_PRIO){
 				queues[i] = new NonPQueue(i);
-				((NonPQueue) queues[i]).setNumberOFProcesses(processes.size());
+				((NonPQueue) queues[i]).setNumberOFProcesses(processes.length);
 				((NonPQueue) queues[i]).startThread();
 			}else if (algorithms[i] == SchedulingAlgorithm.PRIO){
 				queues[i] = new PQueue(i);
-				((PQueue) queues[i]).setNumberOFProcesses(processes.size());
+				((PQueue) queues[i]).setNumberOFProcesses(processes.length);
 				((PQueue) queues[i]).startThread();
 			}else if (algorithms[i] == SchedulingAlgorithm.SRTF){
 				queues[i] = new SRTFQueue(i);
-				((SRTFQueue) queues[i]).setNumberOFProcesses(processes.size());
+				((SRTFQueue) queues[i]).setNumberOFProcesses(processes.length);
 				((SRTFQueue) queues[i]).startThread();
 			}
 		}	
@@ -238,7 +222,7 @@ public class Scheduler {
 		}
 	}			
 	
-	private static void insertOnQueue(CPUBoundProcess newProcess){				
+	private static void insertOnQueue(Process newProcess){				
 		//timeArrive = System.currentTimeMillis();	
 		
 		if(queues[0] instanceof FCFSQueue){
@@ -267,13 +251,12 @@ public class Scheduler {
 			System.out.println("running: " + running);
 			while(running){				
 								
-				while(processes.size() > 0){								
-					if(processes.get(0).getArrivalTime() == clockTime){						
-						System.out.println("Clock time: " + clockTime + " insert p" + processes.get(0).getId());
-						insertOnQueue(processes.get(0));
-						processes.remove(0);
+				for(int i = itr; i < processes.length; i++){								
+					if(processes[i].getArrivalTime() == clockTime){						
+						System.out.println("Clock time: " + clockTime + " insert p" + processes[i].getId());
+						insertOnQueue(processes[i]);
 						itr++;
-					}else if(processes.get(0).getArrivalTime() > clockTime){						
+					}else if(processes[i].getArrivalTime() > clockTime){						
 						break;
 					}
 				}

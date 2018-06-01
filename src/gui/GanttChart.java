@@ -27,15 +27,14 @@ import javax.swing.border.Border;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import constants.SchedulingAlgorithm;
-import process.CPUBoundProcess;
-import process.IOBoundProcess;
+import ctrl.Scheduler;
 import queues.FCFSQueue;
 import queues.NonPQueue;
 import queues.PQueue;
 import queues.RRQueue;
 import queues.SJFQueue;
 import queues.SRTFQueue;
-import scheduler.Scheduler;
+import utils.Process;
 
 public class GanttChart extends JFrame{
 
@@ -75,7 +74,6 @@ public class GanttChart extends JFrame{
 	private ArrayList<Integer> arrivalTime = new ArrayList<Integer>();
 	private ArrayList<Integer> burstTime = new ArrayList<Integer>();
 	private ArrayList<Integer> priority = new ArrayList<Integer>();
-	private ArrayList<Integer> iOBoundFlag = new ArrayList<Integer>();
 	
 	private static int algorithm1, algorithm2, algorithm3, algorithm4, algorithm;
 	private static int procYOffset;
@@ -95,8 +93,6 @@ public class GanttChart extends JFrame{
 	private static int quantum = 2;
 	private static int Offset = -2;
 	
-	private static int prevEndTime = -1;
-	
 	private static int quantum1, quantum2, quantum3, quantum4;
 	
 	private static boolean alreadyStarted = false;
@@ -106,14 +102,13 @@ public class GanttChart extends JFrame{
 	private static String fileChosen;
 	private static String[] algorithms = {"FCFS", "SJF", "SRTF", "NP-PRIO", "P-PRIO", "RR"};
 	
-	private static Scheduler scheduler = new Scheduler();;
+	private static Scheduler scheduler;
+	private static Process[] processes;
 	private static Font font = new Font("Helvetica", Font.BOLD, 20);
 	private static Font timeLabelFont = new Font("Helvetica", Font.BOLD, 12);
 	private static Color darkBlue = new Color(0, 46, 70);
 	private static Border border = BorderFactory.createLineBorder(darkBlue);
 	private static Container con;
-	
-	private static ArrayList<CPUBoundProcess> processes = new ArrayList<CPUBoundProcess>();
 	
 	JComboBox<String> algoList1 = new JComboBox<String>(algorithms);
 	JComboBox<String> algoList2 = new JComboBox<String>(algorithms);
@@ -199,13 +194,13 @@ public class GanttChart extends JFrame{
 						    arrivalTime.add(Integer.parseInt(token[1]));
 						    burstTime.add(Integer.parseInt(token[2]));
 						    priority.add(Integer.parseInt(token[3]));
-						    iOBoundFlag.add(Integer.parseInt(token[4]));
 						}
 						in.close();
-											
+						
 						int size = PID.size();
+						processes = new Process[size];						
 						for(int i = 0; i < size; i++){
-							processes.add(new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
+							processes[i] = new Process(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
 						}
 						
 						if(algorithm == SchedulingAlgorithm.RR && quantum < 0)
@@ -864,27 +859,22 @@ public class GanttChart extends JFrame{
 		
 		startButton.addActionListener(new ActionListener(){			
 			public void actionPerformed(ActionEvent e) {
-				/*if(!alreadyStarted){
-					*/
-					int queues_num = level;
+				if(!alreadyStarted){
+					int queues_num = ONE_LEVEL;
 					
-					/*if(level == TWO_LEVEL) {
-						queues_num = TWO_LEVEL;
+					if(level == TWO_LEVEL) {
+						queues_num = 2;
 					}else if(level == THREE_LEVEL) {
-						queues_num = THREE_LEVEL;
+						queues_num = 3;
 					}else if(level == FOUR_LEVEL) {
-						queues_num = FOUR_LEVEL;
-					}*/
-															
-					processes.removeAll(processes);
+						queues_num = 4;
+					}
+					
+					scheduler = new Scheduler();					
 					
 					int size = PID.size();
 					for(int i = 0; i < size; i++){
-						if(iOBoundFlag.get(i) == 1) {
-							processes.add(new IOBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
-						}else {
-							processes.add(new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
-						}
+						processes[i] = new Process(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i));
 					}
 					
 					scheduler.initProcesses(queues_num, processes);
@@ -893,11 +883,11 @@ public class GanttChart extends JFrame{
 					int[] quanta = {quantum1, quantum2, quantum3, quantum4};
 					scheduler.generateQueues(algorithms, quanta);
 									
-					//if(!threadStarted){
+					if(!threadStarted){
 						System.out.println("Simulating...");
 						scheduler.simulate();
-						//threadStarted = true;						
-					/*}else{						
+						threadStarted = true;						
+					}else{						
 						reset();
 						//con.removeAll();						
 						
@@ -917,7 +907,7 @@ public class GanttChart extends JFrame{
 						}else if(Scheduler.queues[0] instanceof PQueue){
 							((PQueue) Scheduler.queues[0]).restart();
 						}
-					}*/
+					}
 					
 					startButton.setEnabled(false);
 					insProcess.setEnabled(false);
@@ -927,7 +917,7 @@ public class GanttChart extends JFrame{
 					quantumItem.setEnabled(false);
 					
 					alreadyStarted = true;					
-				//}
+				}
 			}			
 		});
 		mlfqPanel.add(startButton);
@@ -1088,7 +1078,7 @@ public class GanttChart extends JFrame{
 		
 	}
 
-	public static void addExecutingProcess(byte level, int processId, int executionTime, int timeNow, int algorithm) {
+	public static void addExecutingProcess(byte level, int processId, int executionTime, int algorithm) {
 							
 		Container container = null;		
 		String processName = "p" + processId;		
@@ -1103,22 +1093,27 @@ public class GanttChart extends JFrame{
 		
 		JPanel panel = null, timePanel = null;
 				
+		//System.out.println("========== Gantt: level = " + level);
 		if(level == 0) {
 			container = panel1;
 			panel = panel1;
 			timePanel = timePanel1;
+			//System.out.println("========== Gantt: panel1");
 		}else if(level == 1) {
 			container = panel2;
 			panel = panel2;
 			timePanel = timePanel2;
+			//System.out.println("========== Gantt: panel2");
 		}else if(level == 2) {
 			container = panel3;
 			panel = panel3;
 			timePanel = timePanel3;
+			//System.out.println("========== Gantt: panel3");
 		}else if(level == 3) {
 			container = panel4;
 			panel = panel4;
 			timePanel = timePanel4;
+			//System.out.println("========== Gantt: panel4");
 		}
 			
 		if(timeCounter > 21){
@@ -1132,26 +1127,17 @@ public class GanttChart extends JFrame{
 		}else{							
 			xOffset += prevFCFSBurstLength;											
 		}
-		
-		System.out.println("prevTime = " + prevEndTime + " timeNow = " + timeNow + " executionTime = " + executionTime);
-		if(prevEndTime > timeNow-executionTime) {
-			timeLabel[timeCounter] = new JLabel("" + (timeNow-executionTime));
-			timeLabel[timeCounter].setFont(timeLabelFont);
-			timeLabel[timeCounter].setForeground(Color.WHITE);
-			timeLabel[timeCounter].setBounds(xOffset + 1, 2, 30, 15);
-			
-			timePanel.add(timeLabel[timeCounter++]);
-		}		
-					
-		timeLabel[timeCounter] = new JLabel("" + timeNow);
+				
+		timeLabel[timeCounter] = new JLabel("" + timeLapse);
 		timeLabel[timeCounter].setFont(timeLabelFont);
 		timeLabel[timeCounter].setForeground(Color.WHITE);
-		timeLabel[timeCounter].setBounds(xOffset + 37, 2, 30, 15);
-		
+		timeLabel[timeCounter].setBounds(xOffset + 1, 2, 30, 15);
+			
 		timePanel.add(timeLabel[timeCounter++]);
-		prevFCFSBurstLength = 50;	
-				
-		prevEndTime = timeNow;	
+									
+		System.out.println("timeLapse = " + timeLapse);
+		timeLapse += executionTime;
+		prevFCFSBurstLength = 50;					
 		comp.setBounds(xOffset, yOffset, 50, 51);
 		timePanel.repaint();
 		timePanel.revalidate();			

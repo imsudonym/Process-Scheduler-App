@@ -1,15 +1,15 @@
 package queues;
 import constants.SchedulingAlgorithm;
-import datastructure.PseudoArray;
+import ctrl.Scheduler;
 import gui.GanttChart;
-import process.CPUBoundProcess;
-import scheduler.Scheduler;
+import utils.Process;
+import utils.PseudoArray;
 
 public class PQueue extends Queue{
 		
 	private PseudoArray array = new PseudoArray(20);
-	private CPUBoundProcess currProcess;
-	private CPUBoundProcess prevProcess;
+	private Process currProcess;
+	private Process prevProcess;
 	private boolean running = false;
 	private boolean preempted = false;
 	private int numOfProcesses;
@@ -65,7 +65,7 @@ public class PQueue extends Queue{
 		prevTime = 0;
 	}
 	
-	public void enqueue(CPUBoundProcess newProcess){
+	public void enqueue(Process newProcess){
 		numOfProcesses--;
 		deterMineIfToPreempt(newProcess);	
 		array.add(newProcess);				
@@ -111,7 +111,7 @@ public class PQueue extends Queue{
 		array.printContents();
 	}	
 	
-	private void deterMineIfToPreempt(CPUBoundProcess newProcess) {
+	private void deterMineIfToPreempt(Process newProcess) {
 		if(currProcess != null){
 			int currPriority = currProcess.getPriority();
 			int newPriority = newProcess.getPriority();			
@@ -121,7 +121,7 @@ public class PQueue extends Queue{
 		}
 	}
 
-	private void preempt(CPUBoundProcess newProcess) {		
+	private void preempt(Process newProcess) {		
 		preempted = true;
 		
 		int burstNeeded = currProcess.getBurstNeeded();
@@ -149,9 +149,9 @@ public class PQueue extends Queue{
 		}
 	}
 
-	public CPUBoundProcess dequeue(){
+	public Process dequeue(){
 					
-		CPUBoundProcess prc = array.remove();											
+		Process prc = array.remove();											
 		return prc;
 	}
 	
@@ -159,13 +159,13 @@ public class PQueue extends Queue{
 		array.sortPriority();
 	}
 	
-	public CPUBoundProcess peekHead(){
+	public Process peekHead(){
 		return array.getHead().getValue(); 
 	}
 	
-	/*public CPUBoundProcess peekTail(){
+	public Process peekTail(){
 		return array.get(getSize()-1).getValue(); 		
-	}*/
+	}
 	
 	public int getSize(){
 		return array.getSize();
@@ -249,7 +249,7 @@ public class PQueue extends Queue{
 					int prevBurstPreempted = prevProcess.getPrevBurstPreempted();
 					System.out.println("   burstPreempted = " + burstPreempted + " exec = " + (prevBurstPreempted-burstPreempted));
 					prevProcess.setPrevBurstPreempted(burstPreempted);
-					//GanttChart.addExecutingProcess(level, prevProcess.getId(), (prevBurstPreempted-burstPreempted), SchedulingAlgorithm.SRTF);							
+					GanttChart.addExecutingProcess(level, prevProcess.getId(), (prevBurstPreempted-burstPreempted), SchedulingAlgorithm.SRTF);							
 				}
 				((RRQueue)(prevQueue)).enqueue(dequeue());
 			}
@@ -275,7 +275,7 @@ public class PQueue extends Queue{
 						if(prevProcess != null){
 							int burstPreempted = prevProcess.getBurstTime();
 							prevProcess.setPrevBurstPreempted(burstPreempted);
-							//GanttChart.addExecutingProcess(level, prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.PRIO);
+							GanttChart.addExecutingProcess(level, prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.PRIO);
 						}
 						
 						preempted = false;
@@ -297,7 +297,7 @@ public class PQueue extends Queue{
 							prevTimeQuantum = timeNow;
 							dequeue();
 							
-							//GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);
+							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.PRIO);
 							System.out.println("p" + currProcess.getId() + " Done executing.");
 						}													
 					}
