@@ -23,13 +23,9 @@ public class LinkedList{
 			first = last;
 		}else{
 			
-			System.out.println("last = " + last.getValue().getId());
 			last.next = newLink;
-			System.out.println("last.next = " + last.next.getValue().getId());
 			last.next.previous = last;
-			System.out.println("last.next.previous = " + last.next.previous.getValue().getId());
 			last = last.next;
-			System.out.println("last = " + last.getValue().getId());
 		}						
 	}
 	
@@ -41,11 +37,8 @@ public class LinkedList{
 			first = last;
 		}else {
 			newLink.next = first;
-			System.out.println("p" + newLink.getValue().getId() + ".next = " + newLink.next.getValue().getId());
 			first.previous = newLink;
-			System.out.println("p" + first.getValue().getId() + ".previous = " + newLink.getValue().getId());
 			first = newLink;
-			System.out.println("first = p" + first.getValue().getId());
 		}
 	}
 	
@@ -78,52 +71,16 @@ public class LinkedList{
 	public Link remove(String index){		
 		
 		Link element = get(index);
-		System.out.println("| << Element to remove: p" + element.getValue().getId());
 		
 		if(element == first) {
-			System.out.println("Element is == First");
 			remove();
 		} else if(element == last){
-			System.out.println("Element is == Last");
 			element.previous.next = null;
 			last = element.previous;			
 		} else {
-			System.out.println("Element is == Neither First nor Last");
 			element.previous.next = element.next;
 			element.next.previous = element.previous;
-		}
-		/*
-		if(!isEmpty()){
-			Link current = first;
-						
-			int key = current.key;
-			
-			while(key != index){			
-				if(current.next == null){
-					current = null;
-					break;
-				}else if(current.key == last.key){
-					current = null;
-					break;
-				}else{
-					current = current.next;
-				}
-				
-				key = current.key;
-			}
-			
-			if(current != null) {
-				if(current.next != null && current.previous != null) {
-					current.previous.next = current.next;				
-					current.next.previous = current.previous;
-				}else {
-					remove();
-				}
-			}
-			
-			return current;
-		}*/
-		
+		}		
 		return null;
 	}	
 	

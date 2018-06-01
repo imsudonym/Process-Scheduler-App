@@ -11,9 +11,10 @@ public class CPUBoundProcess {
 	protected int timesPreempted = 0;
 	protected int prevBurstPreempted;
 	
-	protected ArrayList<Long> timePreempted = new ArrayList<Long>();
-	protected ArrayList<Long> timeResumed = new ArrayList<Long>();
+	public ArrayList<Long> timePreempted = new ArrayList<Long>();
+	public ArrayList<Long> timeResumed = new ArrayList<Long>();
 	
+	protected long firstStartTime;
 	protected long startTime;
 	protected long endTime;
 	protected long waitTime;
@@ -103,7 +104,7 @@ public class CPUBoundProcess {
 	}
 	
 	public void setWaitTimePreemptive() {
-		long waitTime = (startTime - arrivalTime) < 0 ? 0: (startTime - arrivalTime);
+		long waitTime = (firstStartTime - arrivalTime) < 0 ? 0: (firstStartTime - arrivalTime);
 		
 		for(int i = 0; i < timeResumed.size(); i++) {
 			waitTime += (timeResumed.get(i) - timePreempted.get(i));
@@ -112,7 +113,7 @@ public class CPUBoundProcess {
 	}
 
 	public void setWaitTimeNonPreemptive() {
-		this.waitTime = (startTime - arrivalTime) < 0 ? 0: (startTime - arrivalTime);
+		this.waitTime = (firstStartTime - arrivalTime) < 0 ? 0: (firstStartTime - arrivalTime);
 	}
 	
 	public long getResponseTime() {
@@ -129,6 +130,10 @@ public class CPUBoundProcess {
 
 	public void setStartTime(long timeStart) {
 		this.startTime = timeStart;
+	}
+	
+	public void setFirstStartTime(long firstStartTime) {
+		this.firstStartTime = firstStartTime;
 	}
 	
 	public long getStartTime() {

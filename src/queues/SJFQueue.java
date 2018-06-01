@@ -154,7 +154,7 @@ public class SJFQueue extends Queue{
 		if(currProcess != null  && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
 			prevTimeQuantum = Scheduler.clockTime; 	
 		
-			GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.RR);
+			//GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.RR);
 			GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.RR);
 			currProcess.setPrevBurstPreempted(currProcess.getBurstTime());
 		}
@@ -174,9 +174,9 @@ public class SJFQueue extends Queue{
 		return array.getHead().getValue(); 
 	}
 	
-	public CPUBoundProcess peekTail(){
+	/*public CPUBoundProcess peekTail(){
 		return array.get(getSize()-1).getValue(); 		
-	}
+	}*/
 	
 	public int getSize(){
 		return array.getSize();
@@ -207,7 +207,7 @@ public class SJFQueue extends Queue{
 						
 						if(burstLeft <= 0){								
 							dequeue();									
-							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SJF);
+							//GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SJF);
 
 							System.out.println("p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 							timeEnd = Scheduler.clockTime;

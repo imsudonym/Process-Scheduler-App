@@ -160,9 +160,9 @@ public class SRTFQueue extends Queue{
 		return array.getHead().getValue(); 
 	}
 	
-	public CPUBoundProcess peekTail(){
+/*	public CPUBoundProcess peekTail(){
 		return array.get(getSize()-1).getValue(); 		
-	}
+	}*/
 	
 	public int getSize(){
 		return array.getSize();
@@ -247,7 +247,7 @@ public class SRTFQueue extends Queue{
 					int prevBurstPreempted = prevProcess.getPrevBurstPreempted();
 					System.out.println("   burstPreempted = " + burstPreempted + " exec = " + (prevBurstPreempted-burstPreempted));
 					prevProcess.setPrevBurstPreempted(burstPreempted);
-					GanttChart.addExecutingProcess(level, prevProcess.getId(), (prevBurstPreempted-burstPreempted), SchedulingAlgorithm.SRTF);							
+					//GanttChart.addExecutingProcess(level, prevProcess.getId(), (prevBurstPreempted-burstPreempted), SchedulingAlgorithm.SRTF);							
 				}
 				((RRQueue)(prevQueue)).enqueue(dequeue());
 			}
@@ -274,7 +274,7 @@ public class SRTFQueue extends Queue{
 							int burstPreempted = prevProcess.getBurstTime();
 							System.out.println("burstPreempted = " + burstPreempted);
 							prevProcess.setPrevBurstPreempted(burstPreempted);
-							GanttChart.addExecutingProcess(level, prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.SRTF);
+							//GanttChart.addExecutingProcess(level, prevProcess.getId(), prevProcess.getBurstNeeded()-burstPreempted, SchedulingAlgorithm.SRTF);
 						}
 						
 						preempted = false;
@@ -297,7 +297,7 @@ public class SRTFQueue extends Queue{
 							dequeue();						
 							
 							array.printContents();
-							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SRTF);					
+							//GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.SRTF);					
 							
 							System.out.println("p" + currProcess.getId() + " Done executing.");
 						}													

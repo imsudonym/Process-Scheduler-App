@@ -23,11 +23,11 @@ public class Scheduler {
 	public static ArrayList<CPUBoundProcess> processes = new ArrayList<CPUBoundProcess>();
 	
 	public void initProcesses(int numOfQueues, ArrayList<CPUBoundProcess> processes){
-		System.out.println("00000000 process size = " + processes.size());
 		Scheduler.numOfQueues = numOfQueues;
 		Scheduler.queues = new Object[numOfQueues];
 		
 		Scheduler.processes = processes;
+		
 		sortByArrivalTime();
 		if(queues[0] instanceof PQueue){
 			preSortSameArrivalTime();
@@ -35,9 +35,9 @@ public class Scheduler {
 	}
 	
 	private static void sortByArrivalTime() {
-		System.out.println("Before sort by arrival...");
-		printContents(processes);
-		System.out.println("Sorting by Arrival Time");
+		/*System.out.println("Before sort by arrival...");
+		//printContents(processes);
+		System.out.println("Sorting by Arrival Time");*/
 		int psize = processes.size();
 		for(int i = 0; i < psize; i++){
 			for(int j = i; j < psize; j++){
@@ -48,7 +48,7 @@ public class Scheduler {
 				}
 			}			
 		}
-		printContents(processes);
+		//printContents(processes);
 	}
 
 	private static void preSortSameArrivalTime() {
@@ -62,7 +62,7 @@ public class Scheduler {
 				}
 			}			
 		}
-		printContents(processes);
+		//printContents(processes);
 	}
 
 	private static void printContents(ArrayList<CPUBoundProcess> processes2) {
@@ -88,6 +88,7 @@ public class Scheduler {
 		clockTime = 0;
 	}
 	
+	/*
 	public void generateQueues(int algorithm, int quantum){
 		System.out.println("Generating single level queue...");
 		for(int i = 0; i < numOfQueues; i++){	
@@ -112,19 +113,20 @@ public class Scheduler {
 			}
 			
 		}							
-	}	
+	}	*/
 	
 	public void generateQueues(int[] algorithms, int[] quantums){
 		System.out.println("Generating multilevel queues...");
 		for(int i = 0; i < numOfQueues; i++){	
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
 				queues[i] = new FCFSQueue(i);
-				((FCFSQueue) queues[i]).setNumberOFProcesses(processes.size());
+				//((FCFSQueue) queues[i]).setNumberOFProcesses(processes.size());
 				((FCFSQueue) queues[i]).startThread();
 				//if(i == 0) ((FCFSQueue) queues[i]).startExecution();
 			}else if (algorithms[i] == SchedulingAlgorithm.RR){
 				queues[i] = new RRQueue(i, quantums[i]);
-				((RRQueue) queues[i]).setNumberOFProcesses(processes.size());
+				//((RRQueue) queues[i]).setNumberOFProcesses(processes.size());
+				System.out.println("Starting RRThread immediately after its generation.");
 				((RRQueue) queues[i]).startThread();
 				if(i == 0) ((RRQueue) queues[i]).startExecution();
 			}else if (algorithms[i] == SchedulingAlgorithm.SJF){

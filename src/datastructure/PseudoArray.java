@@ -19,13 +19,11 @@ public class PseudoArray {
 	}
 	
 	public void add(CPUBoundProcess value){		
-			
-		System.out.println("Adding p" + value.getId());
 		Link newLink = new Link(value, value.toString());
 		list.add(newLink);
 		ctr++;
 			
-		printContents();
+		//printContents();
 	}
 	
 	public Link getHead(){
@@ -121,8 +119,6 @@ public class PseudoArray {
 				
 				current = current.next;
 			}
-			
-			//printContents();
 		}
 	}
 	
@@ -131,8 +127,6 @@ public class PseudoArray {
 	}
 
 	public void givePriorityToIoBounds() {
-		System.out.println("| Before shift . . .");
-		printContents();
 		ArrayList<Link> tempArray = new ArrayList<Link>();
 		
 		Link current = list.first;						
@@ -141,7 +135,6 @@ public class PseudoArray {
 			CPUBoundProcess currProcess = current.getValue();												
 				
 			if(currProcess instanceof IOBoundProcess){	
-				System.out.println("p" + currProcess.getId() + " is instanceof IOBound. key = " + current.getKey());
 				tempArray.add(current); 
 				list.remove(current.getKey());
 				ctr--;
@@ -155,14 +148,9 @@ public class PseudoArray {
 		
 				
 		for(int i = tempArray.size()-1; i >= 0; i--) {
-			System.out.println("adding p" + tempArray.get(i).getValue().getId() + " to front of list.");
 			Link newLink = new Link(tempArray.get(i).getValue(), tempArray.get(i).getKey());
 			list.addToFront(newLink);
 			ctr++;
 		}
-		
-		System.out.println("| After shift . . .");
-		printContents();
-		System.out.println("| IO bounds in front of queue.");
 	}
 }

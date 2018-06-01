@@ -95,6 +95,8 @@ public class GanttChart extends JFrame{
 	private static int quantum = 2;
 	private static int Offset = -2;
 	
+	private static int prevEndTime = -1;
+	
 	private static int quantum1, quantum2, quantum3, quantum4;
 	
 	private static boolean alreadyStarted = false;
@@ -104,7 +106,7 @@ public class GanttChart extends JFrame{
 	private static String fileChosen;
 	private static String[] algorithms = {"FCFS", "SJF", "SRTF", "NP-PRIO", "P-PRIO", "RR"};
 	
-	private static Scheduler scheduler;
+	private static Scheduler scheduler = new Scheduler();;
 	private static Font font = new Font("Helvetica", Font.BOLD, 20);
 	private static Font timeLabelFont = new Font("Helvetica", Font.BOLD, 12);
 	private static Color darkBlue = new Color(0, 46, 70);
@@ -862,18 +864,18 @@ public class GanttChart extends JFrame{
 		
 		startButton.addActionListener(new ActionListener(){			
 			public void actionPerformed(ActionEvent e) {
-				if(!alreadyStarted){
-					int queues_num = ONE_LEVEL;
+				/*if(!alreadyStarted){
+					*/
+					int queues_num = level;
 					
-					if(level == TWO_LEVEL) {
-						queues_num = 2;
+					/*if(level == TWO_LEVEL) {
+						queues_num = TWO_LEVEL;
 					}else if(level == THREE_LEVEL) {
-						queues_num = 3;
+						queues_num = THREE_LEVEL;
 					}else if(level == FOUR_LEVEL) {
-						queues_num = 4;
-					}
-					
-					scheduler = new Scheduler();					
+						queues_num = FOUR_LEVEL;
+					}*/
+															
 					processes.removeAll(processes);
 					
 					int size = PID.size();
@@ -891,11 +893,11 @@ public class GanttChart extends JFrame{
 					int[] quanta = {quantum1, quantum2, quantum3, quantum4};
 					scheduler.generateQueues(algorithms, quanta);
 									
-					if(!threadStarted){
+					//if(!threadStarted){
 						System.out.println("Simulating...");
 						scheduler.simulate();
-						threadStarted = true;						
-					}else{						
+						//threadStarted = true;						
+					/*}else{						
 						reset();
 						//con.removeAll();						
 						
@@ -915,7 +917,7 @@ public class GanttChart extends JFrame{
 						}else if(Scheduler.queues[0] instanceof PQueue){
 							((PQueue) Scheduler.queues[0]).restart();
 						}
-					}
+					}*/
 					
 					startButton.setEnabled(false);
 					insProcess.setEnabled(false);
@@ -925,7 +927,7 @@ public class GanttChart extends JFrame{
 					quantumItem.setEnabled(false);
 					
 					alreadyStarted = true;					
-				}
+				//}
 			}			
 		});
 		mlfqPanel.add(startButton);
@@ -1086,7 +1088,7 @@ public class GanttChart extends JFrame{
 		
 	}
 
-	public static void addExecutingProcess(byte level, int processId, int executionTime, int algorithm) {
+	public static void addExecutingProcess(byte level, int processId, int executionTime, int timeNow, int algorithm) {
 							
 		Container container = null;		
 		String processName = "p" + processId;		
@@ -1101,27 +1103,22 @@ public class GanttChart extends JFrame{
 		
 		JPanel panel = null, timePanel = null;
 				
-		//System.out.println("========== Gantt: level = " + level);
 		if(level == 0) {
 			container = panel1;
 			panel = panel1;
 			timePanel = timePanel1;
-			//System.out.println("========== Gantt: panel1");
 		}else if(level == 1) {
 			container = panel2;
 			panel = panel2;
 			timePanel = timePanel2;
-			//System.out.println("========== Gantt: panel2");
 		}else if(level == 2) {
 			container = panel3;
 			panel = panel3;
 			timePanel = timePanel3;
-			//System.out.println("========== Gantt: panel3");
 		}else if(level == 3) {
 			container = panel4;
 			panel = panel4;
 			timePanel = timePanel4;
-			//System.out.println("========== Gantt: panel4");
 		}
 			
 		if(timeCounter > 21){
@@ -1135,17 +1132,26 @@ public class GanttChart extends JFrame{
 		}else{							
 			xOffset += prevFCFSBurstLength;											
 		}
-				
-		timeLabel[timeCounter] = new JLabel("" + timeLapse);
+		
+		System.out.println("prevTime = " + prevEndTime + " timeNow = " + timeNow + " executionTime = " + executionTime);
+		if(prevEndTime > timeNow-executionTime) {
+			timeLabel[timeCounter] = new JLabel("" + (timeNow-executionTime));
+			timeLabel[timeCounter].setFont(timeLabelFont);
+			timeLabel[timeCounter].setForeground(Color.WHITE);
+			timeLabel[timeCounter].setBounds(xOffset + 1, 2, 30, 15);
+			
+			timePanel.add(timeLabel[timeCounter++]);
+		}		
+					
+		timeLabel[timeCounter] = new JLabel("" + timeNow);
 		timeLabel[timeCounter].setFont(timeLabelFont);
 		timeLabel[timeCounter].setForeground(Color.WHITE);
-		timeLabel[timeCounter].setBounds(xOffset + 1, 2, 30, 15);
-			
+		timeLabel[timeCounter].setBounds(xOffset + 37, 2, 30, 15);
+		
 		timePanel.add(timeLabel[timeCounter++]);
-									
-		System.out.println("timeLapse = " + timeLapse);
-		timeLapse += executionTime;
-		prevFCFSBurstLength = 50;					
+		prevFCFSBurstLength = 50;	
+				
+		prevEndTime = timeNow;	
 		comp.setBounds(xOffset, yOffset, 50, 51);
 		timePanel.repaint();
 		timePanel.revalidate();			

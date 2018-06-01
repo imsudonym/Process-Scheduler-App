@@ -144,7 +144,7 @@ public class FCFSQueue extends Queue{
 		if(currProcess != null  && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
 			prevTimeQuantum = Scheduler.clockTime; 	
 		
-			GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.FCFS);
+			//GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted()-currProcess.getBurstTime(), SchedulingAlgorithm.FCFS);
 			GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.FCFS);
 			currProcess.setPrevBurstPreempted(currProcess.getBurstTime());
 		}
@@ -162,9 +162,9 @@ public class FCFSQueue extends Queue{
 		return array.getHead().getValue(); 
 	}
 	
-	public CPUBoundProcess peekTail(){
+	/*public CPUBoundProcess peekTail(){
 		return array.get(getSize()-1).getValue(); 		
-	}
+	}*/
 	
 	public int getSize(){
 		return array.getSize();
@@ -196,7 +196,7 @@ public class FCFSQueue extends Queue{
 						
 						if(burstLeft <= 0){								
 							dequeue();									
-							GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.FCFS);
+							/*GanttChart.addExecutingProcess(level, currProcess.getId(), currProcess.getPrevBurstPreempted(), SchedulingAlgorithm.FCFS);*/
 
 							System.out.println("p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 							timeEnd = Scheduler.clockTime;
