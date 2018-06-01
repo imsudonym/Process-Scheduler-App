@@ -231,9 +231,9 @@ public class Scheduler {
 			((RRQueue) queues[0]).enqueue(newProcess);
 		}else if(queues[0] instanceof SJFQueue){
 			((SJFQueue) queues[0]).enqueue(newProcess);
-		}else if(queues[0] instanceof NonPQueue){
+		}/*else if(queues[0] instanceof NonPQueue){
 			((NonPQueue) queues[0]).enqueue(newProcess);
-		}else if(queues[0] instanceof PQueue){
+		}*/else if(queues[0] instanceof PQueue){
 			((PQueue) queues[0]).enqueue(newProcess);
 		}else if(queues[0] instanceof SRTFQueue){
 			((SRTFQueue) queues[0]).enqueue(newProcess);
