@@ -88,45 +88,15 @@ public class Scheduler {
 		clockTime = 0;
 	}
 	
-	/*
-	public void generateQueues(int algorithm, int quantum){
-		System.out.println("Generating single level queue...");
-		for(int i = 0; i < numOfQueues; i++){	
-			if(algorithm == SchedulingAlgorithm.FCFS){
-				queues[0] = new FCFSQueue(0);
-				((FCFSQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}else if (algorithm == SchedulingAlgorithm.RR){
-				queues[0] = new RRQueue(0, quantum);
-				((RRQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}else if (algorithm == SchedulingAlgorithm.SJF){
-				queues[0] = new SJFQueue(0);
-				((SJFQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}else if (algorithm == SchedulingAlgorithm.NP_PRIO){
-				queues[0] = new NonPQueue(0);
-				((NonPQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}else if (algorithm == SchedulingAlgorithm.PRIO){
-				queues[0] = new PQueue(0);
-				((PQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}else if (algorithm == SchedulingAlgorithm.SRTF){
-				queues[0] = new SRTFQueue(0);
-				((SRTFQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}
-			
-		}							
-	}	*/
-	
 	public void generateQueues(int[] algorithms, int[] quantums){
 		System.out.println("Generating multilevel queues...");
 		for(int i = 0; i < numOfQueues; i++){	
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
 				queues[i] = new FCFSQueue(i);
-				//((FCFSQueue) queues[i]).setNumberOFProcesses(processes.size());
 				((FCFSQueue) queues[i]).startThread();
-				//if(i == 0) ((FCFSQueue) queues[i]).startExecution();
+				if(i == 0) ((FCFSQueue) queues[i]).startExecution();
 			}else if (algorithms[i] == SchedulingAlgorithm.RR){
-				queues[i] = new RRQueue(i, quantums[i]);
-				//((RRQueue) queues[i]).setNumberOFProcesses(processes.size());
-				System.out.println("Starting RRThread immediately after its generation.");
+				queues[i] = new RRQueue(i, quantums[i]);			
 				((RRQueue) queues[i]).startThread();
 				if(i == 0) ((RRQueue) queues[i]).startExecution();
 			}else if (algorithms[i] == SchedulingAlgorithm.SJF){

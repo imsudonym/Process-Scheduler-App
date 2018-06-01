@@ -47,7 +47,6 @@ public class RRQueue extends Queue{
 	}
 	
 	public void enqueue(CPUBoundProcess newProcess){
-		//System.out.println("level = " + level + " enter p" + newProcess.getId());
 		
 		array.add(newProcess);
 		
@@ -139,8 +138,6 @@ public class RRQueue extends Queue{
 				((NonPQueue)(nextQueue)).stopExecution();
 			}
 		}
-		
-		running = true;
 	}
 	
 	private void shiftIoBoundsToFront() {
@@ -165,11 +162,6 @@ public class RRQueue extends Queue{
 			return array.getHead().getValue();
 		}
 	}
-	
-	/*
-	public CPUBoundProcess peekTail(){
-		return array.get(getSize()-1).getValue(); 		
-	}*/
 	
 	public int getSize(){
 		return array.getSize();
@@ -196,7 +188,6 @@ public class RRQueue extends Queue{
 		}
 
 		if(getSize() > 0) {
-			//System.out.println("| Level = " + level + " starting execution...");
 			restart();
 			prevQueueDone = 1;
 		}
@@ -236,7 +227,6 @@ public class RRQueue extends Queue{
 		 * */
 		if(currProcess != null && currProcess.getPrevBurstPreempted()-currProcess.getBurstTime() > 0) {
 			long timeNow = Scheduler.clockTime; 	
-			prevTimeQuantum = timeNow;
 			
 			// Indicates that current processes is preempted.
 			currProcess.setPreempted();
@@ -365,7 +355,7 @@ public class RRQueue extends Queue{
 							dequeue();													
 							System.out.println("p" + currProcess.getId() + " Done executing.");
 							
-							//currProcess.setTimeResumed(timeNow);
+							
 							currProcess.preemptedFlag = false;
 							prevProcess = currProcess;
 							
@@ -378,18 +368,8 @@ public class RRQueue extends Queue{
 					prevTime = timeNow;					
 					
 				}else{										
-				
-//					/System.out.println("======================");
-					/*if(getSize() < 0) {
-						System.out.println("size was zero");
-					}else if (prevQueueDone != 1) {
-						System.out.println("prevQueeue not done");
-					}else if(peekHead() == null) {
-						System.out.println("peekhead is null");
-					}*/
 					
-					if (allProcessesDone == 0 && getSize() == 0){
-						//GanttChart.addLastCompletionTime(level, SchedulingAlgorithm.RR);		
+					if (allProcessesDone == 0 && getSize() == 0){		
 						allProcessesDone = 1;
 						if(nextQueue != null) {
 							if(nextQueue instanceof RRQueue) {
@@ -397,6 +377,7 @@ public class RRQueue extends Queue{
 							}else if (nextQueue instanceof SRTFQueue) {
 								((SRTFQueue)(nextQueue)).startExecution();								
 							}else if (nextQueue instanceof FCFSQueue) {
+								System.out.println("AAAAAAAAAAAAAAAAAAA");
 								((FCFSQueue)(nextQueue)).startExecution();								
 							}else if (nextQueue instanceof PQueue) {
 								((PQueue)(nextQueue)).startExecution();								
@@ -407,85 +388,15 @@ public class RRQueue extends Queue{
 							}
 						}
 						
-						if(level == Scheduler.getMaxLevelOfQueues() && Scheduler.processes.size() == 0) {
+						if(level == Scheduler.getMaxLevelOfQueues()) {
 							System.out.println("Allprocessdon size zero.. stopping simulation...");
-							simulationDone();
+							simulationDone(processList);
 						}
 					}			
-					
-					/*
-					if(numOfProcesses <= 0){						
-						if(nextQueue != null) {
-							allProcessesDone = 1;
-							if(nextQueue instanceof RRQueue) {
-								((RRQueue)(nextQueue)).startExecution();
-							}else if (nextQueue instanceof SRTFQueue) {
-								((SRTFQueue)(nextQueue)).startExecution();								
-							}
-						}
-						
-						int s = Scheduler.processes.length;
-						Process[] p = Scheduler.processes;
-						
-						double totalRT = 0;
-						double totalWT = 0;
-						double totalTT = 0;
-						
-						for(int i = 0; i < s; i++) {
-							GanttChart.addTimesInformation(p[i].getId(), p[i].getResponseTime(), p[i].getWaitTime(), p[i].getTurnaroundTime());
-							totalRT += p[i].getResponseTime();
-							totalWT += p[i].getWaitTime();
-					
-							totalTT += p[i].getTurnaroundTime();
-						}						
-						GanttChart.addTimeAverages(totalRT/s, totalWT/s, totalTT/s);
-					}*/
 				}
 			}
 		}
 	};
-	
-	public void simulationDone(){
-		// TODO: Print each processes' wait, response, and turnaround time;
-		ArrayList<CPUBoundProcess> temp = processList;
-		int count =  temp.size();
-		
-		double avgResponse = 0;
-		double avgWait = 0;
-		double avgTurnaround = 0;
-		
-		for(int i = 0; i < count; i++) {
-			temp.get(i).setWaitTimePreemptive();
-			
-			System.out.print("[p" + temp.get(i).getId() + "]: ");
-			System.out.println("timesPreempted = " + temp.get(i).timePreempted.size() + " timesResumed = " + temp.get(i).timeResumed.size() 
-					+ " waitTime: " + temp.get(i).getWaitTime() + " responseTime: " + temp.get(i).getResponseTime() + " turnAround: " + temp.get(i).getTurnaroundTime());
-			
-			avgResponse += temp.get(i).getResponseTime();
-			avgWait += temp.get(i).getWaitTime();
-			avgTurnaround += temp.get(i).getTurnaroundTime();
-			
-			int c = temp.get(i).getTimesPreempted();			
-			for(int j = 0; j < c; j++) {
-				System.out.print(temp.get(i).timePreempted.get(j) + "-");
-				System.out.print(temp.get(i).timeResumed.get(j) + "|");
-			}
-			System.out.println();
-		}
-		
-		avgResponse = avgResponse/count;
-		avgWait = avgWait/count;
-		avgTurnaround = avgTurnaround/count;
-		
-		System.out.println("avgResponse = " + avgResponse + " avgWait = " + avgWait + " avgTurnaround = " + avgTurnaround);
-		
-		GanttChart.simulationDone(this);
-	}
-	
-	protected void insertToReadyQueue(IOBoundProcess process) {
-		System.out.println("Insert p" + process.getId() + " with new arrival time = " + process.getArrivalTime());
-		Scheduler.enqueue(process);
-	}
 
 	protected void retain() {
 		enqueue(dequeue());
@@ -512,10 +423,6 @@ public class RRQueue extends Queue{
 		}
 	}
 	
-	public void setNumberOFProcesses(int length) {
-		this.numOfProcesses = length;
-	}
-	
 	public void restart() {
 		running = true;
 	}
@@ -524,8 +431,7 @@ public class RRQueue extends Queue{
 		this.prevQueue = prevQueue;
 		if(prevQueue == null) {
 			prevQueueDone = 1;
-		}
-		
+		}		
 	}
 	
 	public void setNextQueue(Object nextQueue){
