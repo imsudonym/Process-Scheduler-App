@@ -120,8 +120,8 @@ public class CPUBoundProcess {
 		return responseTime;
 	}
 
-	public void setResponseTime(long responseTime) {
-		this.responseTime = responseTime;
+	public void setResponseTime() {
+		this.responseTime = firstStartTime - arrivalTime;
 	}
 
 	public long getTurnaroundTime() {

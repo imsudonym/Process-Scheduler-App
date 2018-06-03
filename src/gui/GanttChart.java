@@ -1088,7 +1088,7 @@ public class GanttChart extends JFrame{
 		
 	}
 
-	public static void addExecutingProcess(byte level, int processId, int executionTime, int timeNow, int algorithm) {
+	public static void addExecutingProcess(byte level, int processId, int executionTime, int timeNow) {
 							
 		Container container = null;		
 		String processName = "p" + processId;		
