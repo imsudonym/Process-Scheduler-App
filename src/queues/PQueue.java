@@ -83,8 +83,8 @@ public class PQueue extends Queue{
 			System.out.println("    instanceof " + prevQueue);
 			int queueSize = 0;
 			
-			if(prevQueue instanceof RRQueue) {
-				queueSize = ((RRQueue)(prevQueue)).getSize();		
+			if(prevQueue instanceof RoundRobin) {
+				queueSize = ((RoundRobin)(prevQueue)).getSize();		
 			}else if(prevQueue instanceof FCFSQueue) {
 				queueSize = ((FCFSQueue)(prevQueue)).getSize();
 			}else if(prevQueue instanceof SJFQueue) {
@@ -174,7 +174,7 @@ public class PQueue extends Queue{
 	public void startExecution() {
 		if(prevQueue != null) {
 			int size = 0;
-			size = ((RRQueue)(prevQueue)).getSize();
+			size = ((RoundRobin)(prevQueue)).getSize();
 			
 			/*}else if(prevQueue instanceof FCFSQueue) {
 				size = ((FCFSQueue)(prevQueue)).getSize();
@@ -239,7 +239,7 @@ public class PQueue extends Queue{
 			 * to be at least one queue down first.
 			 * 
 			 * */
-			if(prevQueue instanceof RRQueue) {
+			if(prevQueue instanceof RoundRobin) {
 				System.out.println("Promoted p" + currProcess.getId());		
 				prevProcess = currProcess;
 				currProcess = null;
@@ -251,7 +251,7 @@ public class PQueue extends Queue{
 					prevProcess.setPrevBurstPreempted(burstPreempted);
 					//GanttChart.addExecutingProcess(level, prevProcess.getId(), (prevBurstPreempted-burstPreempted), SchedulingAlgorithm.SRTF);							
 				}
-				((RRQueue)(prevQueue)).enqueue(dequeue());
+				((RoundRobin)(prevQueue)).enqueue(dequeue());
 			}
 		}
 	}

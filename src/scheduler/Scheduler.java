@@ -9,14 +9,14 @@ import queues.FCFSQueue;
 import queues.NonPQueue;
 import queues.PQueue;
 import queues.Queue;
-import queues.RRQueue;
+import queues.RoundRobin;
 import queues.SJFQueue;
 import queues.SRTFQueue;
 
 public class Scheduler {
 	private static int itr = 0;
 	public static long clockTime = 0;	
-	private static boolean running = false;
+	private static boolean running = true;
 	
 	public static Queue[] queues;
 	private static int numOfQueues = 0;
@@ -24,6 +24,7 @@ public class Scheduler {
 	public static ArrayList<CPUBoundProcess> processes = new ArrayList<CPUBoundProcess>();
 	
 	public void initProcesses(int numOfQueues, ArrayList<CPUBoundProcess> processes){
+		System.out.println("numOfquafd: " + numOfQueues);
 		Scheduler.numOfQueues = numOfQueues;
 		Scheduler.queues = new Queue[numOfQueues];
 		
@@ -31,14 +32,36 @@ public class Scheduler {
 		
 		sortByArrivalTime();
 		if(queues[0] instanceof PQueue){
-			preSortSameArrivalTime();
+			prioritySortSameArrivalTime();
 		}				
+		preSortSameArrivalTimeByType();
 	}
 	
+	/**
+	 * IO-bound processes executes first over CPU-bound processes
+	 * with the same arrival time
+	 * 
+	 * */
+	private static void preSortSameArrivalTimeByType() {
+		int psize = processes.size();
+		for(int i = 0; i < psize; i++){
+			for(int j = i; j < psize; j++){
+				if(processes.get(i).getArrivalTime() == processes.get(j).getArrivalTime() && processes.get(j) instanceof IOBoundProcess && !(processes.get(i) instanceof IOBoundProcess)){
+					CPUBoundProcess temp = processes.get(i);
+					processes.set(i, processes.get(j));
+					processes.set(j, temp);
+				}
+			}			
+		}
+		System.out.print("After by type sorting: ");
+		printContents(processes);
+	}
+
+	/**
+	 * Sorts processes by arrival time
+	 * 
+	 * */
 	private static void sortByArrivalTime() {
-		/*System.out.println("Before sort by arrival...");
-		//printContents(processes);
-		System.out.println("Sorting by Arrival Time");*/
 		int psize = processes.size();
 		for(int i = 0; i < psize; i++){
 			for(int j = i; j < psize; j++){
@@ -49,10 +72,15 @@ public class Scheduler {
 				}
 			}			
 		}
-		//printContents(processes);
+		System.out.print("After arrival time sorting: ");
+		printContents(processes);
 	}
-
-	private static void preSortSameArrivalTime() {
+	
+	/**
+	 * Sorts the processes with same arrival time according to their 
+	 * priorities
+	 * */
+	private static void prioritySortSameArrivalTime() {
 		int psize = processes.size();
 		for(int i = 0; i < psize; i++){
 			for(int j = i; j < psize; j++){
@@ -63,7 +91,9 @@ public class Scheduler {
 				}
 			}			
 		}
-		//printContents(processes);
+		
+		System.out.print("After priority sorting: ");
+		printContents(processes);
 	}
 
 	private static void printContents(ArrayList<CPUBoundProcess> processes2) {
@@ -79,50 +109,31 @@ public class Scheduler {
 		sortByArrivalTime();
 	}
 
-	public void simulate(){
-		running  = true;		
-		clock.start();
+	public static void simulate(){
+		System.out.println("[Scheduler::] simulate.running = " + running);
+		if(running) {
+			clock.start();
+		}else {
+			running = true;
+			System.out.println("[Scheduler::] simulate.running = " + running);
+		}
 	}
 	
 	public static void stop(){
-		clock.interrupt();		
+		System.out.println("[Scheduler::] clock status: interrupted");
+		clock.interrupt();
+		running = false;
 		clockTime = 0;
 	}
 	
-	/*
-	public void generateQueues(int algorithm, int quantum){
-		System.out.println("Generating single level queue...");
-		for(int i = 0; i < numOfQueues; i++){	
-			if(algorithm == SchedulingAlgorithm.FCFS){
-				queues[0] = new FCFSQueue(0);
-				((FCFSQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}else if (algorithm == SchedulingAlgorithm.RR){
-				queues[0] = new RRQueue(0, quantum);
-				((RRQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}else if (algorithm == SchedulingAlgorithm.SJF){
-				queues[0] = new SJFQueue(0);
-				((SJFQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}else if (algorithm == SchedulingAlgorithm.NP_PRIO){
-				queues[0] = new NonPQueue(0);
-				((NonPQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}else if (algorithm == SchedulingAlgorithm.PRIO){
-				queues[0] = new PQueue(0);
-				((PQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}else if (algorithm == SchedulingAlgorithm.SRTF){
-				queues[0] = new SRTFQueue(0);
-				((SRTFQueue) queues[0]).setNumberOFProcesses(processes.size());
-			}
-			
-		}							
-	}	*/
-	
 	public void generateQueues(int[] algorithms, int[] quantums){
 		System.out.println("Generating multilevel queues...");
+		System.out.println("[Scheduler::] numOfQueues: " + numOfQueues);
 		for(int i = 0; i < numOfQueues; i++){			
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
 				queues[i] = new FCFSQueue(i);
 			}else if (algorithms[i] == SchedulingAlgorithm.RR){
-				queues[i] = new RRQueue(i, quantums[i]);
+				queues[i] = new RoundRobin(i, quantums[i]);
 			}else if (algorithms[i] == SchedulingAlgorithm.SJF){
 				queues[i] = new SJFQueue(i);
 			}else if (algorithms[i] == SchedulingAlgorithm.NP_PRIO){
@@ -140,113 +151,32 @@ public class Scheduler {
 		for(int i = 0; i < numOfQueues; i++) {
 		
 			if(i == numOfQueues-1) { 
-				if(numOfQueues != 1)
+				if(numOfQueues != 1) {
+					System.out.println("level = " + i + " previous = " + queues[i-1]);				
 					queues[i].setPrevQueue(queues[i-1]);
-				else
-					queues[i].setPrevQueue(null);				
+				}else {
+					System.out.println("level = " + i + " previous = null");
+					queues[i].setPrevQueue(null);
+				}
 				queues[i].setNextQueue(null);
+				System.out.println("level = " + i + " next = null");
 			}else if(i == 0) {
+				System.out.println("level = " + i + " previous = null");
+				System.out.println("level = " + i + " next = " + queues[i+1]);
 				queues[i].setPrevQueue(null);
 				queues[i].setNextQueue(queues[i+1]);
+				
 			}else {
+				System.out.println("level = " + i + " previous = " + queues[i-1]);
+				System.out.println("level = " + i + " next = " + queues[i+1]);
 				queues[i].setPrevQueue(queues[i-1]);
 				queues[i].setNextQueue(queues[i+1]);
-			}
-			
-			/*
-			if(queues[i] instanceof FCFSQueue){
-				if(i == numOfQueues-1) { 
-					if(numOfQueues != 1)
-						((FCFSQueue) queues[i]).setPrevQueue(queues[i-1]);
-					else
-						((FCFSQueue) queues[i]).setPrevQueue(null);
-					((FCFSQueue) queues[i]).setNextQueue(null);
-				}else if(i == 0) {
-					((FCFSQueue) queues[i]).setPrevQueue(null);
-					((FCFSQueue) queues[i]).setNextQueue(queues[i+1]);
-				}else {
-					((RRQueue) queues[i]).setPrevQueue(queues[i-1]);
-					((RRQueue) queues[i]).setNextQueue(queues[i+1]);
-				}
-			}else if (queues[i] instanceof RRQueue){
-				
-			}else if (queues[i] instanceof SJFQueue){
-				if(i == numOfQueues-1) { 
-					if(numOfQueues != 1)
-						((SJFQueue) queues[i]).setPrevQueue(queues[i-1]);
-					else
-						((SJFQueue) queues[i]).setPrevQueue(null);
-					((SJFQueue) queues[i]).setNextQueue(null);
-				}else if(i == 0) {
-					((SJFQueue) queues[i]).setPrevQueue(null);
-					((SJFQueue) queues[i]).setNextQueue(queues[i+1]);
-				}else {
-					((SJFQueue) queues[i]).setPrevQueue(queues[i-1]);
-					((SJFQueue) queues[i]).setNextQueue(queues[i+1]);
-				}
-			}else if (queues[i] instanceof NonPQueue){
-				if(i == numOfQueues-1) { 
-					if(numOfQueues != 1)
-						((NonPQueue) queues[i]).setPrevQueue(queues[i-1]);
-					else
-						((NonPQueue) queues[i]).setPrevQueue(null);
-					((NonPQueue) queues[i]).setNextQueue(null);
-				}else if(i == 0) {
-					((NonPQueue) queues[i]).setPrevQueue(null);
-					((NonPQueue) queues[i]).setNextQueue(queues[i+1]);
-				}else {
-					((NonPQueue) queues[i]).setPrevQueue(queues[i-1]);
-					((NonPQueue) queues[i]).setNextQueue(queues[i+1]);
-				}
-			}else if (queues[i] instanceof PQueue){
-				if(i == numOfQueues-1) { 
-					if(numOfQueues != 1)
-						((PQueue) queues[i]).setPrevQueue(queues[i-1]);
-					else
-						((PQueue) queues[i]).setPrevQueue(null);
-					((PQueue) queues[i]).setNextQueue(null);
-				}else if(i == 0) {
-					((PQueue) queues[i]).setPrevQueue(null);
-					((PQueue) queues[i]).setNextQueue(queues[i+1]);
-				}else {
-					((PQueue) queues[i]).setPrevQueue(queues[i-1]);
-					((PQueue) queues[i]).setNextQueue(queues[i+1]);
-				}
-			}else if (queues[i] instanceof SRTFQueue){
-				if(i == numOfQueues-1) { 
-					if(numOfQueues != 1)
-						((SRTFQueue) queues[i]).setPrevQueue(queues[i-1]);
-					else
-						((SRTFQueue) queues[i]).setPrevQueue(null);
-					((SRTFQueue) queues[i]).setNextQueue(null);
-				}else if(i == 0) {
-					((SRTFQueue) queues[i]).setPrevQueue(null);
-					((SRTFQueue) queues[i]).setNextQueue(queues[i+1]);
-				}else {
-					((SRTFQueue) queues[i]).setPrevQueue(queues[i-1]);
-					((SRTFQueue) queues[i]).setNextQueue(queues[i+1]);
-				}
-			}*/
+			}			
 		}
 	}			
 	
-	private static void insertOnQueue(CPUBoundProcess newProcess){				
-		//timeArrive = System.currentTimeMillis();	
-		
-		if(queues[0] instanceof FCFSQueue){
-			((FCFSQueue) queues[0]).enqueue(newProcess);		
-		}else if(queues[0] instanceof RRQueue){
-			((RRQueue) queues[0]).enqueue(newProcess);
-		}else if(queues[0] instanceof SJFQueue){
-			((SJFQueue) queues[0]).enqueue(newProcess);
-		}else if(queues[0] instanceof NonPQueue){
-			((NonPQueue) queues[0]).enqueue(newProcess);
-		}else if(queues[0] instanceof PQueue){
-			((PQueue) queues[0]).enqueue(newProcess);
-		}else if(queues[0] instanceof SRTFQueue){
-			((SRTFQueue) queues[0]).enqueue(newProcess);
-		}
-
+	private static void insertOnQueue(CPUBoundProcess newProcess){						
+		queues[0].enqueue(newProcess, queues[0].queueType);		
 		int burstTime = newProcess.getBurstNeeded();
 		int arrivalTime = newProcess.getArrivalTime();
 		int priority = newProcess.getPriority();
@@ -255,13 +185,11 @@ public class Scheduler {
 	}		
 	
 	static Thread clock = new Thread(){
-		public void run(){
-			System.out.println("running: " + running);
-			while(running){				
-								
+		public void run(){			
+			while(running){							
 				while(processes.size() > 0){								
 					if(processes.get(0).getArrivalTime() == clockTime){						
-						System.out.println("Clock time: " + clockTime + " insert p" + processes.get(0).getId());
+						System.out.println("[Scheduler::] Clock time: " + clockTime + " insert P" + processes.get(0).getId());
 						insertOnQueue(processes.get(0));
 						processes.remove(0);
 						itr++;
@@ -282,7 +210,6 @@ public class Scheduler {
 	public void restart() {
 		itr = 0;
 		clockTime = 0;
-		running = true;		
 	}
 						
 	public static int getMaxLevelOfQueues() {

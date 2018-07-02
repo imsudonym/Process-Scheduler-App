@@ -69,8 +69,8 @@ public class NonPQueue extends Queue{
 			System.out.println("    instanceof " + prevQueue);
 			int queueSize = 0;
 			
-			if(prevQueue instanceof RRQueue) {
-				queueSize = ((RRQueue)(prevQueue)).getSize();		
+			if(prevQueue instanceof RoundRobin) {
+				queueSize = ((RoundRobin)(prevQueue)).getSize();		
 			}else if(prevQueue instanceof FCFSQueue) {
 				queueSize = ((FCFSQueue)(prevQueue)).getSize();
 			}else if(prevQueue instanceof SJFQueue) {
@@ -104,8 +104,8 @@ public class NonPQueue extends Queue{
 		if(prevQueue != null) {
 			System.out.println("     PrevQueue Not null");
 			int size = 0;
-			if(prevQueue instanceof RRQueue) {
-				size = ((RRQueue)(prevQueue)).getSize();
+			if(prevQueue instanceof RoundRobin) {
+				size = ((RoundRobin)(prevQueue)).getSize();
 			}else if(prevQueue instanceof FCFSQueue) {
 				size = ((FCFSQueue)(prevQueue)).getSize();
 			}else if(prevQueue instanceof SJFQueue) {

@@ -48,14 +48,14 @@ public class PseudoArray {
 	
 	public void sortSJF(){			
 		for(int i = 0; i <= ctr-1; i++){
-			Link current = list.first;					
+			Link current = list.first.next;					
 			
 			while(true){
-				if(current.next == null)
+				if(current == null || current.next == null)
 					break;
 				
-				long currBurst = current.getValue().getBurstTime();
-				long nextBurst = current.next.getValue().getBurstTime();												
+				long currBurst = current.getValue().getBurstNeeded();
+				long nextBurst = current.next.getValue().getBurstNeeded();												
 				
 				if(currBurst > nextBurst){					
 					CPUBoundProcess temp = current.getValue();
@@ -66,7 +66,8 @@ public class PseudoArray {
 			}			
 		}
 		
-		//printContents();
+		System.out.println("Sorting SJF");
+		printContents();
 	}
 	
 	public void sortPriority(){

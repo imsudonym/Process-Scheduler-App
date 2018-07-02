@@ -32,7 +32,7 @@ import process.IOBoundProcess;
 import queues.FCFSQueue;
 import queues.NonPQueue;
 import queues.PQueue;
-import queues.RRQueue;
+import queues.RoundRobin;
 import queues.SJFQueue;
 import queues.SRTFQueue;
 import scheduler.Scheduler;
@@ -142,13 +142,7 @@ public class GanttChart extends JFrame{
 		insProcess = new JMenu("Insert processes");
 		insProcess.setEnabled(true);
 		
-		setAlgorithm = new JMenu("Set Algorithm");
-		setAlgorithm.setEnabled(true);
-		
-		mlfq = new JMenu("MLFQ");
-		
-		singleQueue = new JMenu("Single Queue");
-		singleQueue.setEnabled(true);
+		mlfq = new JMenu("MLFQ");		
 		
 		quantumItem = new JMenu("Quantum");
 		if(algorithm == SchedulingAlgorithm.RR){
@@ -186,36 +180,7 @@ public class GanttChart extends JFrame{
 			    int returnVal = fileChooser.showOpenDialog(null);
 			    if(returnVal == JFileChooser.APPROVE_OPTION) {				       
 			        fileChosen = fileChooser.getSelectedFile().getAbsolutePath();			        
-			        try(
-			        	BufferedReader in = new BufferedReader(new FileReader(fileChosen));
-			        ){
-			        	
-			        	String line;
-						while((line = in.readLine()) != null){
-						    System.out.println(line);
-						    String[] token = line.split("\t");
-						    						    						    
-						    PID.add(Integer.parseInt(token[0]));
-						    arrivalTime.add(Integer.parseInt(token[1]));
-						    burstTime.add(Integer.parseInt(token[2]));
-						    priority.add(Integer.parseInt(token[3]));
-						    iOBoundFlag.add(Integer.parseInt(token[4]));
-						}
-						in.close();
-											
-						int size = PID.size();
-						for(int i = 0; i < size; i++){
-							processes.add(new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
-						}
-						
-						if(algorithm == SchedulingAlgorithm.RR && quantum < 0)
-							startButton.setEnabled(false);
-						else
-							startButton.setEnabled(true);
-			        } catch (Exception e1) { 
-			        	e1.printStackTrace();
-			        	startButton.setEnabled(false);
-			        }
+			        readFile(fileChosen);
 			    }
 			}
 		});
@@ -305,12 +270,6 @@ public class GanttChart extends JFrame{
 			}			
 		});
 			
-		setAlgorithm.add(fcfs);
-		setAlgorithm.add(rr);
-		setAlgorithm.add(sjf);
-		setAlgorithm.add(srtf);
-		setAlgorithm.add(prio);
-		setAlgorithm.add(npprio);
 				
 		JMenuItem mlfqOneLevel, mlfqTwoLevel, mlfqThreeLevel, mlfqFourLevel;
 		mlfqOneLevel = new JMenuItem("1-Level");
@@ -367,7 +326,6 @@ public class GanttChart extends JFrame{
 		mlfq.add(mlfqFourLevel);
 		
 		singleSet = new JMenuItem("Set");
-		singleQueue.add(singleSet);
 		
 		quantumChange = new JMenuItem("Change (quantum = " + quantum + ")");
 		quantumChange.addActionListener(new ActionListener(){
@@ -399,9 +357,7 @@ public class GanttChart extends JFrame{
 		quantumItem.add(quantumChange);
 		
 		menuBar.add(insProcess);
-		menuBar.add(setAlgorithm);
 		menuBar.add(mlfq);
-		menuBar.add(singleQueue);
 		menuBar.add(quantumItem);
 		
 		setJMenuBar(menuBar);
@@ -410,6 +366,39 @@ public class GanttChart extends JFrame{
 		con.revalidate();					
 	}
 	
+	protected void readFile(String fileChosen) {
+		try(
+	        	BufferedReader in = new BufferedReader(new FileReader(fileChosen));
+	        ){
+	        	
+	        	String line;
+				while((line = in.readLine()) != null){
+				    System.out.println(line);
+				    String[] token = line.split("\t");
+				    						    						    
+				    PID.add(Integer.parseInt(token[0]));
+				    arrivalTime.add(Integer.parseInt(token[1]));
+				    burstTime.add(Integer.parseInt(token[2]));
+				    priority.add(Integer.parseInt(token[3]));
+				    iOBoundFlag.add(Integer.parseInt(token[4]));
+				}
+				in.close();
+									
+				int size = PID.size();
+				for(int i = 0; i < size; i++){
+					processes.add(new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
+				}
+				
+				if(algorithm == SchedulingAlgorithm.RR && quantum < 0)
+					startButton.setEnabled(false);
+				else
+					startButton.setEnabled(true);
+	        } catch (Exception e1) { 
+	        	e1.printStackTrace();
+	        	startButton.setEnabled(false);
+	        }
+	}
+
 	private void initGanttChart(int x, int y, int level /*JComboBox cb,*/) {
 		JPanel panel = null;
 		
@@ -864,18 +853,7 @@ public class GanttChart extends JFrame{
 		
 		startButton.addActionListener(new ActionListener(){			
 			public void actionPerformed(ActionEvent e) {
-				/*if(!alreadyStarted){
-					*/
-					int queues_num = level;
-					
-					/*if(level == TWO_LEVEL) {
-						queues_num = TWO_LEVEL;
-					}else if(level == THREE_LEVEL) {
-						queues_num = THREE_LEVEL;
-					}else if(level == FOUR_LEVEL) {
-						queues_num = FOUR_LEVEL;
-					}*/
-															
+					int queues_num = level;								
 					processes.removeAll(processes);
 					
 					int size = PID.size();
@@ -893,41 +871,28 @@ public class GanttChart extends JFrame{
 					int[] quanta = {quantum1, quantum2, quantum3, quantum4};
 					scheduler.generateQueues(algorithms, quanta);
 									
-					//if(!threadStarted){
+					System.out.println("Simulating...");
+					Scheduler.simulate();
+					/*if(!threadStarted){
 						System.out.println("Simulating...");
-						scheduler.simulate();
-						//threadStarted = true;						
-					/*}else{						
+						Scheduler.simulate();
+						threadStarted = true;						
+					}else{						
 						reset();
-						//con.removeAll();						
-						
-						//init();
-						scheduler.restart();			
-						
-						if(Scheduler.queues[0] instanceof FCFSQueue){
-							((FCFSQueue) Scheduler.queues[0]).restart();
-						}else if(Scheduler.queues[0] instanceof RRQueue){
-							((RRQueue) Scheduler.queues[0]).restart();
-						}else if(Scheduler.queues[0] instanceof SJFQueue){
-							((SJFQueue) Scheduler.queues[0]).restart();
-						}else if(Scheduler.queues[0] instanceof SRTFQueue){
-							((SRTFQueue) Scheduler.queues[0]).restart();
-						}else if(Scheduler.queues[0] instanceof NonPQueue){
-							((NonPQueue) Scheduler.queues[0]).restart();
-						}else if(Scheduler.queues[0] instanceof PQueue){
-							((PQueue) Scheduler.queues[0]).restart();
-						}
+						//readFile(fileChosen);
+						scheduler.restart();									
+						Scheduler.queues[0].restart();		
+						System.out.println("Simulating...");
+						Scheduler.simulate();
 					}*/
 					
 					startButton.setEnabled(false);
 					insProcess.setEnabled(false);
-					setAlgorithm.setEnabled(false);
 					mlfq.setEnabled(false);
-					singleQueue.setEnabled(false);
 					quantumItem.setEnabled(false);
 					
-					alreadyStarted = true;					
-				//}
+//					alreadyStarted = true;					
+//				}
 			}			
 		});
 		mlfqPanel.add(startButton);
@@ -1133,7 +1098,6 @@ public class GanttChart extends JFrame{
 			xOffset += prevFCFSBurstLength;											
 		}
 		
-		System.out.println("prevTime = " + prevEndTime + " timeNow = " + timeNow + " executionTime = " + executionTime);
 		if(prevEndTime > timeNow-executionTime) {
 			timeLabel[timeCounter] = new JLabel("" + (timeNow-executionTime));
 			timeLabel[timeCounter].setFont(timeLabelFont);
@@ -1301,8 +1265,6 @@ public class GanttChart extends JFrame{
 				
 		startButton.setEnabled(true);
 		insProcess.setEnabled(true);
-		setAlgorithm.setEnabled(true);		
-		singleQueue.setEnabled(true);
 		mlfq.setEnabled(true);
 		
 		if(algorithm == SchedulingAlgorithm.RR)
@@ -1323,8 +1285,8 @@ public class GanttChart extends JFrame{
 			((PQueue) queue).stopThread();
 		}else if(queue instanceof NonPQueue){			
 			((NonPQueue) queue).stopThread();
-		}else if(queue instanceof RRQueue){
-			((RRQueue) queue).stopThread();
+		}else if(queue instanceof RoundRobin){
+			((RoundRobin) queue).stopThread();
 			System.out.println("RRThread stopped.");
 		}
 		

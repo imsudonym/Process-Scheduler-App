@@ -2,6 +2,7 @@ package queues;
 
 import java.util.ArrayList;
 
+import constants.QueueType;
 import datastructure.PseudoArray;
 import gui.GanttChart;
 import process.CPUBoundProcess;
@@ -18,8 +19,8 @@ public abstract class Queue {
 	protected Queue prevQueue;
 	protected Queue nextQueue;
 	
-	protected CPUBoundProcess currProcess;
-	protected CPUBoundProcess prevProcess;
+	protected static CPUBoundProcess currProcess;
+	protected static CPUBoundProcess prevProcess;
 	protected boolean running = false;
 	
 	protected int level = -1;
@@ -29,6 +30,8 @@ public abstract class Queue {
 	public byte allProcessesDone = 1;
 	public byte prevQueueDone = 1;
 	
+	public int queueType;
+	
 	public abstract void startThread(); 
 	public abstract void stopThread();
 	
@@ -36,20 +39,27 @@ public abstract class Queue {
 		this.level = level;
 	}
 	
-	public void enqueue(CPUBoundProcess newProcess){
+	public void enqueue(CPUBoundProcess newProcess, int qType){
 		allProcessesDone = 0;
 		array.add(newProcess);
+		
+		if(qType == QueueType.SJF || qType == QueueType.SRTF) {
+			sortSJF();
+		}
 		
 		if(!processList.contains(newProcess)) {
 			processList.add(newProcess);
 		}		
-		if(prevQueue != null && !isHigherQueueDone()) {
-			return;
-		}
 		
+//		System.out.println("level 1: determining if to preempt... ");
 		determineIfToPreemptExec(newProcess);		
 		startExecution();
 		stopLowerLevelQueues();
+	}
+	
+	
+	public void sortSJF(){
+		array.sortSJF();
 	}
 	
 	protected CPUBoundProcess dequeue(){					
@@ -57,50 +67,53 @@ public abstract class Queue {
 		return prc;
 	}
 	
-	protected void retain() {
-		enqueue(dequeue());
+	protected void retain(int qType) {
+		enqueue(dequeue(), qType);
 	}
 	
 	protected void insertToReadyQueue(IOBoundProcess process) {
-		System.out.println("Insert p" + process.getId() + " with new arrival time = " + process.getArrivalTime());
 		Scheduler.enqueue(process);
 	}
 	
 	protected void preemptCurrProcess(int timeNow) {
+		System.out.println("[Queue:] Preempting current process P" + currProcess.getId() + " [timeNow:" + timeNow + "]");
 		currProcess.setPreempted();
-		currProcess.setTimePreempted(timeNow);
+		currProcess.setTimePreempted(timeNow);		
 		currProcess.setEndTime(timeNow);
 		currProcess.preemptedFlag = true;
 		prevProcess = currProcess;		
 	}
 	
-	/* 
+	/** 
 	 * Preempts a current CPUBound process that was executing if the 
 	 * new process is IO-bound.
 	 * 
 	 * */
 	protected void determineIfToPreemptExec(CPUBoundProcess newProcess) {
 		if(newProcess instanceof IOBoundProcess) {
+			System.out.println("[Queue:] Instance of IOBound");
 			long timeNow = Scheduler.clockTime;
 			
+			System.out.println("[Queue:] newProcess startTime:" + timeNow);
 			newProcess.setStartTime(timeNow);
+			newProcess.setFirstStartTime(timeNow);
 			newProcess.setResponseTime();
 			
 			if(currProcess != null  && currProcess instanceof CPUBoundProcess) {				
 				if(hasExecuted(currProcess)) {			
-					System.out.println("| !! p" + currProcess.getId() + " was executing when p" + newProcess.getId() + " burstLeft = " + currProcess.getBurstTime());				
+//					System.out.println("| !! p" + currProcess.getId() + " was executing when p" + newProcess.getId() + " burstLeft = " + currProcess.getBurstTime());				
 					prevTimeQuantum = timeNow; 
 										
 					preemptCurrProcess((int)timeNow);							
 					int burstExecuted = (int) (currProcess.getEndTime()-currProcess.getStartTime());
-					System.out.println("| burstExecuted = " + burstExecuted);			
+//					System.out.println("| burstExecuted = " + burstExecuted);			
 					currProcess.setPrevBurstPreempted(currProcess.getBurstTime());			
 					displayInUI(burstExecuted, (int)timeNow);
 					
 				}else if(!hasExecuted(currProcess)) {										
 					currProcess.setStartTime(-1);
 					if(currProcess.getBurstTime() == currProcess.getBurstNeeded()) {
-						System.out.println("Resetting first start time p" + currProcess.getId());
+//						System.out.println("Resetting first start time p" + currProcess.getId());
 						currProcess.setFirstStartTime(-1);
 						currProcess.setResponseTime();
 					}					
@@ -114,15 +127,20 @@ public abstract class Queue {
 	}
 	
 	public void startExecution() {
-		if(prevQueue != null && !isHigherQueueDone()) return;
-		if(getSize() > 0) {
-			restart();
-			prevQueueDone = 1;
+//		System.out.println("Level = " + level + " starting...");
+		
+		if(prevQueue != null && !isHigherQueueDone()) {
+			prevQueueDone = 0;
+			return;
 		}
+		
+		//if(getSize() > 0) {
+			System.out.println("[Queue:] size = " + getSize());
+			restart();
+		//}
 	}
 	
-	public void stopExecution() {
-		System.out.println("	level = " + level + " stopping execution...");
+	public void stopExecution() {		
 		prevQueueDone = 0;
 		
 		stopLowerLevelQueues();
@@ -133,9 +151,7 @@ public abstract class Queue {
 			
 			preemptCurrProcess((int)timeNow);		
 			
-			int burstExecuted = (int) (currProcess.getEndTime()-currProcess.getStartTime());
-			
-			System.out.println("| burstExecuted = " + burstExecuted);			
+			int burstExecuted = (int) (currProcess.getEndTime()-currProcess.getStartTime());			
 			currProcess.setPrevBurstPreempted(currProcess.getBurstTime());
 			displayInUI(burstExecuted, (int)timeNow);
 
@@ -143,28 +159,17 @@ public abstract class Queue {
 	}
 	
 	protected void startLowerLevelQueues() {
-		if(nextQueue != null) {
-			if(nextQueue instanceof RRQueue) {
-				((RRQueue)(nextQueue)).startExecution();
-			}else if (nextQueue instanceof SRTFQueue) {
-				((SRTFQueue)(nextQueue)).startExecution();								
-			}else if (nextQueue instanceof FCFSQueue) {
-				((FCFSQueue)(nextQueue)).startExecution();								
-			}else if (nextQueue instanceof PQueue) {
-				((PQueue)(nextQueue)).startExecution();								
-			}else if (nextQueue instanceof SJFQueue) {
-				((SJFQueue)(nextQueue)).startExecution();								
-			}else if (nextQueue instanceof NonPQueue) {
-				((NonPQueue)(nextQueue)).startExecution();								
-			}
+		if(nextQueue != null) {			
+			System.out.println("[Queue:] Level " + level + " Starting next queue.");
+			nextQueue.startExecution();
 		}
 	}
 	
 	protected void stopLowerLevelQueues() {
 		if(nextQueue != null) {
-			if(nextQueue instanceof RRQueue) {
-				if(((RRQueue)(nextQueue)).getSize() > 0) {
-					((RRQueue)(nextQueue)).stopExecution();
+			if(nextQueue instanceof RoundRobin) {
+				if(((RoundRobin)(nextQueue)).getSize() > 0) {
+					((RoundRobin)(nextQueue)).stopExecution();
 				}
 			}else if(nextQueue instanceof SRTFQueue) {
 				((SRTFQueue)(nextQueue)).stopExecution();
@@ -181,7 +186,7 @@ public abstract class Queue {
 	}
 	
 	protected void displayInUI(int burstExecuted, int timeNow) {
-		GanttChart.addExecutingProcess((byte)level, currProcess.getId(), burstExecuted, (int)timeNow);
+		//GanttChart.addExecutingProcess((byte)level, currProcess.getId(), burstExecuted, (int)timeNow);
 	}
 	
 	protected boolean hasExecuted(CPUBoundProcess currProcess) {
@@ -191,27 +196,29 @@ public abstract class Queue {
 	}
 	
 	protected boolean isHigherQueueDone() {
-		int queueSize = 0;
+		//System.out.println("level " + level + " prevQueue.getSize() = " + prevQueue.getSize());
+		if(prevQueue == null) return true;
 		
-		if(prevQueue instanceof RRQueue) {
-			queueSize = ((RRQueue)(prevQueue)).getSize();		
-		}else if(prevQueue instanceof FCFSQueue) {
-			queueSize = ((FCFSQueue)(prevQueue)).getSize();
-		}else if(prevQueue instanceof SJFQueue) {
-			queueSize = ((SJFQueue)(prevQueue)).getSize();
-		}else if(prevQueue instanceof SRTFQueue) {
-			queueSize = ((SRTFQueue)(prevQueue)).getSize();
-		}else if(prevQueue instanceof NonPQueue) {
-			queueSize = ((NonPQueue)(prevQueue)).getSize();
-		}else if(prevQueue instanceof PQueue) {
-			queueSize = ((PQueue)(prevQueue)).getSize();
+		Queue currPrevQueue = prevQueue;
+		
+		while(true) {
+			if(currPrevQueue == null)
+				break;
+			
+			if(currPrevQueue.getSize() > 0) {
+				return false;
+			}
+			
+			currPrevQueue = currPrevQueue.prevQueue;
 		}
-		
-		if(queueSize > 0) {		
+		/*if(prevQueue.getSize() > 0) {		
 			prevQueueDone = 0;
+			System.out.println("level " + level + " prevQueue not done.");
 			return false;
-		}		
+		}		*/
 		
+		//System.out.println("level " + level + " prevQueue done.");
+		//System.out.println("level = " + level + " size: " + getSize() + "peekHead() = " + peekHead());
 		return true;
 	}
 
@@ -232,6 +239,7 @@ public abstract class Queue {
 	}
 		
 	public void restart() {
+		prevTime = Scheduler.clockTime;
 		running = true;
 	}
 	
@@ -262,7 +270,9 @@ public abstract class Queue {
 		double avgWait = 0;
 		double avgTurnaround = 0;
 		
+		System.out.println("[Queue:] count:" + count);
 		for(int i = 0; i < count; i++) {
+			System.out.println("[Queue:] i:" + i);
 			temp.get(i).setWaitTimePreemptive();
 			
 			System.out.print("[p" + temp.get(i).getId() + "]: ");
@@ -296,5 +306,6 @@ public abstract class Queue {
 		System.out.println("avgResponse = " + avgResponse + " avgWait = " + avgWait + " avgTurnaround = " + avgTurnaround);
 		
 		GanttChart.simulationDone(this);
+		Scheduler.stop();
 	}
 }

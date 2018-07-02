@@ -31,7 +31,7 @@ public class CPUBoundProcess {
 		this.prevBurstPreempted = burstTime;
 		this.priority = priority;		
 		
-		this.endTime = this.waitTime = this.responseTime 
+		this.startTime = this.endTime = this.waitTime = this.responseTime 
 				= this.turnaroundTime = -1;
 	}
 	
@@ -60,7 +60,7 @@ public class CPUBoundProcess {
 	}
 	
 	public int getTimesPreempted(){
-		return timesPreempted;
+		return timePreempted.size();
 	}
 	
 	public void setPreempted(){
@@ -89,6 +89,7 @@ public class CPUBoundProcess {
 
 	public void setTimePreempted(long timePreempted) {
 		this.timePreempted.add(timePreempted);
+		System.out.println("size = " + this.timePreempted.size());
 	}
 
 	public long getTimeResumed(int index) {
@@ -105,6 +106,10 @@ public class CPUBoundProcess {
 	
 	public void setWaitTimePreemptive() {
 		long waitTime = (firstStartTime - arrivalTime) < 0 ? 0: (firstStartTime - arrivalTime);
+		
+		System.out.println("[CPUBoundProcess] process P" + id);
+		System.out.println("[CPUBoundProcess:] timeResumed.size:" + timeResumed.size());
+		System.out.println("[CPUBoundProcess:] timePreemted.size:" + timePreempted.size());
 		
 		for(int i = 0; i < timeResumed.size(); i++) {
 			waitTime += (timeResumed.get(i) - timePreempted.get(i));
