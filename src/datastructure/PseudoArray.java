@@ -22,8 +22,6 @@ public class PseudoArray {
 		Link newLink = new Link(value, value.toString());
 		list.add(newLink);
 		ctr++;
-			
-		//printContents();
 	}
 	
 	public Link getHead(){
@@ -54,9 +52,10 @@ public class PseudoArray {
 				if(current == null || current.next == null)
 					break;
 				
-				long currBurst = current.getValue().getBurstNeeded();
-				long nextBurst = current.next.getValue().getBurstNeeded();												
+				long currBurst = current.getValue().getBurstTime();
+				long nextBurst = current.next.getValue().getBurstTime();												
 				
+				//System.out.println("[PseudoArray:] currBurst: " + currBurst + " nextBurst: " + nextBurst);
 				if(currBurst > nextBurst){					
 					CPUBoundProcess temp = current.getValue();
 					current.setValue(current.next.getValue());
@@ -66,16 +65,40 @@ public class PseudoArray {
 			}			
 		}
 		
-		System.out.println("Sorting SJF");
+		//System.out.println("[PseudoArray:] Sorting SJF");
 		printContents();
 	}
 	
-	public void sortPriority(){
+	public void sortSRTF(){			
 		for(int i = 0; i <= ctr-1; i++){
 			Link current = list.first;					
 			
 			while(true){
-				if(current.next == null)
+				if(current == null || current.next == null)
+					break;
+				
+				long currBurst = current.getValue().getBurstTime();
+				long nextBurst = current.next.getValue().getBurstTime();												
+				
+				//System.out.println("[PseudoArray:] currBurst: " + currBurst + " nextBurst: " + nextBurst);
+				if(currBurst > nextBurst){					
+					CPUBoundProcess temp = current.getValue();
+					current.setValue(current.next.getValue());
+					current.next.setValue(temp);
+				}
+				current = current.next;
+			}			
+		}
+		
+		//System.out.println("[PseudoArray:] Sorting SRTF");
+		printContents();
+	}
+	
+	public void sortPQ(){
+		for(int i = 0; i <= ctr-1; i++){
+			Link current = list.first;			
+			while(true){
+				if(current == null || current.next == null)
 					break;
 				
 				int currPriority = current.getValue().getPriority();
@@ -89,37 +112,25 @@ public class PseudoArray {
 				current = current.next;
 			}			
 		}
-		
-		//printContents();
 	}
 	
-	public void sortNonPQ(){		
-		Link current = list.first;
-		if(current != null){
-			long timeEnd = current.getValue().getArrivalTime() + current.getValue().getBurstTime();
-			
-			for(int i = 0; i <= ctr-1; i++){
-				if(current.next == null){
-					continue;
-				}else if(current.next.getValue().getArrivalTime() == current.getValue().getArrivalTime()){
-					if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority						
-						CPUBoundProcess temp = current.getValue();
-						current.setValue(current.next.getValue());
-						current.next.setValue(temp);
-						timeEnd += current.getValue().getBurstTime();
-					}
-				}else if(current.next.getValue().getArrivalTime() > current.getValue().getArrivalTime() &&
-					current.next.getValue().getArrivalTime() <= timeEnd && current.getValue().getArrivalTime() <= timeEnd){
-					if(current.next.getValue().getPriority() < current.getValue().getPriority()){ //lower priority number, higher priority						
-						CPUBoundProcess temp = current.getValue();
-						current.setValue(current.next.getValue());
-						current.next.setValue(temp);
-						timeEnd += current.getValue().getBurstTime();
-					}
-				}
+	public void sortNPQ(){
+		for(int i = 0; i <= ctr-1; i++){
+			Link current = list.first.next;			
+			while(true){
+				if(current == null || current.next == null)
+					break;
 				
+				int currPriority = current.getValue().getPriority();
+				int nextPriority = current.next.getValue().getPriority();												
+				
+				if(currPriority > nextPriority){					
+					CPUBoundProcess temp = current.getValue();
+					current.setValue(current.next.getValue());
+					current.next.setValue(temp);
+				}
 				current = current.next;
-			}
+			}			
 		}
 	}
 	

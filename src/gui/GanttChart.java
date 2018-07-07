@@ -374,7 +374,7 @@ public class GanttChart extends JFrame{
 	        	String line;
 				while((line = in.readLine()) != null){
 				    System.out.println(line);
-				    String[] token = line.split("\t");
+				    String[] token = line.split(" ");
 				    						    						    
 				    PID.add(Integer.parseInt(token[0]));
 				    arrivalTime.add(Integer.parseInt(token[1]));

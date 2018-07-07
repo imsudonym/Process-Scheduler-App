@@ -15,7 +15,7 @@ import queues.SRTFQueue;
 
 public class Scheduler {
 	private static int itr = 0;
-	public static long clockTime = 0;	
+	public static int clockTime = 0;	
 	private static boolean running = true;
 	
 	public static Queue[] queues;
@@ -24,7 +24,6 @@ public class Scheduler {
 	public static ArrayList<CPUBoundProcess> processes = new ArrayList<CPUBoundProcess>();
 	
 	public void initProcesses(int numOfQueues, ArrayList<CPUBoundProcess> processes){
-		System.out.println("numOfquafd: " + numOfQueues);
 		Scheduler.numOfQueues = numOfQueues;
 		Scheduler.queues = new Queue[numOfQueues];
 		
@@ -110,17 +109,16 @@ public class Scheduler {
 	}
 
 	public static void simulate(){
-		System.out.println("[Scheduler::] simulate.running = " + running);
+		/*System.out.println("[Scheduler::] simulate.running = " + running);
 		if(running) {
 			clock.start();
 		}else {
 			running = true;
 			System.out.println("[Scheduler::] simulate.running = " + running);
-		}
+		}*/
 	}
 	
-	public static void stop(){
-		System.out.println("[Scheduler::] clock status: interrupted");
+	public static void stop(){		
 		clock.interrupt();
 		running = false;
 		clockTime = 0;
@@ -190,7 +188,7 @@ public class Scheduler {
 				while(processes.size() > 0){								
 					if(processes.get(0).getArrivalTime() == clockTime){						
 						System.out.println("[Scheduler::] Clock time: " + clockTime + " insert P" + processes.get(0).getId());
-						insertOnQueue(processes.get(0));
+						//insertOnQueue(processes.get(0));
 						processes.remove(0);
 						itr++;
 					}else if(processes.get(0).getArrivalTime() > clockTime){						
@@ -214,5 +212,15 @@ public class Scheduler {
 						
 	public static int getMaxLevelOfQueues() {
 		return numOfQueues-1;
+	}
+
+	public static CPUBoundProcess getNextProcess() {		
+		CPUBoundProcess nextProcess =  processes.remove(0);		
+		return nextProcess;
+	}
+
+	public static int getNextArrivalTime() {
+		if(processes.size() == 0) return -1;
+		return processes.get(0).getArrivalTime();
 	}
 }

@@ -13,8 +13,13 @@ public abstract class Queue {
 	public static ArrayList<CPUBoundProcess> processList = new ArrayList<CPUBoundProcess>();
 	protected PseudoArray array = new PseudoArray(1000);
 	
-	protected static long prevTime = 0;
-	protected static long prevTimeQuantum;
+	protected int totalBurstTime = 0;
+	protected static int prevTime = 0;
+	protected static int prevTimeQuantum;
+	protected static int clockTime = 0;
+	protected int queueStartTime = -1;
+	protected int timeNow;
+	protected int clockTimeEnd;
 	
 	protected Queue prevQueue;
 	protected Queue nextQueue;
@@ -22,6 +27,7 @@ public abstract class Queue {
 	protected static CPUBoundProcess currProcess;
 	protected static CPUBoundProcess prevProcess;
 	protected boolean running = false;
+	protected static boolean threadStopped = false;
 	
 	protected int level = -1;
 	protected long timeStart;
@@ -32,8 +38,28 @@ public abstract class Queue {
 	
 	public int queueType;
 	
-	public abstract void startThread(); 
-	public abstract void stopThread();
+	public void startThread() {
+		run();
+	}
+	
+	public void stopThread() {
+		if(threadStopped) return;
+		if(peekHead() == null && getSize() == 0 && isHigherQueueDone()) {
+			if(Scheduler.processes.size() == 0) {
+				if(level == Scheduler.getMaxLevelOfQueues()) {						
+					System.out.println("level = " + level + " stopping simulation...");
+					threadStopped = true;
+					clockTimeEnd = clockTime;
+					simulationDone();					
+				}else {							
+					System.out.println("[Roundrobin:] starting lower level queues");
+					startLowerLevelQueues();													
+				}
+			}
+		}
+	}
+	
+	public abstract void run();
 	
 	public Queue(int level) {
 		this.level = level;
@@ -43,21 +69,33 @@ public abstract class Queue {
 		allProcessesDone = 0;
 		array.add(newProcess);
 		
-		if(qType == QueueType.SJF || qType == QueueType.SRTF) {
-			sortSJF();
-		}
+		if(qType == QueueType.SJF) sortSJF();
+		if(qType == QueueType.SRTF) sortSRTF(); 
+		if(qType == QueueType.PQ) sortPQ();
+		if(qType == QueueType.NPQ) sortNPQ();
 		
 		if(!processList.contains(newProcess)) {
+			totalBurstTime += newProcess.getBurstNeeded();
 			processList.add(newProcess);
 		}		
 		
-//		System.out.println("level 1: determining if to preempt... ");
 		determineIfToPreemptExec(newProcess);		
 		startExecution();
 		stopLowerLevelQueues();
 	}
 	
-	
+	private void sortNPQ() {
+		array.sortNPQ();
+	}
+
+	private void sortPQ() {
+		array.sortPQ();
+	}
+
+	private void sortSRTF() {
+		array.sortSRTF();
+	}
+
 	public void sortSJF(){
 		array.sortSJF();
 	}
@@ -92,7 +130,7 @@ public abstract class Queue {
 	protected void determineIfToPreemptExec(CPUBoundProcess newProcess) {
 		if(newProcess instanceof IOBoundProcess) {
 			System.out.println("[Queue:] Instance of IOBound");
-			long timeNow = Scheduler.clockTime;
+			int timeNow = Scheduler.clockTime;
 			
 			System.out.println("[Queue:] newProcess startTime:" + timeNow);
 			newProcess.setStartTime(timeNow);
@@ -136,7 +174,7 @@ public abstract class Queue {
 		
 		//if(getSize() > 0) {
 			System.out.println("[Queue:] size = " + getSize());
-			restart();
+			startThread();
 		//}
 	}
 	
@@ -146,7 +184,7 @@ public abstract class Queue {
 		stopLowerLevelQueues();
 				
 		if(currProcess != null && hasExecuted(currProcess)) {
-			long timeNow = Scheduler.clockTime; 	
+			int timeNow = Scheduler.clockTime; 	
 			prevTimeQuantum = timeNow;
 			
 			preemptCurrProcess((int)timeNow);		
@@ -269,10 +307,8 @@ public abstract class Queue {
 		double avgResponse = 0;
 		double avgWait = 0;
 		double avgTurnaround = 0;
-		
-		System.out.println("[Queue:] count:" + count);
 		for(int i = 0; i < count; i++) {
-			System.out.println("[Queue:] i:" + i);
+			System.out.println("[Queue:] id:" + i);
 			temp.get(i).setWaitTimePreemptive();
 			
 			System.out.print("[p" + temp.get(i).getId() + "]: ");
@@ -285,16 +321,13 @@ public abstract class Queue {
 				avgTurnaround += temp.get(i).getTurnaroundTime();
 			}
 			
-			if((temp.get(i) instanceof IOBoundProcess)) continue; 
-			
-			int c = temp.get(i).getTimesPreempted();			
-			for(int j = 0; j < c; j++) {
-				
+			if((temp.get(i) instanceof IOBoundProcess)) continue; 			
+			/*int c = temp.get(i).getTimesPreempted();			
+			for(int j = 0; j < c; j++) {				
 				System.out.print(temp.get(i).timePreempted.get(j) + "-");
-				System.out.print(temp.get(i).timeResumed.get(j) + "|");
-				
+				System.out.print(temp.get(i).timeResumed.get(j) + "|");				
 			}
-			System.out.println();
+			System.out.println();*/
 		}
 		
 		count--;
@@ -307,5 +340,48 @@ public abstract class Queue {
 		
 		GanttChart.simulationDone(this);
 		Scheduler.stop();
+	}
+	
+	protected int getNextArrivalTime() {
+		int nextArrivalTime = Scheduler.getNextArrivalTime();
+		//System.out.println("[Roundrobin:] nextArrivalTime: " + nextArrivalTime + " timeNow: " + timeNow);
+		return nextArrivalTime;
+	}
+
+	protected void getNextProcess() {
+		CPUBoundProcess nextProcess = Scheduler.getNextProcess();
+		System.out.println("[Roundrobin:] Inserting process P" + nextProcess.getId());
+		enqueue(nextProcess, this.queueType);
+	}
+
+	/**
+	 * Promotes the preempted process to an
+	 * immediate higher priority queue.
+	 * */
+	protected void determineToPromote() {
+		/**
+		 * TODO: Determine if a process needs to be promoted. 
+		 * If yes, then promote
+		 * */
+		
+		if(prevQueue == null ||
+			!(prevQueue instanceof RoundRobin) ||
+				currProcess == null ||
+					prevProcess == null ||
+						currProcess.getBurstTime() <= 0 ||					
+							prevProcess.getId() == currProcess.getId()) {
+			return;
+		}
+		
+		int burstLeft = currProcess.getBurstTime();
+		if(burstLeft > 0) { 	
+			/** 
+			 * Promotion for SRTF only occurs when it has a higher queue
+			 * that is Round Robin
+			 * */
+			int burstPreempted = prevProcess.getBurstTime();
+			prevProcess.setPrevBurstPreempted(burstPreempted);							
+			prevQueue.enqueue(dequeue(), this.queueType);
+		}
 	}
 }

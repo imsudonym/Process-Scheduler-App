@@ -12,153 +12,92 @@ public class RoundRobin extends PreemptiveQueue{
 		super(level);
 		this.quantum = quantum;
 		this.queueType = QueueType.RR;
-	}	
-	
-	public void startThread(){
-		prevTime = Scheduler.clockTime;
-		running = true;
-		thread.start();
-	}
-	
-	public void stopThread(){
-		thread.interrupt();
-		running = false;
 	}
 
 	public void reenqueue(CPUBoundProcess newProcess){		
 		array.add(newProcess);		
 		allProcessesDone = 0;		
 	}	
-	
-	Thread thread = new Thread(){				
-		public void run(){
-			while(running){
-				System.out.print("");	
-				if(peekHead() != null){
-					currProcess = peekHead();									
-				
-					long startTime = Scheduler.clockTime;
-					if(prevProcess != null && prevProcess.preemptedFlag) {						
-						startTime = prevProcess.getTimePreempted(prevProcess.getTimesPreempted()-1);
-					}
-										
-					//currProcess.setStartTime(startTime);
 					
-					if(currProcess.getResponseTime() < 0/* && hasExecuted(currProcess)*/) {
-						System.out.println("[Roundrobin:] P" + currProcess.getId() + "startTime=" + startTime);
-						currProcess.setStartTime(startTime);
-						currProcess.setFirstStartTime(startTime);
-						currProcess.setResponseTime();
-						//System.out.print("");
-						//System.out.println("Setting response time (p" + currProcess.getId() + ") to " + currProcess.getResponseTime() + " timeNow = " +  startTime);
-					}					
-					
-					if(currProcess.preemptedFlag) {						
-						System.out.println("resuming p" + currProcess.getId() + "..... timeStart = " + startTime);						
-						currProcess.setStartTime(startTime);
-						currProcess.setTimeResumed(startTime);						
-						currProcess.preemptedFlag = false;
-					}
-
-					long timeNow = Scheduler.clockTime;
-					if(timeNow - prevTime > 1) {
-						prevTime = timeNow;
-					}
-					
-					if(prevTime < timeNow){				
-						System.out.println("[Roundrobin:] prevTime:" + prevTime + " timeNow:" + timeNow);
-						System.out.println("| Level = " + level + " executing p" + currProcess.getId() + " startTime = " + currProcess.getStartTime() + " timeNow = " + timeNow);
-						
-						int lapse = (int)(timeNow - prevTime);
-						int burstLeft = currProcess.getBurstTime() - lapse;					
-						currProcess.setBurstTime(burstLeft);																	
-											
-						/* Block below relinquishes IOBound process
-						 * for supposedly 'IO operation'.
-						 * */
-						if(currProcess instanceof IOBoundProcess) {
-							System.out.println("[Roundrobin:] prevTimeQuantum:" + prevTimeQuantum);
-							if(timeNow == prevTimeQuantum + (quantum-1)){
-								preemptCurrProcess((int)timeNow);								
-								displayInUI(quantum-1, (int)timeNow);											
-								currProcess.setArrivalTime(timeNow + ((IOBoundProcess)(currProcess)).getIoSpeed());								
-								if(burstLeft > 0){						
-									insertToReadyQueue((IOBoundProcess)currProcess);
-									dequeue();
-								}							
-								prevTimeQuantum = timeNow;
-							}							
-						}
-												
-						if(timeNow == prevTimeQuantum + quantum){							
-							System.out.println("| -- Quantum time is done timeNow = " + timeNow);
-							
-							displayInUI(quantum, (int)timeNow);
-							
-							if(burstLeft > 0){											
-								preemptCurrProcess((int)timeNow);
-								int burstPreempted = currProcess.getBurstTime();
-								currProcess.setPrevBurstPreempted(burstPreempted);
-								
-								if(nextQueue == null) {
-									retain(QueueType.RR);
-								} else {								
-									demote(dequeue());									
-								}
-							}							
-							prevTimeQuantum = timeNow;
-						}
-						
-						if(burstLeft <= 0){		
-							//currProcess.setWaitTimePreemptive();
-										
-							if(currProcess.getPrevBurstPreempted() < quantum){						
-								displayInUI(currProcess.getPrevBurstPreempted(), (int)timeNow);								
-							}
-							
-							dequeue();													
-							System.out.println("p" + currProcess.getId() + " Done executing.");
-							
-							//currProcess.setTimeResumed(timeNow);
-							currProcess.preemptedFlag = false;
-							prevProcess = currProcess;
-							
-							//timeEnd = Scheduler.clockTime;
-							prevTimeQuantum = timeNow;
-							//timeStart = -1;							
-						}				
-						
-						prevTime = timeNow;
-					}															
-					
-				}else{		
-					
-					if(peekHead() == null && getSize() == 0 && isHigherQueueDone()) {
-						if(Scheduler.processes.size() == 0) {
-							if(level == Scheduler.getMaxLevelOfQueues()) {						
-								System.out.println("level = " + level + " stopping simulation...");
-								simulationDone();
-							}else {							
-								System.out.println("[Roundrobin:] starting lower level queues");
-								startLowerLevelQueues();
-								stopThread();								
-							}
-						}
-					}
-					
-					/*if (allProcessesDone == 0 && getSize() == 0){						
-						allProcessesDone = 1;
-						startLowerLevelQueues();
-						
-						if(level == Scheduler.getMaxLevelOfQueues() && Scheduler.processes.size() == 0) {
-							System.out.println("Allprocessdon size zero.. stopping simulation...");
-							simulationDone();
-						}
-					}		*/
-				}
-			}
+	public void run(){	 
+		queueStartTime = clockTime; // time this queue started executing.		
+		
+		System.out.println("[Roundrobin:] Inside run method");
+		System.out.println("[Roundrobin:] queueStartTime: " + queueStartTime);
+		
+		while(getNextArrivalTime() == clockTime) {
+			getNextProcess();
 		}		
-	};
+		for(int ctr = 0; ctr < totalBurstTime; ctr++){					
+			if((currProcess = peekHead()) != null){				
+				if(currProcess.getResponseTime() < 0) {
+					currProcess.setStartTime(queueStartTime + ctr);
+					currProcess.setFirstStartTime(queueStartTime + ctr);
+					currProcess.setResponseTime();
+				}
+				if(currProcess.preemptedFlag) {												
+					currProcess.setStartTime(queueStartTime);
+					currProcess.setTimeResumed(queueStartTime);						
+					currProcess.preemptedFlag = false;
+				}
+				int burstLeft = currProcess.getBurstTime() - 1;					
+				currProcess.setBurstTime(burstLeft);			
+				System.out.println("[Roundrobin] Level = " + 
+						level + 
+						" executing P" + 
+						currProcess.getId() + 
+						" startTime = " + 
+						currProcess.getStartTime() +
+						" burstLeft = " +
+						burstLeft +
+						" timeNow = " + (queueStartTime + ctr));
+				timeNow = queueStartTime + ctr;
+				/*if(quantum > 1 && currProcess instanceof IOBoundProcess) {	
+					if(timeNow == prevTimeQuantum + (quantum-1)){
+						preemptCurrProcess(timeNow);								
+						displayInUI(quantum-1, timeNow);
+
+						currProcess.setArrivalTime(timeNow + ((IOBoundProcess)(currProcess)).getIoSpeed());
+						if(burstLeft > 0){						
+							insertToReadyQueue((IOBoundProcess)currProcess);
+							dequeue();
+						}
+					}							
+				}*/
+
+				if(burstLeft <= 0){										
+					if(currProcess.getPrevBurstPreempted() < quantum){
+						displayInUI(currProcess.getPrevBurstPreempted(), timeNow);								
+					}					
+					dequeue();													
+					System.out.println("p" + currProcess.getId() + " Done executing.");					
+					currProcess.preemptedFlag = false;
+					prevProcess = currProcess;
+					prevTimeQuantum = timeNow;				
+				}			
+				while(getNextArrivalTime() == clockTime) {
+					getNextProcess();
+				}
+				if(timeNow == prevTimeQuantum + quantum){							
+					System.out.println("[Roundrobin:] Quantum time is DONE (timeNow = " + timeNow + ")");
+					prevTimeQuantum = timeNow;
+					displayInUI(quantum, timeNow);					
+					if(burstLeft > 0){											
+						preemptCurrProcess(timeNow);
+						int burstPreempted = currProcess.getBurstTime();
+						currProcess.setPrevBurstPreempted(burstPreempted);						
+						if(nextQueue == null) {
+							retain(QueueType.RR);
+						} /*else {								
+							demote(dequeue());									
+						}*/
+					}
+				}
+				clockTime++;
+			}
+			stopThread();
+		}				
+	}
 
 	protected void demote(CPUBoundProcess process) {
 		if(nextQueue == null) return;
