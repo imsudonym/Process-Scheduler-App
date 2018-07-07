@@ -1,8 +1,6 @@
 package queues;
 import constants.QueueType;
 import process.CPUBoundProcess;
-import process.IOBoundProcess;
-import scheduler.Scheduler;
 
 public class RoundRobin extends PreemptiveQueue{
 	private int quantum = 0;

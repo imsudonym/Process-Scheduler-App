@@ -35,7 +35,7 @@ import queues.PQueue;
 import queues.RoundRobin;
 import queues.SJFQueue;
 import queues.SRTFQueue;
-import scheduler.Scheduler;
+import scheduler.Main;
 
 public class GanttChart extends JFrame{
 
@@ -106,7 +106,7 @@ public class GanttChart extends JFrame{
 	private static String fileChosen;
 	private static String[] algorithms = {"FCFS", "SJF", "SRTF", "NP-PRIO", "P-PRIO", "RR"};
 	
-	private static Scheduler scheduler = new Scheduler();;
+	private static Main scheduler = new Main();;
 	private static Font font = new Font("Helvetica", Font.BOLD, 20);
 	private static Font timeLabelFont = new Font("Helvetica", Font.BOLD, 12);
 	private static Color darkBlue = new Color(0, 46, 70);
@@ -872,7 +872,7 @@ public class GanttChart extends JFrame{
 					scheduler.generateQueues(algorithms, quanta);
 									
 					System.out.println("Simulating...");
-					Scheduler.simulate();
+					Main.simulate();
 					/*if(!threadStarted){
 						System.out.println("Simulating...");
 						Scheduler.simulate();

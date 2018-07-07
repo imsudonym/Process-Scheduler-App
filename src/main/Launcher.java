@@ -3,7 +3,7 @@ import javax.swing.JFrame;
 
 import gui.GanttChart;
 
-public class Main {
+public class Launcher {
 	public static void main(String[] args) {	
 		GanttChart gantt = new GanttChart();
 		gantt.setVisible(true);

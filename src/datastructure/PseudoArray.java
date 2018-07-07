@@ -6,12 +6,10 @@ import process.CPUBoundProcess;
 import process.IOBoundProcess;
 
 public class PseudoArray {		
-	private int size;	
 	public int ctr = 0;
 	LinkedList list = new LinkedList();	
 	
 	public PseudoArray(int size){
-		this.size = size;
 	}
 	
 	public boolean isEmpty(){

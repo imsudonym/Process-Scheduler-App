@@ -1,7 +1,5 @@
 package queues;
 import constants.QueueType;
-import process.IOBoundProcess;
-import scheduler.Scheduler;
 
 public class SJFQueue extends Queue{
 	

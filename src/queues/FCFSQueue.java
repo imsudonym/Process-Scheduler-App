@@ -1,6 +1,5 @@
 package queues;
 import constants.QueueType;
-import scheduler.Scheduler;
 
 public class FCFSQueue extends Queue{	
 	public FCFSQueue(int level){
@@ -11,12 +10,10 @@ public class FCFSQueue extends Queue{
 	public void run(){
 		queueStartTime = clockTime;
 		
-		System.out.println("[FCFS:] Inside run method");
-		System.out.println("[FCFS:] queueStartTime: " + queueStartTime);
-		
 		while(getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
+		
 		for(int ctr = 0; ctr < totalBurstTime; ctr++){
 			if((currProcess = peekHead()) != null){					
 				if(currProcess.getResponseTime() < 0) {

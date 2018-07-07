@@ -13,22 +13,15 @@ import queues.RoundRobin;
 import queues.SJFQueue;
 import queues.SRTFQueue;
 
-public class Scheduler {
-	private static int itr = 0;
-	public static int clockTime = 0;	
-	private static boolean running = true;
-	
+public class Main {
 	public static Queue[] queues;
-	private static int numOfQueues = 0;
-		
+	public static int numOfQueues = 0;		
 	public static ArrayList<CPUBoundProcess> processes = new ArrayList<CPUBoundProcess>();
 	
 	public void initProcesses(int numOfQueues, ArrayList<CPUBoundProcess> processes){
-		Scheduler.numOfQueues = numOfQueues;
-		Scheduler.queues = new Queue[numOfQueues];
-		
-		Scheduler.processes = processes;
-		
+		Main.numOfQueues = numOfQueues;
+		Main.queues = new Queue[numOfQueues];		
+		Main.processes = processes;		
 		sortByArrivalTime();
 		if(queues[0] instanceof PQueue){
 			prioritySortSameArrivalTime();
@@ -107,26 +100,10 @@ public class Scheduler {
 		processes.add(process);
 		sortByArrivalTime();
 	}
-
-	public static void simulate(){
-		/*System.out.println("[Scheduler::] simulate.running = " + running);
-		if(running) {
-			clock.start();
-		}else {
-			running = true;
-			System.out.println("[Scheduler::] simulate.running = " + running);
-		}*/
-	}
-	
-	public static void stop(){		
-		clock.interrupt();
-		running = false;
-		clockTime = 0;
-	}
 	
 	public void generateQueues(int[] algorithms, int[] quantums){
-		System.out.println("Generating multilevel queues...");
-		System.out.println("[Scheduler::] numOfQueues: " + numOfQueues);
+		System.out.println("[Main:] Generating multilevel queues...");
+		System.out.println("[Main:] numOfQueues: " + numOfQueues);
 		for(int i = 0; i < numOfQueues; i++){			
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
 				queues[i] = new FCFSQueue(i);
@@ -150,65 +127,28 @@ public class Scheduler {
 		
 			if(i == numOfQueues-1) { 
 				if(numOfQueues != 1) {
-					System.out.println("level = " + i + " previous = " + queues[i-1]);				
+					System.out.println("[Main:] Level = " + i + " previous = " + queues[i-1]);				
 					queues[i].setPrevQueue(queues[i-1]);
 				}else {
-					System.out.println("level = " + i + " previous = null");
+					System.out.println("[Main:] Level = " + i + " previous = null");
 					queues[i].setPrevQueue(null);
 				}
 				queues[i].setNextQueue(null);
-				System.out.println("level = " + i + " next = null");
+				System.out.println("[Main:] Level = " + i + " next = null");
 			}else if(i == 0) {
-				System.out.println("level = " + i + " previous = null");
-				System.out.println("level = " + i + " next = " + queues[i+1]);
+				System.out.println("[Main:] Level = " + i + " previous = null");
+				System.out.println("[Main:] Level = " + i + " next = " + queues[i+1]);
 				queues[i].setPrevQueue(null);
 				queues[i].setNextQueue(queues[i+1]);
 				
 			}else {
-				System.out.println("level = " + i + " previous = " + queues[i-1]);
-				System.out.println("level = " + i + " next = " + queues[i+1]);
+				System.out.println("[Main:] Level = " + i + " previous = " + queues[i-1]);
+				System.out.println("[Main:] Level = " + i + " next = " + queues[i+1]);
 				queues[i].setPrevQueue(queues[i-1]);
 				queues[i].setNextQueue(queues[i+1]);
 			}			
 		}
 	}			
-	
-	private static void insertOnQueue(CPUBoundProcess newProcess){						
-		queues[0].enqueue(newProcess, queues[0].queueType);		
-		int burstTime = newProcess.getBurstNeeded();
-		int arrivalTime = newProcess.getArrivalTime();
-		int priority = newProcess.getPriority();
-		
-		GanttChart.addNewArrivedProcess(newProcess.getId(), arrivalTime, burstTime, priority);
-	}		
-	
-	static Thread clock = new Thread(){
-		public void run(){			
-			while(running){							
-				while(processes.size() > 0){								
-					if(processes.get(0).getArrivalTime() == clockTime){						
-						System.out.println("[Scheduler::] Clock time: " + clockTime + " insert P" + processes.get(0).getId());
-						//insertOnQueue(processes.get(0));
-						processes.remove(0);
-						itr++;
-					}else if(processes.get(0).getArrivalTime() > clockTime){						
-						break;
-					}
-				}
-								
-				clockTime++;
-				
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {}
-			}
-		}
-	};
-		
-	public void restart() {
-		itr = 0;
-		clockTime = 0;
-	}
 						
 	public static int getMaxLevelOfQueues() {
 		return numOfQueues-1;

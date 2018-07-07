@@ -1,10 +1,5 @@
 package queues;
 import constants.QueueType;
-import constants.SchedulingAlgorithm;
-import datastructure.PseudoArray;
-import gui.GanttChart;
-import process.CPUBoundProcess;
-import scheduler.Scheduler;
 
 public class NonPQueue extends Queue{
 	
