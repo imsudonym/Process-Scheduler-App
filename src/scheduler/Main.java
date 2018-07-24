@@ -104,6 +104,7 @@ public class Main {
 	public void generateQueues(int[] algorithms, int[] quantums){
 		System.out.println("[Main:] Generating multilevel queues...");
 		System.out.println("[Main:] numOfQueues: " + numOfQueues);
+		
 		for(int i = 0; i < numOfQueues; i++){			
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
 				queues[i] = new FCFSQueue(i);
@@ -118,7 +119,7 @@ public class Main {
 			}else if (algorithms[i] == SchedulingAlgorithm.SRTF){
 				queues[i] = new SRTFQueue(i);
 			}
-			
+
 			queues[i].startThread();
 			if(i == 0) queues[i].startExecution();
 		}	
@@ -154,7 +155,7 @@ public class Main {
 		return numOfQueues-1;
 	}
 
-	public static CPUBoundProcess getNextProcess() {		
+	public static CPUBoundProcess getNextProcess() {
 		CPUBoundProcess nextProcess =  processes.remove(0);		
 		return nextProcess;
 	}

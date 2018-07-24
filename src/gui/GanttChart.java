@@ -32,6 +32,7 @@ import process.IOBoundProcess;
 import queues.FCFSQueue;
 import queues.NonPQueue;
 import queues.PQueue;
+import queues.Queue;
 import queues.RoundRobin;
 import queues.SJFQueue;
 import queues.SRTFQueue;
@@ -384,10 +385,10 @@ public class GanttChart extends JFrame{
 				}
 				in.close();
 									
-				int size = PID.size();
+				/*int size = PID.size();
 				for(int i = 0; i < size; i++){
 					processes.add(new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
-				}
+				}*/
 				
 				if(algorithm == SchedulingAlgorithm.RR && quantum < 0)
 					startButton.setEnabled(false);
@@ -846,6 +847,7 @@ public class GanttChart extends JFrame{
 		startButton.setBounds(xOffset, yOffset, 100, 50);
 		
 		if(processes == null || (algorithm == SchedulingAlgorithm.RR && quantum == 0)){
+			System.out.println("[GanttChart:] processes: " + processes);
 			startButton.setEnabled(false);
 		}else{
 			startButton.setEnabled(true);
@@ -853,14 +855,19 @@ public class GanttChart extends JFrame{
 		
 		startButton.addActionListener(new ActionListener(){			
 			public void actionPerformed(ActionEvent e) {
-					int queues_num = level;								
+					
+					System.out.println("[GanttChart:] Start Button pressed.");
+					Queue.threadStopped = false;
+					Queue.processList.removeAll(Queue.processList);
+					
+					int queues_num = level;
 					processes.removeAll(processes);
 					
 					int size = PID.size();
 					for(int i = 0; i < size; i++){
 						if(iOBoundFlag.get(i) == 1) {
 							processes.add(new IOBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
-						}else {
+						} else {
 							processes.add(new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
 						}
 					}
@@ -870,29 +877,12 @@ public class GanttChart extends JFrame{
 					int[] algorithms = {algorithm1, algorithm2, algorithm3, algorithm4};
 					int[] quanta = {quantum1, quantum2, quantum3, quantum4};
 					scheduler.generateQueues(algorithms, quanta);
-									
-					System.out.println("Simulating...");
-					Main.simulate();
-					/*if(!threadStarted){
-						System.out.println("Simulating...");
-						Scheduler.simulate();
-						threadStarted = true;						
-					}else{						
-						reset();
-						//readFile(fileChosen);
-						scheduler.restart();									
-						Scheduler.queues[0].restart();		
-						System.out.println("Simulating...");
-						Scheduler.simulate();
-					}*/
 					
 					startButton.setEnabled(false);
 					insProcess.setEnabled(false);
 					mlfq.setEnabled(false);
 					quantumItem.setEnabled(false);
 					
-//					alreadyStarted = true;					
-//				}
 			}			
 		});
 		mlfqPanel.add(startButton);
@@ -1133,7 +1123,7 @@ public class GanttChart extends JFrame{
 		timeLapse = 0;
 		procYOffset = 0;
 		timesYOffset = 0;
-		panelWidth = 1150;		
+		panelWidth = 1150;	
 	}
 	
 	public static void addNewArrivedProcess(int processId, int arrivalTime, int burstTime, int priority){							
@@ -1261,16 +1251,22 @@ public class GanttChart extends JFrame{
 		con.revalidate();
 	}
 
-	public static void simulationDone(Object queue) {
-				
+	public void simulationDone(Object queue) {
+		
+		con.removeAll();
+		init();
+		
 		startButton.setEnabled(true);
 		insProcess.setEnabled(true);
 		mlfq.setEnabled(true);
 		
+		System.out.println(startButton.isEnabled());
+		
+		con.repaint();
+		con.revalidate();
+		
 		if(algorithm == SchedulingAlgorithm.RR)
 			quantumItem.setEnabled(true);
-		
-		alreadyStarted = false;
 		
 		if(queue instanceof FCFSQueue){
 			((FCFSQueue) queue).stopThread();

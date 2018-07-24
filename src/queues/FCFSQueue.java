@@ -1,21 +1,25 @@
 package queues;
 import constants.QueueType;
 
-public class FCFSQueue extends Queue{	
+public class FCFSQueue extends Queue{
 	public FCFSQueue(int level){
 		super(level);
 		this.queueType = QueueType.FCFS;
 	}
-			
+
 	public void run(){
+		//if (clockTime <= 0) return;
+		System.out.println("[FCFSQueue:] In run()");		
 		queueStartTime = clockTime;
-		
-		while(getNextArrivalTime() == clockTime) {
+		System.out.println("[FCFSQueue:] clockTime: " + clockTime);
+
+		while(getNextArrivalTime() == clockTime) {			
 			getNextProcess();
 		}
-		
+
+		//System.out.println("[FCFS:] totalBurstTime: " + totalBurstTime);
 		for(int ctr = 0; ctr < totalBurstTime; ctr++){
-			if((currProcess = peekHead()) != null){					
+			if((currProcess = peekHead()) != null){			
 				if(currProcess.getResponseTime() < 0) {
 					currProcess.setStartTime(queueStartTime + ctr);
 					currProcess.setFirstStartTime(queueStartTime + ctr);
@@ -45,15 +49,15 @@ public class FCFSQueue extends Queue{
 					prevProcess = currProcess;					
 					prevTimeQuantum = timeNow;
 				}
-				while(getNextArrivalTime() == clockTime) {
+				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
+					System.out.println("[FCFSQueue:] getNextProcess()");
 					getNextProcess();
 				}
 				clockTime++;
-			}
+			}			
 			stopThread();
-		}
+		}		
 	}		
-	
 
 	public void preemptQueue() {
 		stopThread();

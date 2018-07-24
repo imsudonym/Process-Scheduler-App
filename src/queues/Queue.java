@@ -12,6 +12,7 @@ import scheduler.Main;
 public abstract class Queue {
 	public static ArrayList<CPUBoundProcess> processList = new ArrayList<CPUBoundProcess>();
 	protected PseudoArray array = new PseudoArray(1000);
+	protected GanttChart ganttChart = new GanttChart();
 	
 	protected int totalBurstTime = 0;
 	protected static int prevTime = 0;
@@ -27,7 +28,7 @@ public abstract class Queue {
 	protected static CPUBoundProcess currProcess;
 	protected static CPUBoundProcess prevProcess;
 	protected boolean running = false;
-	protected static boolean threadStopped = false;
+	public static boolean threadStopped = false;
 	
 	protected int level = -1;
 	protected long timeStart;
@@ -203,6 +204,7 @@ public abstract class Queue {
 	}
 	
 	protected void simulationDone(){
+		clockTime = -1;
 		ArrayList<CPUBoundProcess> temp = processList;
 		int count =  temp.size();
 		
@@ -225,7 +227,7 @@ public abstract class Queue {
 			if((temp.get(i) instanceof IOBoundProcess)) continue;
 		}
 		
-		count--;
+		//count--;	// Bakit tayo magma-minus ng isa?
 		
 		avgResponse = avgResponse/count;
 		avgWait = avgWait/count;
@@ -233,7 +235,7 @@ public abstract class Queue {
 		
 		System.out.println("avgResponse = " + avgResponse + " avgWait = " + avgWait + " avgTurnaround = " + avgTurnaround);
 		
-		GanttChart.simulationDone(this);
+		ganttChart.simulationDone(this);
 	}
 	
 	protected int getNextArrivalTime() {
