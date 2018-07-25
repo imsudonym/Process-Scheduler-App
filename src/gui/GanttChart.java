@@ -89,7 +89,7 @@ public class GanttChart extends JFrame{
 	
 	private static int yOffset = -1;			
 	private static int xOffset = -1;
-	private static int prevFCFSBurstLength = -1;
+	private static int prevBurstLength = -1;
 	private static int timeCounter = 0;
 	private static int timeLapse = 0;
 	private static int timesEntry;
@@ -183,6 +183,18 @@ public class GanttChart extends JFrame{
 			        fileChosen = fileChooser.getSelectedFile().getAbsolutePath();			        
 			        readFile(fileChosen);
 			    }
+			    
+			    Queue.threadStopped = false;
+				Queue.processList.removeAll(Queue.processList);
+				Queue.clockTime = 0;
+				
+				resetGanttChart();
+				resetTimesInformation();
+				resetArrivedTable();
+				resetTimeAverages();
+				
+				con.repaint();
+				con.revalidate();
 			}
 		});
 		
@@ -376,7 +388,7 @@ public class GanttChart extends JFrame{
 				while((line = in.readLine()) != null){
 				    System.out.println(line);
 				    String[] token = line.split(" ");
-				    						    						    
+				    
 				    PID.add(Integer.parseInt(token[0]));
 				    arrivalTime.add(Integer.parseInt(token[1]));
 				    burstTime.add(Integer.parseInt(token[2]));
@@ -539,10 +551,20 @@ public class GanttChart extends JFrame{
 		algoList1.setSelectedIndex(0);
 		
 		algoList1.addActionListener(new ActionListener() {
-
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
+				
+				Queue.threadStopped = false;
+				Queue.processList.removeAll(Queue.processList);
+				Queue.clockTime = 0;
+				
+				resetGanttChart();
+				resetTimesInformation();
+				resetArrivedTable();
+				resetTimeAverages();
+				
+				con.repaint();
+				con.revalidate();
 				
 				if (selected.equals("SJF")) {
 					algorithm1 = SchedulingAlgorithm.SJF;
@@ -554,7 +576,6 @@ public class GanttChart extends JFrame{
 					algorithm1 = SchedulingAlgorithm.PRIO;
 				}else if (selected.equals("RR")) {
 					algorithm1 = SchedulingAlgorithm.RR;
-					addSetQuantum(160, 65, 1);
 				}else {
 					algorithm1 = SchedulingAlgorithm.FCFS;
 				}
@@ -583,6 +604,18 @@ public class GanttChart extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
+				
+				Queue.threadStopped = false;
+				Queue.processList.removeAll(Queue.processList);
+				Queue.clockTime = 0;
+				
+				resetGanttChart();
+				resetTimesInformation();
+				resetArrivedTable();
+				resetTimeAverages();
+				
+				con.repaint();
+				con.revalidate();
 				
 				if (selected.equals("SJF")) {
 					algorithm2 = SchedulingAlgorithm.SJF;
@@ -623,6 +656,18 @@ public class GanttChart extends JFrame{
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
 				
+				Queue.threadStopped = false;
+				Queue.processList.removeAll(Queue.processList);
+				Queue.clockTime = 0;
+				
+				resetGanttChart();
+				resetTimesInformation();
+				resetArrivedTable();
+				resetTimeAverages();
+				
+				con.repaint();
+				con.revalidate();
+				
 				if (selected.equals("SJF")) {
 					algorithm3 = SchedulingAlgorithm.SJF;
 				}else if (selected.equals("SRTF")) {
@@ -661,6 +706,18 @@ public class GanttChart extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
+				
+				Queue.threadStopped = false;
+				Queue.processList.removeAll(Queue.processList);
+				Queue.clockTime = 0;
+				
+				resetGanttChart();
+				resetTimesInformation();
+				resetArrivedTable();
+				resetTimeAverages();
+				
+				con.repaint();
+				con.revalidate();
 				
 				if (selected.equals("SJF")) {
 					algorithm4 = SchedulingAlgorithm.SJF;
@@ -722,12 +779,7 @@ public class GanttChart extends JFrame{
 							break;
 						}
 					}
-					
-					// TODO does not show change of quantum value
-					button.setVisible(false);
-					GanttChart.mlfqPanel.remove(button);
-					GanttChart.mlfqPanel.repaint();
-					GanttChart.mlfqPanel.revalidate();
+					button.setText("Quantum = " + quantum1);
 				}
 			});
 			
@@ -859,6 +911,12 @@ public class GanttChart extends JFrame{
 					System.out.println("[GanttChart:] Start Button pressed.");
 					Queue.threadStopped = false;
 					Queue.processList.removeAll(Queue.processList);
+					Queue.clockTime = 0;
+					
+					resetGanttChart();
+					resetTimesInformation();
+					resetArrivedTable();
+					resetTimeAverages();
 					
 					int queues_num = level;
 					processes.removeAll(processes);
@@ -1042,7 +1100,7 @@ public class GanttChart extends JFrame{
 		avgTimeTable.add(avgTurnaroundTime);		
 		
 	}
-
+	
 	public static void addExecutingProcess(byte level, int processId, int executionTime, int timeNow) {
 							
 		Container container = null;		
@@ -1081,11 +1139,11 @@ public class GanttChart extends JFrame{
 			timePanel.setSize(new Dimension(panelWidth, 73));
 		}
 		
-		if(prevFCFSBurstLength < 0){
+		if(prevBurstLength < 0){
 			xOffset = 0;
 			yOffset = 0;				
 		}else{							
-			xOffset += prevFCFSBurstLength;											
+			xOffset += prevBurstLength;											
 		}
 		
 		if(prevEndTime > timeNow-executionTime) {
@@ -1103,28 +1161,29 @@ public class GanttChart extends JFrame{
 		timeLabel[timeCounter].setBounds(xOffset + 37, 2, 30, 15);
 		
 		timePanel.add(timeLabel[timeCounter++]);
-		prevFCFSBurstLength = 50;	
+		prevBurstLength = 50;	
 				
 		prevEndTime = timeNow;	
 		comp.setBounds(xOffset, yOffset, 50, 51);
 		timePanel.repaint();
-		timePanel.revalidate();			
+		timePanel.revalidate();
 										
 		container.add(comp);
 		container.repaint();
 		con.repaint();
 		con.revalidate();
 	}
-	
+
 	private void reset(){
 		timeCounter = 0;
-		prevFCFSBurstLength = -1;
+		prevBurstLength = -1;
 		xOffset = 0;
 		timeLapse = 0;
 		procYOffset = 0;
 		timesYOffset = 0;
 		panelWidth = 1150;	
 	}
+	
 	
 	public static void addNewArrivedProcess(int processId, int arrivalTime, int burstTime, int priority){							
 				
@@ -1140,22 +1199,22 @@ public class GanttChart extends JFrame{
 		}
 		
 		JPanel idLabelPanel = new JPanel();
-		idLabelPanel.setBounds(1, procYOffset+=25, 50, 25);
-		idLabelPanel.add(new JLabel(""+processId));		
+		idLabelPanel.setBounds(1, procYOffset+=25, 40, 25);
+		idLabelPanel.add(new JLabel(""+processId));
 		pcbIdPanel.add(idLabelPanel);		
 
 		JPanel arrLabelPanel = new JPanel();
-		arrLabelPanel.setBounds(1, procYOffset, 120, 25);
+		arrLabelPanel.setBounds(1, procYOffset, 110, 25);
 		arrLabelPanel.add(new JLabel(""+arrivalTime));		
 		pcbArrivalPanel.add(arrLabelPanel);
 		
 		JPanel burstLabelPanel = new JPanel();
-		burstLabelPanel.setBounds(1, procYOffset, 120, 25);
+		burstLabelPanel.setBounds(1, procYOffset, 110, 25);
 		burstLabelPanel.add(new JLabel(""+burstTime));		
 		pcbBurstPanel.add(burstLabelPanel);				
 		
 		JPanel priorityLabelPanel = new JPanel();
-		priorityLabelPanel.setBounds(1, procYOffset, 118, 25);
+		priorityLabelPanel.setBounds(1, procYOffset, 108, 25);
 		priorityLabelPanel.add(new JLabel(""+priority));		
 		pcbPriorityPanel.add(priorityLabelPanel);
 		
@@ -1168,32 +1227,11 @@ public class GanttChart extends JFrame{
 		pcbPriorityPanel.repaint();
 		pcbPriorityPanel.revalidate();
 	}
-	
-	public static void addLastCompletionTime(byte level, int algorithm){
-				
-		JPanel timePanel = null;
-		
-		if(level == 0)
-			timePanel = timePanel1;
-		else if(level == 1)
-			timePanel = timePanel2;
-		else if(level == 2)
-			timePanel = timePanel3;
-		else if(level == 3)
-			timePanel = timePanel4;
-			
-		timeLabel[timeCounter] = new JLabel("" + timeLapse);
-		timeLabel[timeCounter].setFont(timeLabelFont);
-		timeLabel[timeCounter].setForeground(Color.WHITE);
-		timeLabel[timeCounter].setBounds(xOffset + prevFCFSBurstLength + 1, 2, 30, 15);			
-		timePanel.add(timeLabel[timeCounter++]);
-		timePanel.repaint();
-	}
-	
+
 	public static void addTimesInformation(int processId, long responseTime, long waitTime, long turnaroundTime) {
 		timesEntry++;
 		if(timesEntry > 9){
-			timesPanelHeight += 18;
+			timesPanelHeight += 22;
 			timesPanel.setPreferredSize(new Dimension(575, timesPanelHeight));
 			timesIdPanel.setSize(new Dimension(timesIdPanel.getWidth(), timesPanelHeight));
 			responseTimePanel.setSize(new Dimension(responseTimePanel.getWidth(), timesPanelHeight));
@@ -1202,22 +1240,22 @@ public class GanttChart extends JFrame{
 		}
 		
 		JPanel idLabelPanel = new JPanel();
-		idLabelPanel.setBounds(1, timesYOffset+=25, 50, 25);
+		idLabelPanel.setBounds(1, timesYOffset+=25, 40, 25);
 		idLabelPanel.add(new JLabel("" + processId));		
 		timesIdPanel.add(idLabelPanel);		
 
 		JPanel resLabelPanel = new JPanel();
-		resLabelPanel.setBounds(1, timesYOffset, 120, 25);
+		resLabelPanel.setBounds(1, timesYOffset, 110, 25);
 		resLabelPanel.add(new JLabel("" + responseTime));		
 		responseTimePanel.add(resLabelPanel);
 		
 		JPanel waitLabelPanel = new JPanel();
-		waitLabelPanel.setBounds(1, timesYOffset, 120, 25);
+		waitLabelPanel.setBounds(1, timesYOffset, 110, 25);
 		waitLabelPanel.add(new JLabel("" + waitTime));		
 		waitTimePanel.add(waitLabelPanel);				
 		
 		JPanel turnaroundLabelPanel = new JPanel();
-		turnaroundLabelPanel.setBounds(1, timesYOffset, 141, 25);
+		turnaroundLabelPanel.setBounds(1, timesYOffset, 131, 25);
 		turnaroundLabelPanel.add(new JLabel("" + turnaroundTime));		
 		turnaroundTimePanel.add(turnaroundLabelPanel);
 		
@@ -1242,17 +1280,230 @@ public class GanttChart extends JFrame{
 		waitLabelPanel.add(new JLabel("" + String.format("%.2f", avgWait)));		
 		avgWaitTime.add(waitLabelPanel);				
 		
-		JPanel avgTurnaroundLabelPanel = new JPanel();
-		avgTurnaroundLabelPanel.setBounds(1, 1, 141, 23);
-		avgTurnaroundLabelPanel.add(new JLabel("" + String.format("%.2f", avgTurnaround)));		
-		avgTurnaroundTime.add(avgTurnaroundLabelPanel);
-		
-		con.repaint();
-		con.revalidate();
+		JPanel turnaroundLabelPanel = new JPanel();
+		turnaroundLabelPanel.setBounds(1, 1, 141, 23);
+		turnaroundLabelPanel.add(new JLabel("" + String.format("%.2f", avgTurnaround)));		
+		avgTurnaroundTime.add(turnaroundLabelPanel);
+				
+		resLabelPanel.repaint();
+		waitLabelPanel.repaint();
+		turnaroundLabelPanel.repaint();
+		resLabelPanel.revalidate();
+		waitLabelPanel.revalidate();
+		turnaroundLabelPanel.revalidate();
 	}
+	
 
-	public void simulationDone(Object queue) {
+	private void resetGanttChart() {
+		timeCounter = 0;
+		xOffset = -1;
+		prevBurstLength = -1;
+		prevEndTime = -1;
+		panelWidth = 1150;		
 		
+		if(level == 1) {			
+			panel1.removeAll();
+			timePanel1.removeAll();
+			panel1.add(timePanel1);
+			panel1.repaint();
+			panel1.revalidate();
+			
+			panel1.setPreferredSize(new Dimension(panelWidth-2, 73));
+			timePanel1.setSize(new Dimension(panelWidth, 73));
+			
+		}else if (level == 2) {			
+			
+			panel1.removeAll();
+			panel2.removeAll();
+			
+			timePanel1.removeAll();
+			timePanel2.removeAll();
+			
+			panel1.add(timePanel1);
+			panel2.add(timePanel2);
+			
+			panel1.repaint();
+			panel2.repaint();
+			
+			panel1.revalidate();
+			panel2.revalidate();
+			
+		}else if (level == 3) {
+			
+			panel1.removeAll();
+			panel2.removeAll();
+			panel3.removeAll();
+			
+			timePanel1.removeAll();
+			timePanel2.removeAll();
+			timePanel3.removeAll();
+			
+			panel1.add(timePanel1);
+			panel2.add(timePanel2);
+			panel3.add(timePanel3);
+			
+			panel1.repaint();
+			panel2.repaint();
+			panel3.repaint();
+			
+			panel1.revalidate();
+			panel2.revalidate();
+			panel3.revalidate();
+			
+		}else if (level == 4) {			
+			
+			panel1.removeAll();
+			panel2.removeAll();
+			panel3.removeAll();
+			panel4.removeAll();
+			
+			timePanel1.removeAll();
+			timePanel2.removeAll();
+			timePanel3.removeAll();
+			timePanel4.removeAll();
+			
+			panel1.add(timePanel1);
+			panel2.add(timePanel2);
+			panel3.add(timePanel3);			
+			panel4.add(timePanel4);
+			
+			panel1.repaint();
+			panel2.repaint();
+			panel3.repaint();
+			panel4.repaint();
+			
+			panel1.revalidate();
+			panel2.revalidate();
+			panel3.revalidate();
+			panel4.revalidate();			
+		}
+		mlfqPanel.repaint();
+		mlfqPanel.revalidate();
+	}
+	
+	
+	private void resetArrivedTable() {
+		procYOffset = 0;
+		processCount = 0;
+		pcbPanelHeight = 350;		
+		
+		pcbIdPanel.removeAll();
+		pcbIdPanel.setBorder(border);		
+		pcbIdPanel.setBounds(1, 1, 50, 350);
+		
+		pcbPanel.setPreferredSize(new Dimension(575, pcbPanelHeight));
+		
+		JPanel idLabelPanel = new JPanel();
+		idLabelPanel.setBounds(0, 0, 50, 25);
+		idLabelPanel.setBorder(border);
+		idLabelPanel.add(new JLabel("PID"));
+		pcbIdPanel.add(idLabelPanel);		
+		pcbPanel.add(pcbIdPanel);		
+		
+		pcbArrivalPanel.removeAll();;
+		pcbArrivalPanel.setBorder(border);		
+		pcbArrivalPanel.setBounds(51, 1, 120, 350);		
+		
+		JPanel arrivalLabelPanel = new JPanel();
+		arrivalLabelPanel.setBounds(0, 0, 120, 25);
+		arrivalLabelPanel.setBorder(border);
+		arrivalLabelPanel.add(new JLabel("ARRIVAL TIME"));
+		pcbArrivalPanel.add(arrivalLabelPanel, BorderLayout.NORTH);
+		pcbPanel.add(pcbArrivalPanel);
+		
+		pcbBurstPanel.removeAll();
+		pcbBurstPanel.setBorder(border);		
+		pcbBurstPanel.setBounds(171, 1, 120, 350);
+		pcbPanel.add(pcbBurstPanel);
+		
+		JPanel burstLabelPanel = new JPanel();
+		burstLabelPanel.setBounds(0, 0, 120, 25);
+		burstLabelPanel.setBorder(border);
+		burstLabelPanel.add(new JLabel("BURST TIME"));
+		pcbBurstPanel.add(burstLabelPanel, BorderLayout.NORTH);
+		pcbPanel.add(pcbBurstPanel);
+		
+		pcbPriorityPanel.removeAll();
+		pcbPriorityPanel.setBorder(border);		
+		pcbPriorityPanel.setBounds(291, 1, 110, 350);
+		pcbPanel.add(pcbPriorityPanel);		
+		
+		JPanel priorityLabelPanel = new JPanel();
+		priorityLabelPanel.setBounds(0, 0, 110, 25);
+		priorityLabelPanel.setBorder(border);
+		priorityLabelPanel.add(new JLabel("PRIORITY"));
+		pcbPriorityPanel.add(priorityLabelPanel, BorderLayout.NORTH);
+		pcbPanel.add(pcbPriorityPanel);
+		
+		pcbIdPanel.repaint();
+		pcbArrivalPanel.repaint();
+		pcbBurstPanel.repaint();
+		pcbPriorityPanel.repaint();
+		
+		pcbIdPanel.revalidate();
+		pcbArrivalPanel.revalidate();
+		pcbBurstPanel.revalidate();
+		pcbPriorityPanel.revalidate();
+	}
+	
+	
+	private void resetTimesInformation() {
+		timesEntry = 0;
+		timesPanelHeight = 350;
+		timesYOffset = 0;
+		
+		timesPanel.setPreferredSize(new Dimension(575, 250));
+		
+		timesIdPanel.removeAll();		
+		JPanel timeIdLabelPanel = new JPanel();
+		timeIdLabelPanel.setBounds(0, 0, 50, 25);
+		timeIdLabelPanel.setBorder(border);
+		timeIdLabelPanel.add(new JLabel("PID"));
+		timesIdPanel.add(timeIdLabelPanel);		
+		timesPanel.add(timesIdPanel);			
+		
+		responseTimePanel.removeAll();				
+		JPanel responseTimeLabelPanel = new JPanel();
+		responseTimeLabelPanel.setBounds(0, 0, 120, 25);
+		responseTimeLabelPanel.setBorder(border);
+		responseTimeLabelPanel.add(new JLabel("RESPONSE TIME"));
+		responseTimePanel.add(responseTimeLabelPanel, BorderLayout.NORTH);
+		timesPanel.add(responseTimePanel);
+		
+		waitTimePanel.removeAll();		
+		JPanel waitTimeLabelPanel = new JPanel();
+		waitTimeLabelPanel.setBounds(0, 0, 120, 25);
+		waitTimeLabelPanel.setBorder(border);
+		waitTimeLabelPanel.add(new JLabel("WAIT TIME"));
+		waitTimePanel.add(waitTimeLabelPanel, BorderLayout.NORTH);
+		timesPanel.add(waitTimePanel);
+		
+		turnaroundTimePanel.removeAll();
+		JPanel turnaroundTimeLabelPanel = new JPanel();
+		turnaroundTimeLabelPanel.setBounds(0, 0, 141, 25);
+		turnaroundTimeLabelPanel.setBorder(border);
+		turnaroundTimeLabelPanel.add(new JLabel("TURNAROUND TIME"));
+		turnaroundTimePanel.add(turnaroundTimeLabelPanel, BorderLayout.NORTH);
+		timesPanel.add(turnaroundTimePanel);
+		
+		timesIdPanel.repaint();
+		timesIdPanel.revalidate();
+		responseTimePanel.repaint();
+		responseTimePanel.revalidate();
+		waitTimePanel.repaint();
+		waitTimePanel.revalidate();
+		turnaroundTimePanel.repaint();
+		turnaroundTimePanel.revalidate();
+	}
+	
+	
+	private void resetTimeAverages() {
+		avgResponseTime.removeAll();
+		avgWaitTime.removeAll();
+		avgTurnaroundTime.removeAll();
+	}
+	
+	public void simulationDone(Object queue) {	
 		con.removeAll();
 		init();
 		

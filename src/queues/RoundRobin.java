@@ -65,7 +65,7 @@ public class RoundRobin extends PreemptiveQueue{
 
 				if(burstLeft <= 0){										
 					if(currProcess.getPrevBurstPreempted() < quantum){
-						displayInUI(currProcess.getPrevBurstPreempted(), timeNow);								
+						displayExecutingInUI(currProcess.getPrevBurstPreempted(), timeNow);								
 					}					
 					dequeue();													
 					System.out.println("p" + currProcess.getId() + " Done executing.");					
@@ -79,7 +79,7 @@ public class RoundRobin extends PreemptiveQueue{
 				if(timeNow == prevTimeQuantum + quantum){							
 					System.out.println("[Roundrobin:] Quantum time is DONE (timeNow = " + timeNow + ")");
 					prevTimeQuantum = timeNow;
-					displayInUI(quantum, timeNow);					
+					displayExecutingInUI(quantum, timeNow);					
 					if(burstLeft > 0){											
 						preemptCurrProcess(timeNow);
 						int burstPreempted = currProcess.getBurstTime();

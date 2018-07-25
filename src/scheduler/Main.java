@@ -156,6 +156,8 @@ public class Main {
 	}
 
 	public static CPUBoundProcess getNextProcess() {
+		if(processes.size() == 0) return null;
+		
 		CPUBoundProcess nextProcess =  processes.remove(0);		
 		return nextProcess;
 	}

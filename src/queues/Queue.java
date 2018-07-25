@@ -17,7 +17,7 @@ public abstract class Queue {
 	protected int totalBurstTime = 0;
 	protected static int prevTime = 0;
 	protected static int prevTimeQuantum;
-	protected static int clockTime = 0;
+	public static int clockTime = 0;
 	protected int queueStartTime = -1;
 	protected int timeNow;
 	protected int clockTimeEnd;
@@ -67,7 +67,6 @@ public abstract class Queue {
 	}
 	
 	public void enqueue(CPUBoundProcess newProcess, int qType){
-		allProcessesDone = 0;
 		array.add(newProcess);
 		
 		if(qType == QueueType.SJF) sortSJF();
@@ -80,7 +79,7 @@ public abstract class Queue {
 			processList.add(newProcess);
 		}		
 		
-		startExecution();
+		//startExecution();
 		stopLowerLevelQueues();
 	}
 	
@@ -101,8 +100,14 @@ public abstract class Queue {
 	}
 	
 	protected CPUBoundProcess dequeue(){					
-		CPUBoundProcess prc = array.remove();											
-		return prc;
+		CPUBoundProcess process = array.remove();
+		
+		int burstExecuted = (int) (process.getEndTime()-process.getStartTime());			
+		process.setPrevBurstPreempted(process.getBurstTime());
+		System.out.println("[GanttChart] (Displaying in UI) clockTime: " + clockTime);
+		displayExecutingInUI(burstExecuted, clockTime+1);
+		
+		return process;
 	}
 	
 	protected void retain(int qType) {
@@ -124,6 +129,7 @@ public abstract class Queue {
 	
 	public void startExecution() {		
 		if(prevQueue != null && !isHigherQueueDone()) return;
+		System.out.println("[Queue] Starting execution..");
 		startThread();
 	}
 	
@@ -132,7 +138,7 @@ public abstract class Queue {
 		if(currProcess != null && hasExecuted(currProcess)) { 	
 			int burstExecuted = (int) (currProcess.getEndTime()-currProcess.getStartTime());			
 			currProcess.setPrevBurstPreempted(currProcess.getBurstTime());
-			displayInUI(burstExecuted, (int)timeNow);
+			displayExecutingInUI(burstExecuted, (int)timeNow);
 		}
 	}
 	
@@ -146,8 +152,12 @@ public abstract class Queue {
 		nextQueue.stopExecution();			
 	}
 	
-	protected void displayInUI(int burstExecuted, int timeNow) {
-		//GanttChart.addExecutingProcess((byte)level, currProcess.getId(), burstExecuted, (int)timeNow);
+	protected void displayExecutingInUI(int burstExecuted, int timeNow) {
+		GanttChart.addExecutingProcess((byte)level, currProcess.getId(), burstExecuted, timeNow);
+	}
+		
+	protected void displayArrivedInUI(int processId, int arrivalTime, int burstTime, int priority) {		
+		GanttChart.addNewArrivedProcess(processId, arrivalTime, burstTime, priority);
 	}
 	
 	protected boolean hasExecuted(CPUBoundProcess currProcess) {
@@ -215,10 +225,10 @@ public abstract class Queue {
 			System.out.println("[Queue:] id:" + i);
 			temp.get(i).setWaitTimePreemptive();
 			
-			System.out.print("[p" + temp.get(i).getId() + "]: ");
+			/*System.out.print("[p" + temp.get(i).getId() + "]: ");
 			System.out.println("timesPreempted = " + temp.get(i).timePreempted.size() + " timesResumed = " + temp.get(i).timeResumed.size() 
-					+ " waitTime: " + temp.get(i).getWaitTime() + " responseTime: " + temp.get(i).getResponseTime() + " turnAround: " + temp.get(i).getTurnaroundTime());
-			
+					+ " waitTime: " + temp.get(i).getWaitTime() + " responseTime: " + temp.get(i).getResponseTime() + " turnAround: " + temp.get(i).getTurnaroundTime());*/
+			addTimesInformation(temp.get(i).getId(), temp.get(i).getResponseTime(), temp.get(i).getWaitTime(), temp.get(i).getTurnaroundTime());
 			if(!(temp.get(i) instanceof IOBoundProcess)) {
 				avgResponse += temp.get(i).getResponseTime();
 				avgWait += temp.get(i).getWaitTime();
@@ -234,20 +244,29 @@ public abstract class Queue {
 		avgTurnaround = avgTurnaround/count;
 		
 		System.out.println("avgResponse = " + avgResponse + " avgWait = " + avgWait + " avgTurnaround = " + avgTurnaround);
+		addAverageTime(avgResponse, avgWait, avgTurnaround);
 		
 		ganttChart.simulationDone(this);
 	}
 	
+	private void addAverageTime(double avgResponse, double avgWait, double avgTurnaround) {
+		GanttChart.addTimeAverages(avgResponse, avgWait, avgTurnaround);
+	}
+	
+	private void addTimesInformation(int processId, long responseTime, long waitTime, long turnaroundTime) {
+		GanttChart.addTimesInformation(processId, responseTime, waitTime, turnaroundTime);
+	}
+	
 	protected int getNextArrivalTime() {
 		int nextArrivalTime = Main.getNextArrivalTime();
-		//System.out.println("[Roundrobin:] nextArrivalTime: " + nextArrivalTime + " timeNow: " + timeNow);
 		return nextArrivalTime;
 	}
 
 	protected void getNextProcess() {
 		CPUBoundProcess nextProcess = Main.getNextProcess();
-		System.out.println("[Roundrobin:] Inserting process P" + nextProcess.getId());
+		System.out.println("[Queue:] Inserting process P" + nextProcess.getId() + " burst: " + nextProcess.getBurstTime());
 		enqueue(nextProcess, this.queueType);
+		displayArrivedInUI(nextProcess.getId(), nextProcess.getArrivalTime(), nextProcess.getBurstNeeded(), nextProcess.getPriority());
 	}
 
 	/**
