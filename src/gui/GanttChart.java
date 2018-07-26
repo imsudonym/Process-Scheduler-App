@@ -96,7 +96,7 @@ public class GanttChart extends JFrame{
 	private static int quantum = 2;
 	private static int Offset = -2;
 	
-	private static int prevEndTime = -1;
+	private static int prevEndTime = 0;
 	
 	private static int quantum1, quantum2, quantum3, quantum4;
 	
@@ -1101,7 +1101,7 @@ public class GanttChart extends JFrame{
 		
 	}
 	
-	public static void addExecutingProcess(byte level, int processId, int executionTime, int timeNow) {
+	public static void addExecutingProcess(byte level, int processId, int startTime, int executionTime, int timeNow) {
 							
 		Container container = null;		
 		String processName = "p" + processId;		
@@ -1146,14 +1146,29 @@ public class GanttChart extends JFrame{
 			xOffset += prevBurstLength;											
 		}
 		
-		if(prevEndTime > timeNow-executionTime) {
+		
+		System.out.println("[GanttChart] prevEndTime: " + prevEndTime + " timeNow: " + timeNow + 
+				" exec: " + executionTime + " timeNow-executionTime: " + (timeNow-executionTime));
+		if(prevEndTime < timeNow-executionTime) {
+			
+			addGap();		
 			timeLabel[timeCounter] = new JLabel("" + (timeNow-executionTime));
 			timeLabel[timeCounter].setFont(timeLabelFont);
 			timeLabel[timeCounter].setForeground(Color.WHITE);
 			timeLabel[timeCounter].setBounds(xOffset + 1, 2, 30, 15);
 			
-			timePanel.add(timeLabel[timeCounter++]);
-		}		
+			timePanel.add(timeLabel[timeCounter++]);			
+			
+		}
+		
+		if(prevEndTime == 0) {
+			timeLabel[timeCounter] = new JLabel("" + 0);
+			timeLabel[timeCounter].setFont(timeLabelFont);
+			timeLabel[timeCounter].setForeground(Color.WHITE);
+			timeLabel[timeCounter].setBounds(1, 2, 30, 15);
+			
+			timePanel.add(timeLabel[timeCounter++]);			
+		}
 					
 		timeLabel[timeCounter] = new JLabel("" + timeNow);
 		timeLabel[timeCounter].setFont(timeLabelFont);
@@ -1174,6 +1189,10 @@ public class GanttChart extends JFrame{
 		con.revalidate();
 	}
 
+	public static void addGap() {
+		xOffset += 10;
+	}
+	
 	private void reset(){
 		timeCounter = 0;
 		prevBurstLength = -1;
@@ -1298,7 +1317,7 @@ public class GanttChart extends JFrame{
 		timeCounter = 0;
 		xOffset = -1;
 		prevBurstLength = -1;
-		prevEndTime = -1;
+		prevEndTime = 0;
 		panelWidth = 1150;		
 		
 		if(level == 1) {			

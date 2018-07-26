@@ -1,5 +1,7 @@
 package scheduler;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import constants.SchedulingAlgorithm;
 import gui.GanttChart;
@@ -17,11 +19,13 @@ public class Main {
 	public static Queue[] queues;
 	public static int numOfQueues = 0;		
 	public static ArrayList<CPUBoundProcess> processes = new ArrayList<CPUBoundProcess>();
+	public static int lastArrivalTime;
 	
 	public void initProcesses(int numOfQueues, ArrayList<CPUBoundProcess> processes){
 		Main.numOfQueues = numOfQueues;
 		Main.queues = new Queue[numOfQueues];		
 		Main.processes = processes;		
+		initLastArrivalTime();
 		sortByArrivalTime();
 		if(queues[0] instanceof PQueue){
 			prioritySortSameArrivalTime();
@@ -103,7 +107,7 @@ public class Main {
 	
 	public void generateQueues(int[] algorithms, int[] quantums){
 		System.out.println("[Main:] Generating multilevel queues...");
-		System.out.println("[Main:] numOfQueues: " + numOfQueues);
+		System.out.println("[Main:] numOfQueues: " + numOfQueues);	
 		
 		for(int i = 0; i < numOfQueues; i++){			
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
@@ -120,7 +124,7 @@ public class Main {
 				queues[i] = new SRTFQueue(i);
 			}
 
-			queues[i].startThread();
+			//queues[i].startThread();
 			if(i == 0) queues[i].startExecution();
 		}	
 		
@@ -165,5 +169,18 @@ public class Main {
 	public static int getNextArrivalTime() {
 		if(processes.size() == 0) return -1;
 		return processes.get(0).getArrivalTime();
+	}
+
+	private static void initLastArrivalTime() {
+		lastArrivalTime = 0;
+		for(int i = 0; i < processes.size(); i++) {
+			if(processes.get(i).getArrivalTime() >= lastArrivalTime) {
+				lastArrivalTime = processes.get(i).getArrivalTime();
+			}
+		}		
+	}
+	
+	public static int getLastArrivalTime() {
+		return lastArrivalTime;
 	}
 }

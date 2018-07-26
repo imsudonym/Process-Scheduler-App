@@ -102,11 +102,10 @@ public abstract class Queue {
 	protected CPUBoundProcess dequeue(){					
 		CPUBoundProcess process = array.remove();
 		
-		int burstExecuted = (int) (process.getEndTime()-process.getStartTime());			
+		int burstExecuted = (int)(process.getEndTime()-process.getStartTime());			
 		process.setPrevBurstPreempted(process.getBurstTime());
 		System.out.println("[GanttChart] (Displaying in UI) clockTime: " + clockTime);
-		displayExecutingInUI(burstExecuted, clockTime+1);
-		
+		displayExecutingInUI(process.getStartTime(), burstExecuted, clockTime+1);
 		return process;
 	}
 	
@@ -130,7 +129,12 @@ public abstract class Queue {
 	public void startExecution() {		
 		if(prevQueue != null && !isHigherQueueDone()) return;
 		System.out.println("[Queue] Starting execution..");
-		startThread();
+		
+		for(int i = 0; i < Main.getLastArrivalTime(); i++) {
+			startThread();
+			clockTime++;
+//			System.out.println("[Main] clockTime: " + clockTime);
+		}		
 	}
 	
 	public void stopExecution() {
@@ -138,7 +142,7 @@ public abstract class Queue {
 		if(currProcess != null && hasExecuted(currProcess)) { 	
 			int burstExecuted = (int) (currProcess.getEndTime()-currProcess.getStartTime());			
 			currProcess.setPrevBurstPreempted(currProcess.getBurstTime());
-			displayExecutingInUI(burstExecuted, (int)timeNow);
+			//displayExecutingInUI(currProcess.getStartTime(), burstExecuted, timeNow);
 		}
 	}
 	
@@ -152,8 +156,8 @@ public abstract class Queue {
 		nextQueue.stopExecution();			
 	}
 	
-	protected void displayExecutingInUI(int burstExecuted, int timeNow) {
-		GanttChart.addExecutingProcess((byte)level, currProcess.getId(), burstExecuted, timeNow);
+	protected void displayExecutingInUI(int startTime, int burstExecuted, int timeNow) {
+		GanttChart.addExecutingProcess((byte)level, currProcess.getId(), startTime, burstExecuted, timeNow);
 	}
 		
 	protected void displayArrivedInUI(int processId, int arrivalTime, int burstTime, int priority) {		

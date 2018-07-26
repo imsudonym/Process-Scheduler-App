@@ -11,7 +11,7 @@ public class NonPQueue extends Queue{
 	public void run(){
 		queueStartTime = clockTime;
 		
-		while(getNextArrivalTime() == clockTime) {
+		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
 		

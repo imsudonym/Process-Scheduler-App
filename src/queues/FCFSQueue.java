@@ -9,13 +9,15 @@ public class FCFSQueue extends Queue{
 
 	public void run(){
 		queueStartTime = clockTime;
-		System.out.println("[FCFS] clockTime: " + clockTime);
-		while(clockTime != -1 && getNextArrivalTime() == clockTime) {			
+		
+//		System.out.println("[FCFS] clockTime: " + clockTime);
+		
+		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
-
+		
 		for(int ctr = 0; ctr < totalBurstTime; ctr++){
-			if((currProcess = peekHead()) != null){			
+			if((currProcess = peekHead()) != null){				
 				if(currProcess.getResponseTime() < 0) {
 					currProcess.setStartTime(queueStartTime + ctr);
 					currProcess.setFirstStartTime(queueStartTime + ctr);
@@ -27,12 +29,12 @@ public class FCFSQueue extends Queue{
 					currProcess.preemptedFlag = false;
 				}				
 				
-				int burstLeft = currProcess.getBurstTime() - 1;					
+				int burstLeft = currProcess.getBurstTime() - 1;
 				currProcess.setBurstTime(burstLeft);	
 				
 				timeNow = queueStartTime + ctr;
 				
-				System.out.println("[FCFS:] Level = " + 
+				/*System.out.println("[FCFS:] Level = " + 
 						level + 
 						" executing P" + 
 						currProcess.getId() + 
@@ -41,20 +43,21 @@ public class FCFSQueue extends Queue{
 						" burstLeft = " +
 						burstLeft +
 						" timeNow = " + timeNow + 
-						" clockTime = " + clockTime);	
+						" clockTime = " + clockTime);*/	
 				
-				if(burstLeft == 0){				
-					dequeue();									
+				if(burstLeft == 0){
+					currProcess.setEndTime(timeNow+1);
+					dequeue();					
 					System.out.println("[FCFS:] p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 					currProcess.preemptedFlag = false;
-					prevProcess = currProcess;					
+					prevProcess = currProcess;
 					prevTimeQuantum = timeNow;
 				}
-				while(clockTime != -1 && getNextArrivalTime() == clockTime) {					
-					getNextProcess();					
+				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
+					getNextProcess();
 				}
-				
 				clockTime++;
+				System.out.println("[FCFS] clockTime: " + clockTime);
 			}			
 			stopThread();
 		}		

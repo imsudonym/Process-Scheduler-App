@@ -9,12 +9,9 @@ public class SJFQueue extends Queue{
 	}
 					
 	public void run(){
-		queueStartTime = clockTime;
+		queueStartTime = clockTime;		
 		
-		System.out.println("[SJF:] Inside run method");
-		System.out.println("[SJF:] queueStartTime: " + queueStartTime);
-		
-		while(getNextArrivalTime() == clockTime) {
+		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
 		
@@ -29,9 +26,13 @@ public class SJFQueue extends Queue{
 					currProcess.setStartTime(queueStartTime);
 					currProcess.setTimeResumed(queueStartTime);						
 					currProcess.preemptedFlag = false;
-				}				
+				}
+				
 				int burstLeft = currProcess.getBurstTime() - 1;					
-				currProcess.setBurstTime(burstLeft);	
+				currProcess.setBurstTime(burstLeft);
+				
+				timeNow = queueStartTime + ctr;
+				
 				System.out.println("[SJF:] Level = " + 
 						level + 
 						" executing P" + 
@@ -40,8 +41,8 @@ public class SJFQueue extends Queue{
 						currProcess.getStartTime() +
 						" burstLeft = " +
 						burstLeft +
-						" timeNow = " + (queueStartTime + ctr));
-				timeNow = queueStartTime + ctr;				
+						" timeNow = " + timeNow);
+							
 				if(burstLeft <= 0){								
 					dequeue();									
 					System.out.println("[SJF:] p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
@@ -49,9 +50,9 @@ public class SJFQueue extends Queue{
 					prevProcess = currProcess;					
 					prevTimeQuantum = timeNow;
 				}
-				while(getNextArrivalTime() == clockTime) {
+				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 					getNextProcess();
-				}
+				}				
 				clockTime++;			
 			}
 			stopThread();
