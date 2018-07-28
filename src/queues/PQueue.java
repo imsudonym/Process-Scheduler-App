@@ -11,30 +11,53 @@ public class PQueue extends Queue{
 	public void run(){
 		queueStartTime = clockTime;
 		
-		System.out.println("[PQ:] Inside run method");
-		System.out.println("[PQ:] queueStartTime: " + queueStartTime);
-		
-		while(getNextArrivalTime() == clockTime) {
+		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
 		
 		for(int ctr = 0; ctr < totalBurstTime; ctr++){	
 			determineToPromote();
-			if((currProcess = peekHead()) != null){				
+			if((currProcess = peekHead()) != null){
+				if(prevProcess != null && prevProcess.getId() != currProcess.getId()) {
+					if(prevProcess.getBurstTime() > 0) {
+						prevProcess.setPreempted();
+						prevProcess.setTimePreempted(timeNow);		
+						prevProcess.setEndTime(timeNow);
+						prevProcess.preemptedFlag = true;
+						prevTimeQuantum = timeNow;
+						int burstExecuted = prevProcess.getEndTime()-prevProcess.getStartTime();
+						displayExecutingInUI(burstExecuted, prevProcess.getEndTime(), prevProcess.getId());
+					}
+				}
 				prevProcess = currProcess;
 				
 				if(currProcess.getResponseTime() < 0) {
-					currProcess.setStartTime(queueStartTime + ctr);
-					currProcess.setFirstStartTime(queueStartTime + ctr);
-					currProcess.setResponseTime();	
+					if(currProcess.getArrivalTime() <= prevTimeQuantum) {
+						currProcess.setStartTime(prevTimeQuantum);
+						currProcess.setFirstStartTime(prevTimeQuantum);
+					}else {
+						currProcess.setStartTime(queueStartTime + ctr);
+						currProcess.setFirstStartTime(queueStartTime + ctr);
+					}				
+					currProcess.setResponseTime();		
 				}
 				if(currProcess.preemptedFlag) {						
-					currProcess.setStartTime(queueStartTime);
-					currProcess.setTimeResumed(queueStartTime);						
+					if(currProcess.getArrivalTime() <= prevTimeQuantum) {
+						currProcess.setStartTime(prevTimeQuantum);
+						currProcess.setStartTime(prevTimeQuantum);
+						currProcess.setTimeResumed(prevTimeQuantum);
+					}else {
+						currProcess.setStartTime(queueStartTime + ctr);
+						currProcess.setStartTime(queueStartTime + ctr);
+						currProcess.setTimeResumed(queueStartTime + ctr);
+					}									
 					currProcess.preemptedFlag = false;
 				}				
 				int burstLeft = currProcess.getBurstTime() - 1;					
 				currProcess.setBurstTime(burstLeft);	
+				
+				timeNow = queueStartTime + ctr;	
+				
 				System.out.println("[PQ:] Level = " + 
 						level + 
 						" executing P" + 
@@ -44,15 +67,16 @@ public class PQueue extends Queue{
 						" burstLeft = " +
 						burstLeft +
 						" timeNow = " + (queueStartTime + ctr));
-				timeNow = queueStartTime + ctr;				
-				if(burstLeft <= 0){								
+							
+				if(burstLeft == 0){	
+					currProcess.setEndTime(timeNow+1);
 					dequeue();									
 					System.out.println("[PQ:] p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 					currProcess.preemptedFlag = false;
 					prevProcess = currProcess;					
 					prevTimeQuantum = timeNow;
 				}
-				while(getNextArrivalTime() == clockTime) {
+				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 					getNextProcess();
 				}
 				clockTime++;

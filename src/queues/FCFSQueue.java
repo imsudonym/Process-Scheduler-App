@@ -10,8 +10,6 @@ public class FCFSQueue extends Queue{
 	public void run(){
 		queueStartTime = clockTime;
 		
-//		System.out.println("[FCFS] clockTime: " + clockTime);
-		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
@@ -57,7 +55,6 @@ public class FCFSQueue extends Queue{
 					getNextProcess();
 				}
 				clockTime++;
-				System.out.println("[FCFS] clockTime: " + clockTime);
 			}			
 			stopThread();
 		}		

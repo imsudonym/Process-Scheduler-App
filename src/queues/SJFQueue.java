@@ -43,7 +43,8 @@ public class SJFQueue extends Queue{
 						burstLeft +
 						" timeNow = " + timeNow);
 							
-				if(burstLeft <= 0){								
+				if(burstLeft <= 0){		
+					currProcess.setEndTime(timeNow+1);
 					dequeue();									
 					System.out.println("[SJF:] p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 					currProcess.preemptedFlag = false;

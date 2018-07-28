@@ -75,7 +75,7 @@ public class CPUBoundProcess {
 		this.prevBurstPreempted = prevBurstPreempted;
 	}
 
-	public long getEndTime() {
+	public int getEndTime() {
 		return endTime;
 	}
 

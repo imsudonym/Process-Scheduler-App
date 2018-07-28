@@ -32,6 +32,9 @@ public class NonPQueue extends Queue{
 				}				
 				int burstLeft = currProcess.getBurstTime() - 1;					
 				currProcess.setBurstTime(burstLeft);	
+				
+				timeNow = queueStartTime + ctr;		
+				
 				System.out.println("[NPQ:] Level = " + 
 						level + 
 						" executing P" + 
@@ -41,15 +44,16 @@ public class NonPQueue extends Queue{
 						" burstLeft = " +
 						burstLeft +
 						" timeNow = " + (queueStartTime + ctr));
-				timeNow = queueStartTime + ctr;				
-				if(burstLeft <= 0){								
+				
+				if(burstLeft == 0){		
+					currProcess.setEndTime(timeNow+1);
 					dequeue();									
 					System.out.println("[NPQ:] p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 					currProcess.preemptedFlag = false;
 					prevProcess = currProcess;					
 					prevTimeQuantum = timeNow;
 				}
-				while(getNextArrivalTime() == clockTime) {
+				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 					getNextProcess();
 				}
 				clockTime++;							
