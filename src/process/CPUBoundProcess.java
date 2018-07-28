@@ -106,8 +106,8 @@ public class CPUBoundProcess {
 	public void setWaitTimePreemptive() {
 		int waitTime = (firstStartTime - arrivalTime) < 0 ? 0: (firstStartTime - arrivalTime);
 		
-		System.out.println("[CPUBoundProcess] process P" + id);
-		/*System.out.println("[CPUBoundProcess:] timeResumed.size:" + timeResumed.size());
+		/*System.out.println("[CPUBoundProcess] process P" + id);
+		System.out.println("[CPUBoundProcess:] timeResumed.size:" + timeResumed.size());
 		System.out.println("[CPUBoundProcess:] timePreemted.size:" + timePreempted.size());*/
 		
 		for(int i = 0; i < timeResumed.size(); i++) {

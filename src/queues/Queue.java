@@ -43,6 +43,7 @@ public abstract class Queue {
 		run();
 	}
 	
+	
 	public void stopThread() {
 		if(threadStopped) return;
 		if(peekHead() == null && getSize() == 0 && isHigherQueueDone()) {
@@ -53,7 +54,7 @@ public abstract class Queue {
 					clockTimeEnd = clockTime;
 					simulationDone();					
 				}else {							
-					System.out.println("[Queue:] starting lower level queues");
+					//System.out.println("[Queue:] starting lower level queues");
 					startLowerLevelQueues();													
 				}
 			}
@@ -73,6 +74,7 @@ public abstract class Queue {
 		if(qType == QueueType.SRTF) sortSRTF(); 
 		if(qType == QueueType.PQ) sortPQ();
 		if(qType == QueueType.NPQ) sortNPQ();
+		sortByBound();
 		
 		if(!processList.contains(newProcess)) {
 			totalBurstTime += newProcess.getBurstNeeded();
@@ -83,6 +85,11 @@ public abstract class Queue {
 		stopLowerLevelQueues();
 	}
 	
+	private void sortByBound() {
+		array.givePriorityToIoBounds();
+	}
+
+
 	private void sortNPQ() {
 		array.sortNPQ();
 	}
@@ -129,13 +136,16 @@ public abstract class Queue {
 	
 	public void startExecution() {		
 		if(prevQueue != null && !isHigherQueueDone()) return;
-		System.out.println("[Queue] Starting execution..");
+		//System.out.println("[Queue] Starting execution..");
 		
-		for(int i = 0; i < Main.getLastArrivalTime(); i++) {
+		if(clockTime < Main.getLastArrivalTime()) {
+			for(int i = clockTime; i < Main.getLastArrivalTime(); i++) {
+				startThread();
+				clockTime++;
+			}
+		}else {
 			startThread();
-			clockTime++;
-//			System.out.println("[Main] clockTime: " + clockTime);
-		}		
+		}
 	}
 	
 	public void stopExecution() {
@@ -148,7 +158,8 @@ public abstract class Queue {
 	}
 	
 	protected void startLowerLevelQueues() {
-		if(nextQueue == null) return;			
+		if(nextQueue == null) return;	
+		System.out.println("[Queue] nextQueue: " + nextQueue);
 		nextQueue.startExecution();
 	}
 	
@@ -226,8 +237,7 @@ public abstract class Queue {
 		double avgResponse = 0;
 		double avgWait = 0;
 		double avgTurnaround = 0;
-		for(int i = 0; i < count; i++) {
-			System.out.println("[Queue:] id:" + i);
+		for(int i = 0; i < count; i++) {			
 			temp.get(i).setWaitTimePreemptive();
 			
 			/*System.out.print("[p" + temp.get(i).getId() + "]: ");

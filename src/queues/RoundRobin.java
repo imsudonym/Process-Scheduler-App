@@ -18,14 +18,14 @@ public class RoundRobin extends PreemptiveQueue{
 	}	
 					
 	public void run(){	 
-		queueStartTime = clockTime; // time this queue started executing.		
+		queueStartTime = clockTime;		
 		
-		System.out.println("[Roundrobin:] Inside run method");
-		System.out.println("[Roundrobin:] queueStartTime: " + queueStartTime);
+		System.out.println("[Roundrobin:] Inside run method");		
 		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}		
+		
 		for(int ctr = 0; ctr < totalBurstTime; ctr++){					
 			if((currProcess = peekHead()) != null){				
 				if(currProcess.getResponseTime() < 0) {
@@ -90,9 +90,9 @@ public class RoundRobin extends PreemptiveQueue{
 						
 						if(nextQueue == null) {
 							retain(QueueType.RR);
-						}/*else {
+						}else {
 							demote(dequeue());									
-						}*/
+						}
 					}
 				}				
 				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
@@ -106,7 +106,7 @@ public class RoundRobin extends PreemptiveQueue{
 
 	protected void demote(CPUBoundProcess process) {
 		if(nextQueue == null) return;
-		System.out.println("level = " + level + " demote p" + process.getId() + " burstLeft = " + process.getBurstTime() + " size = " + getSize());
+		System.out.println("****[RR] level = " + level + " demote p" + process.getId() + " burstLeft = " + process.getBurstTime() + " size = " + getSize());
 		nextQueue.enqueue(process, nextQueue.queueType);
 	}
 	

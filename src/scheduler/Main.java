@@ -123,9 +123,6 @@ public class Main {
 			}else if (algorithms[i] == SchedulingAlgorithm.SRTF){
 				queues[i] = new SRTFQueue(i);
 			}
-
-			//queues[i].startThread();
-			if(i == 0) queues[i].startExecution();
 		}	
 		
 		for(int i = 0; i < numOfQueues; i++) {
@@ -153,6 +150,8 @@ public class Main {
 				queues[i].setNextQueue(queues[i+1]);
 			}			
 		}
+		
+		queues[0].startExecution();
 	}			
 						
 	public static int getMaxLevelOfQueues() {

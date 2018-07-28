@@ -145,6 +145,7 @@ public class PseudoArray {
 			CPUBoundProcess currProcess = current.getValue();												
 				
 			if(currProcess instanceof IOBoundProcess){	
+				System.out.println("[PseudoArray] P" + currProcess.getId() + " instanceof IOBoundProcess");
 				tempArray.add(current); 
 				list.remove(current.getKey());
 				ctr--;
@@ -162,5 +163,6 @@ public class PseudoArray {
 			list.addToFront(newLink);
 			ctr++;
 		}
+		printContents();
 	}
 }
