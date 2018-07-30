@@ -14,51 +14,60 @@ public class FCFSQueue extends Queue{
 		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
-		}
+		}		
 
 		for(int ctr = 0; ctr < totalBurstTime; ctr++){
-			if((currProcess = peekHead()) != null){		
-				if(prevProcess != null && prevProcess.getId() != currProcess.getId()) {
-					if(prevProcess.getBurstTime() > 0) {
-						prevProcess.setPreempted();
-						prevProcess.setTimePreempted(timeNow);		
-						prevProcess.setEndTime(timeNow);
-						prevProcess.preemptedFlag = true;
-						prevTimeQuantum = timeNow;
-						int burstExecuted = prevProcess.getEndTime()-prevProcess.getStartTime();
-						displayExecutingInUI(burstExecuted, prevProcess.getEndTime(), prevProcess.getId());
-					}
-				}
-				prevProcess = currProcess;	
-				if(currProcess.getResponseTime() < 0) {
-					if(currProcess.getArrivalTime() <= prevTimeQuantum) {
-						currProcess.setStartTime(prevTimeQuantum);
-						currProcess.setFirstStartTime(prevTimeQuantum);
-					}else {
-						currProcess.setStartTime(queueStartTime + ctr);
-						currProcess.setFirstStartTime(queueStartTime + ctr);
-					}					
-					currProcess.setResponseTime();
-				}
-				if(currProcess.preemptedFlag) {						
-					if(currProcess.getArrivalTime() <= prevTimeQuantum) {
-						currProcess.setStartTime(prevTimeQuantum);
-						currProcess.setStartTime(prevTimeQuantum);
+			
+			timeNow = queueStartTime + ctr;
+			
+			if((currProcess = peekHead()) != null){									
+				if(prevQueue != null && prevQueue instanceof RoundRobin) {
+					currProcess.setStartTime(prevTimeQuantum);
+					if(currProcess.preemptedFlag) {
 						currProcess.setTimeResumed(prevTimeQuantum);
-					}else {
-						currProcess.setStartTime(queueStartTime + ctr);
-						currProcess.setStartTime(queueStartTime + ctr);
-						currProcess.setTimeResumed(queueStartTime + ctr);
-					}										
-					currProcess.preemptedFlag = false;
-				}				
+						currProcess.preemptedFlag = false;
+					}
+				}else {
+					if(prevProcess != null && prevProcess.getId() != currProcess.getId()) {
+						if(prevProcess.getBurstTime() > 0) {
+							prevProcess.setPreempted();
+							prevProcess.setTimePreempted(timeNow);		
+							prevProcess.setEndTime(timeNow);
+							prevProcess.preemptedFlag = true;
+							System.out.println("*****[FCFS] prevTimeQuantum: " + prevTimeQuantum);
+							prevTimeQuantum = timeNow;
+							System.out.println("	*****[FCFS] prevTimeQuantum: " + prevTimeQuantum);
+							int burstExecuted = prevProcess.getEndTime()-prevProcess.getStartTime();
+							displayExecutingInUI(burstExecuted, prevProcess.getEndTime(), prevProcess.getId());
+						}
+					}
+					if(currProcess.getResponseTime() < 0) {
+						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
+							currProcess.setStartTime(prevTimeQuantum);
+							currProcess.setFirstStartTime(prevTimeQuantum);
+						}else {
+							currProcess.setStartTime(queueStartTime + ctr);
+							currProcess.setFirstStartTime(queueStartTime + ctr);
+						}					
+						currProcess.setResponseTime();
+					}
+					if(currProcess.preemptedFlag) {		
+						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
+							currProcess.setStartTime(prevTimeQuantum);
+							currProcess.setTimeResumed(prevTimeQuantum);
+						}else {
+							currProcess.setStartTime(queueStartTime + ctr);
+							currProcess.setTimeResumed(queueStartTime + ctr);
+						}
+						currProcess.preemptedFlag = false;
+					}			
+				}
+				prevProcess = currProcess;
 				
 				int burstLeft = currProcess.getBurstTime() - 1;
 				currProcess.setBurstTime(burstLeft);	
 				
-				timeNow = queueStartTime + ctr;
-				
-				/*System.out.println("[FCFS:] Level = " + 
+				System.out.println("[FCFS:] Level = " + 
 						level + 
 						" executing P" + 
 						currProcess.getId() + 
@@ -67,10 +76,10 @@ public class FCFSQueue extends Queue{
 						" burstLeft = " +
 						burstLeft +
 						" timeNow = " + timeNow + 
-						" clockTime = " + clockTime);*/	
+						" clockTime = " + clockTime);
 				
 				if(burstLeft == 0){
-					currProcess.setEndTime(timeNow+1);
+					currProcess.setEndTime(timeNow);
 					dequeue();					
 					System.out.println("[FCFS:] p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 					currProcess.preemptedFlag = false;

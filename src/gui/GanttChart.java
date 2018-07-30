@@ -66,7 +66,7 @@ public class GanttChart extends JFrame{
 	private static JLabel[] timeLabel = new JLabel[100000];
 	
 	private static JMenuBar menuBar;
-	private static JMenu insProcess, setAlgorithm, mlfq, singleQueue, quantumItem;
+	private static JMenu insProcess, mlfq, quantumItem;
 
 	private static JButton startButton;
 	private static JButton setQuantum1, setQuantum2, setQuantum3, setQuantum4;
@@ -91,7 +91,6 @@ public class GanttChart extends JFrame{
 	private static int xOffset = -1;
 	private static int prevBurstLength = -1;
 	private static int timeCounter = 0;
-	private static int timeLapse = 0;
 	private static int timesEntry;
 	private static int quantum = 2;
 	private static int Offset = -2;
@@ -99,10 +98,6 @@ public class GanttChart extends JFrame{
 	private static int prevEndTime = 0;
 	
 	private static int quantum1, quantum2, quantum3, quantum4;
-	
-	private static boolean alreadyStarted = false;
-	private static boolean threadStarted = false;
-	private static boolean MLFQ = false;
 	
 	private static String fileChosen;
 	private static String[] algorithms = {"FCFS", "SJF", "SRTF", "NP-PRIO", "P-PRIO", "RR"};
@@ -132,10 +127,7 @@ public class GanttChart extends JFrame{
 		
 	public void init(){
 		
-		alreadyStarted = false;
-		
 		JMenuItem importFile;				
-		JMenuItem singleSet;
 		JMenuItem quantumChange;
 		
 		menuBar = new JMenuBar();		
@@ -198,91 +190,7 @@ public class GanttChart extends JFrame{
 			}
 		});
 		
-		insProcess.add(importFile);				
-		
-		JRadioButtonMenuItem fcfs, rr, sjf, srtf, prio, npprio;
-		fcfs = new JRadioButtonMenuItem("FCFS");
-		fcfs.addActionListener(new ActionListener(){			
-			public void actionPerformed(ActionEvent e) {
-				algorithm = SchedulingAlgorithm.FCFS;	
-				reset();
-				con.removeAll();
-				init();
-			}			
-		});
-		
-		rr = new JRadioButtonMenuItem("Round robin");
-		rr.addActionListener(new ActionListener(){			
-			public void actionPerformed(ActionEvent e) {
-				algorithm = SchedulingAlgorithm.RR;
-				reset();
-
-				if(quantum == 0){
-					while(true){
-						String result = JOptionPane.showInputDialog(null, "Quantum:");	
-						if(result != null){
-							char[] letters = result.toCharArray();
-							
-							int i;
-							for(i = 0; i < letters.length; i++){
-								if(!Character.isDigit(letters[i])){
-									break;
-								}
-							}
-							
-							if(i == letters.length){
-								quantum = Integer.parseInt(result);
-								break;
-							}
-						}
-					}
-				}
-					
-				con.removeAll();
-				init();
-			}			
-		});
-		
-		sjf = new JRadioButtonMenuItem("SJF");
-		sjf.addActionListener(new ActionListener(){			
-			public void actionPerformed(ActionEvent e) {
-				algorithm = SchedulingAlgorithm.SJF;
-				reset();
-				con.removeAll();
-				init();
-			}			
-		});
-		
-		srtf = new JRadioButtonMenuItem("SRTF");
-		srtf.addActionListener(new ActionListener(){			
-			public void actionPerformed(ActionEvent e) {
-				algorithm = SchedulingAlgorithm.SRTF;
-				reset();
-				con.removeAll();
-				init();
-			}			
-		});
-		
-		prio = new JRadioButtonMenuItem("Priority");
-		prio.addActionListener(new ActionListener(){			
-			public void actionPerformed(ActionEvent e) {
-				algorithm = SchedulingAlgorithm.PRIO;
-				reset();
-				con.removeAll();
-				init();
-			}			
-		});
-		
-		npprio = new JRadioButtonMenuItem("Nonpreemptive Priority");
-		npprio.addActionListener(new ActionListener(){			
-			public void actionPerformed(ActionEvent e) {
-				algorithm = SchedulingAlgorithm.NP_PRIO;
-				reset();
-				con.removeAll();
-				init();
-			}			
-		});
-			
+		insProcess.add(importFile);	
 				
 		JMenuItem mlfqOneLevel, mlfqTwoLevel, mlfqThreeLevel, mlfqFourLevel;
 		mlfqOneLevel = new JMenuItem("1-Level");
@@ -293,7 +201,6 @@ public class GanttChart extends JFrame{
 				con.removeAll();
 				init();
 				initOneLevel();
-				MLFQ = true;
 			}
 		});
 		
@@ -303,9 +210,8 @@ public class GanttChart extends JFrame{
 				Offset = 150;
 				reset();
 				con.removeAll();
-				init();
+				init();				
 				initTwoLevel();
-				MLFQ = true;
 			}
 		});
 		
@@ -317,7 +223,6 @@ public class GanttChart extends JFrame{
 				con.removeAll();
 				init();
 				initThreeLevel();
-				MLFQ = true;
 			}
 		});
 		
@@ -329,7 +234,6 @@ public class GanttChart extends JFrame{
 				con.removeAll();
 				init();
 				initFourLevel();
-				MLFQ = true;
 			}
 		});
 		
@@ -338,7 +242,7 @@ public class GanttChart extends JFrame{
 		mlfq.add(mlfqThreeLevel);
 		mlfq.add(mlfqFourLevel);
 		
-		singleSet = new JMenuItem("Set");
+		new JMenuItem("Set");
 		
 		quantumChange = new JMenuItem("Change (quantum = " + quantum + ")");
 		quantumChange.addActionListener(new ActionListener(){
@@ -495,13 +399,18 @@ public class GanttChart extends JFrame{
 	
 	private void initOneLevel() {
 		level = ONE_LEVEL;
-
+		
 		initOneLevelComboBox();
 		
 		initGanttChart(60, 90, 1);
 		initProcessTable(270, 200, 150, 250);
 		initTimesTable(300);
 		initAvgTimeTable(650, 560);
+		
+		mlfqPanel.repaint();
+		mlfqPanel.revalidate();
+		con.repaint();
+		con.revalidate();
 	}
 
 	private void initTwoLevel() {
@@ -553,10 +462,10 @@ public class GanttChart extends JFrame{
 	
 	private void initOneLevelComboBox() {
 		addSetQuantum(160, 65, 1);
-		disableQuantum(1);
+		//disableQuantum(1);
 				
-		algoList1.setBounds(70, 65, 80, 20);
-		algoList1.setSelectedIndex(0);
+		mlfqPanel.remove(algoList1);
+		algoList1.setBounds(70, 65, 80, 20);		
 		algoList1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();				
@@ -589,17 +498,17 @@ public class GanttChart extends JFrame{
 				if(selected.equals("RR")){					
 					enableQuantum(1);
 				}else{
-					disableQuantum(1);
+					setQuantum1.setEnabled(false);
 				}
 			}
 			
 		});				
+		algoList1.setSelectedIndex(0);
 		mlfqPanel.add(algoList1);
 	}
 	
 	private void initTwoLevelComboBox() {
-		addSetQuantum(160, 200, 2);		
-		disableQuantum(2);
+		addSetQuantum(160, 200, 2);
 		
 		algoList2.setBounds(70, 200, 80, 20);		
 		algoList2.addActionListener(new ActionListener() {
@@ -637,7 +546,7 @@ public class GanttChart extends JFrame{
 				if(selected.equals("RR")){					
 					enableQuantum(2);
 				}else{
-					disableQuantum(2);
+					setQuantum2.setEnabled(false);
 				}
 			}
 			
@@ -648,7 +557,7 @@ public class GanttChart extends JFrame{
 	
 	private void initThreeLevelComboBox() {
 		addSetQuantum(160, 335, 3);
-		disableQuantum(3);
+		//disableQuantum(3);
 		
 		algoList3.setBounds(70, 335, 80, 20);		
 		algoList3.addActionListener(new ActionListener() {
@@ -686,7 +595,7 @@ public class GanttChart extends JFrame{
 				if(selected.equals("RR")){					
 					enableQuantum(3);
 				}else{
-					disableQuantum(3);
+					setQuantum3.setEnabled(false);
 				}
 			}
 			
@@ -697,7 +606,6 @@ public class GanttChart extends JFrame{
 	
 	private void initFourLevelComboBox() {
 		addSetQuantum(160, 475, 4);
-		disableQuantum(4);
 		
 		algoList4.setBounds(70, 475, 80, 20);		
 		algoList4.addActionListener(new ActionListener() {
@@ -735,7 +643,7 @@ public class GanttChart extends JFrame{
 				if(selected.equals("RR")){					
 					enableQuantum(4);
 				}else{
-					disableQuantum(4);
+					setQuantum4.setEnabled(false);
 				}
 			}
 			
@@ -1556,19 +1464,19 @@ public class GanttChart extends JFrame{
 		mlfqPanel.revalidate();
 	}
 	
-	private void disableQuantum(int level) {
-		if(level == 1) {
-			setQuantum1.setEnabled(false);
-		}else if(level == 2) {
+/*	private void disableQuantum(int lvl) {
+//		if(lvl == 1) {
+//			/setQuantum1.setEnabled(false);
+		}else if(lvl == 2) {
 			setQuantum2.setEnabled(false);
-		}else if(level == 3) {
+		}else if(lvl == 3) {
 			setQuantum3.setEnabled(false);
-		}else if(level == 4) {
+		}else if(lvl == 4) {
 			setQuantum4.setEnabled(false);
 		}
 		mlfqPanel.repaint();
 		mlfqPanel.revalidate();
-	}
+	}*/
 	
 	public void simulationDone(Object queue) {	
 		con.removeAll();

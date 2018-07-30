@@ -2,9 +2,9 @@ package queues;
 import constants.QueueType;
 import process.CPUBoundProcess;
 
-public class RoundRobin extends PreemptiveQueue{
-	private int quantum = 0;
+public class RoundRobin extends PreemptiveQueue{	
 	public boolean executing = false;
+	private int counter = 1;
 	
 	public RoundRobin(int level, int quantum){
 		super(level);
@@ -18,25 +18,34 @@ public class RoundRobin extends PreemptiveQueue{
 	}	
 					
 	public void run(){	 
-		queueStartTime = clockTime;		
-		
-		System.out.println("[Roundrobin:] Inside run method");		
+		queueStartTime = clockTime;				
 		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
-		}		
+		}
+		//System.out.println("[Roundrobin:] Inside run method");		
+		//System.out.println("[Roundrobin:] totalBurstTime: " + totalBurstTime);
+		//System.out.println("[Roundrobin:] clockTime: " + clockTime + " getNextArrivalTime: " + getNextArrivalTime());
 		
-		for(int ctr = 0; ctr < totalBurstTime; ctr++){					
+		for(int ctr = 1; ctr <= totalBurstTime; ctr++){			
 			if((currProcess = peekHead()) != null){				
 				if(currProcess.getResponseTime() < 0) {
 					if(currProcess.getArrivalTime() <= prevTimeQuantum) {
 						currProcess.setStartTime(prevTimeQuantum);
 						currProcess.setFirstStartTime(prevTimeQuantum);
 					}else {
-						currProcess.setStartTime(queueStartTime + ctr);
-						currProcess.setFirstStartTime(queueStartTime + ctr);
+						System.out.println("[RR] queueStartTime: " + queueStartTime + " ctr: " + ctr);
+						currProcess.setStartTime(queueStartTime);
+						currProcess.setFirstStartTime(queueStartTime );
+						prevTimeQuantum = queueStartTime;
 					}					
 					currProcess.setResponseTime();
+					counter = 1;
+					if(currProcess.getStartTime()%10 == 0 && quantum%2 == 1) {
+						System.out.println("[RR] ct++");
+						clockTime++;
+						//prevTimeQuantum = queueStartTime + ctr;
+					}					
 				}
 				if(currProcess.preemptedFlag) {			
 					if(currProcess.getArrivalTime() <= prevTimeQuantum) {
@@ -49,9 +58,10 @@ public class RoundRobin extends PreemptiveQueue{
 						currProcess.setTimeResumed(queueStartTime + ctr);
 					}										
 					currProcess.preemptedFlag = false;
-				}
+				}				
 				int burstLeft = currProcess.getBurstTime() - 1;					
-				currProcess.setBurstTime(burstLeft);			
+				currProcess.setBurstTime(burstLeft);	
+				timeNow = queueStartTime + ctr;
 				System.out.println("[Roundrobin] Level = " + 
 						level + 
 						" executing P" + 
@@ -60,11 +70,11 @@ public class RoundRobin extends PreemptiveQueue{
 						currProcess.getStartTime() +
 						" burstLeft = " +
 						burstLeft +
-						" timeNow = " + (queueStartTime + ctr));
-				timeNow = queueStartTime + ctr;				
+						" timeNow = " + (queueStartTime + ctr) +
+						" counter = " + counter);
 				
 				if(burstLeft <= 0){		
-					currProcess.setEndTime(timeNow+1);
+					currProcess.setEndTime(timeNow);
 					
 					dequeue();													
 					System.out.println("p" + currProcess.getId() + " Done executing.");					
@@ -73,17 +83,17 @@ public class RoundRobin extends PreemptiveQueue{
 					prevProcess = currProcess;
 					prevTimeQuantum = timeNow;
 					
-				}else if(timeNow == prevTimeQuantum + quantum){	
+				}else if(counter == quantum){	
 					
 					System.out.println("[Roundrobin:] Quantum time is DONE (timeNow = " + timeNow + ")");
 					prevTimeQuantum = timeNow;
-					currProcess.setEndTime(timeNow+1);
+					currProcess.setEndTime(timeNow);
 				
-					if(burstLeft > 0){											
+					if(burstLeft > 0){												
 						preemptCurrProcess(timeNow);
 						int burstPreempted = currProcess.getBurstTime();
-						currProcess.setPrevBurstPreempted(burstPreempted);	
-						
+						currProcess.setPrevBurstPreempted(burstPreempted);										
+
 						while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 							getNextProcess();
 						}
@@ -93,14 +103,21 @@ public class RoundRobin extends PreemptiveQueue{
 						}else {
 							demote(dequeue());									
 						}
+
 					}
-				}				
+					counter = 1;
+				}
+				
 				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 					getNextProcess();
 				}
 				clockTime++;
+				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
+					getNextProcess();
+				}
 			}
 			stopThread();
+			counter++;
 		}				
 	}
 
