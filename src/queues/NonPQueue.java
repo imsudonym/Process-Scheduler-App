@@ -1,5 +1,6 @@
 package queues;
 import constants.QueueType;
+import scheduler.Main;
 
 public class NonPQueue extends Queue{
 	
@@ -9,15 +10,37 @@ public class NonPQueue extends Queue{
 	}
 			
 	public void run(){
+		if(prevQueue != null && prevQueue instanceof RoundRobin) {
+			clockTime = prevTimeQuantum;
+		}
 		queueStartTime = clockTime;
+		
+		System.out.println("[FCFS] inside run");
+		System.out.println("[FCFS] queueStartTime: " + queueStartTime);
 		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
 		
-		for(int ctr = 0; ctr < totalBurstTime; ctr++){
+		for(int ctr = 1; ctr <= totalBurstTime; ctr++){
 			//determineToPromote();
-			timeNow = queueStartTime + ctr;
+			if(queuePreempted) {
+				if(currProcess != null) {
+					currProcess.setPreempted();
+					currProcess.setTimePreempted(timeNow);
+					currProcess.setEndTime(timeNow);
+					currProcess.preemptedFlag = true;
+					System.out.println("[FCFS] timeNow: " + timeNow);					
+					System.out.println("[FCFS] prevTimeQuantum: " + prevTimeQuantum);					
+					if(hasExecuted(currProcess)) {
+						prevTimeQuantum = timeNow;
+						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
+						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
+					}
+				}
+				queuePreempted = false;
+				break;
+			}
 			
 			if((currProcess = peekHead()) != null){
 				if(prevQueue != null && prevQueue instanceof RoundRobin) {
@@ -51,7 +74,9 @@ public class NonPQueue extends Queue{
 				prevProcess = currProcess;
 				
 				int burstLeft = currProcess.getBurstTime() - 1;					
-				currProcess.setBurstTime(burstLeft);								
+				currProcess.setBurstTime(burstLeft);
+				timeNow = queueStartTime + ctr;
+				clockTime = timeNow;
 				
 				System.out.println("[NPQ:] Level = " + 
 						level + 
@@ -72,7 +97,26 @@ public class NonPQueue extends Queue{
 					prevTimeQuantum = timeNow;
 				}
 				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
-					getNextProcess();
+					if(prevQueue != null && prevQueue instanceof RoundRobin) {						
+						if(currProcess != null) {
+							currProcess.setPreempted();
+							currProcess.setTimePreempted(timeNow);
+							currProcess.setEndTime(timeNow);
+							currProcess.preemptedFlag = true;
+							System.out.println("[NPQ] timeNow: " + timeNow);					
+							System.out.println("[NPQ] prevTimeQuantum: " + prevTimeQuantum);					
+							if(hasExecuted(currProcess)) {
+								prevTimeQuantum = timeNow;
+								int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
+								displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
+							}
+							currProcess = null;
+						}
+						Main.queues[0].getNextProcess();
+						Main.queues[0].startThread();
+					}else {
+						getNextProcess();
+					}						
 				}
 				clockTime++;		
 			}
