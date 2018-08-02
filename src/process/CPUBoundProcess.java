@@ -111,6 +111,7 @@ public class CPUBoundProcess {
 		System.out.println("[CPUBoundProcess:] timePreemted.size:" + timePreempted.size());*/
 		
 		for(int i = 0; i < timeResumed.size(); i++) {
+			System.out.println("[CPUBoundProcess] timeResumed: " + timeResumed.get(i) + " timePreempted: " + timePreempted.get(i));
 			waitTime += (timeResumed.get(i) - timePreempted.get(i));
 		}
 		this.waitTime = waitTime;

@@ -44,7 +44,7 @@ public class PseudoArray {
 	
 	public void sortSJF(){			
 		for(int i = 0; i <= ctr-1; i++){
-			Link current = list.first.next;					
+			Link current = list.first;					
 			
 			while(true){
 				if(current == null || current.next == null)

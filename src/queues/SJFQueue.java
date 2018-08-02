@@ -9,29 +9,48 @@ public class SJFQueue extends Queue{
 	}
 					
 	public void run(){
-		queueStartTime = clockTime;		
+		queueStartTime = clockTime;	
 		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
 		
-		for(int ctr = 0; ctr < totalBurstTime; ctr++){		
-			if((currProcess = peekHead()) != null){										
-				if(currProcess.getResponseTime() < 0) {
-					currProcess.setStartTime(queueStartTime + ctr);
-					currProcess.setFirstStartTime(queueStartTime + ctr);
-					currProcess.setResponseTime();	
+		for(int ctr = 0; ctr < totalBurstTime; ctr++){
+			timeNow = queueStartTime + ctr;
+			
+			if((currProcess = peekHead()) != null){	
+				if(prevQueue != null && prevQueue instanceof RoundRobin) {
+					currProcess.setStartTime(prevTimeQuantum);
+					if(currProcess.preemptedFlag) {
+						currProcess.setTimeResumed(prevTimeQuantum);
+						currProcess.preemptedFlag = false;
+					}
+				}else {
+					if(currProcess.getResponseTime() < 0) {
+						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
+							currProcess.setStartTime(prevTimeQuantum);
+							currProcess.setFirstStartTime(prevTimeQuantum);
+						}else {
+							currProcess.setStartTime(queueStartTime + ctr);
+							currProcess.setFirstStartTime(queueStartTime + ctr);
+						}					
+						currProcess.setResponseTime();
+					}
+					if(currProcess.preemptedFlag) {						
+						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
+							currProcess.setStartTime(prevTimeQuantum);
+							currProcess.setTimeResumed(prevTimeQuantum);
+						}else {
+							currProcess.setStartTime(queueStartTime + ctr);
+							currProcess.setTimeResumed(queueStartTime + ctr);
+						}
+						currProcess.preemptedFlag = false;
+					}
 				}
-				if(currProcess.preemptedFlag) {						
-					currProcess.setStartTime(queueStartTime);
-					currProcess.setTimeResumed(queueStartTime);						
-					currProcess.preemptedFlag = false;
-				}
+				prevProcess = currProcess;
 				
-				int burstLeft = currProcess.getBurstTime() - 1;					
+				int burstLeft = currProcess.getBurstTime() - 1;
 				currProcess.setBurstTime(burstLeft);
-				
-				timeNow = queueStartTime + ctr;
 				
 				System.out.println("[SJF:] Level = " + 
 						level + 
@@ -44,7 +63,7 @@ public class SJFQueue extends Queue{
 						" timeNow = " + timeNow);
 							
 				if(burstLeft <= 0){		
-					currProcess.setEndTime(timeNow+1);
+					currProcess.setEndTime(timeNow);
 					dequeue();									
 					System.out.println("[SJF:] p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 					currProcess.preemptedFlag = false;
@@ -54,7 +73,7 @@ public class SJFQueue extends Queue{
 				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 					getNextProcess();
 				}				
-				clockTime++;			
+				clockTime++;
 			}
 			stopThread();
 		}

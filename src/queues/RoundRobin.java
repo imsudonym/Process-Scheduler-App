@@ -23,13 +23,13 @@ public class RoundRobin extends PreemptiveQueue{
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
-		//System.out.println("[Roundrobin:] Inside run method");		
-		//System.out.println("[Roundrobin:] totalBurstTime: " + totalBurstTime);
-		//System.out.println("[Roundrobin:] clockTime: " + clockTime + " getNextArrivalTime: " + getNextArrivalTime());
-		
-		for(int ctr = 1; ctr <= totalBurstTime; ctr++){			
-			if((currProcess = peekHead()) != null){				
-				if(currProcess.getResponseTime() < 0) {
+		System.out.println("[Roundrobin:] Inside run method");		
+		System.out.println("[Roundrobin:] totalBurstTime: " + totalBurstTime);
+		System.out.println("[Roundrobin:] clockTime: " + clockTime + " getNextArrivalTime: " + getNextArrivalTime());
+
+		for(int ctr = 1; ctr <= totalBurstTime; ctr++){	
+			if((currProcess = peekHead()) != null){
+				if(currProcess.getResponseTime() < 0) {					
 					if(currProcess.getArrivalTime() <= prevTimeQuantum) {
 						currProcess.setStartTime(prevTimeQuantum);
 						currProcess.setFirstStartTime(prevTimeQuantum);
@@ -38,13 +38,12 @@ public class RoundRobin extends PreemptiveQueue{
 						currProcess.setStartTime(queueStartTime);
 						currProcess.setFirstStartTime(queueStartTime );
 						prevTimeQuantum = queueStartTime;
-					}					
+					}
 					currProcess.setResponseTime();
 					counter = 1;
 					if(currProcess.getStartTime()%10 == 0 && quantum%2 == 1) {
 						System.out.println("[RR] ct++");
 						clockTime++;
-						//prevTimeQuantum = queueStartTime + ctr;
 					}					
 				}
 				if(currProcess.preemptedFlag) {			
@@ -75,10 +74,10 @@ public class RoundRobin extends PreemptiveQueue{
 				
 				if(burstLeft <= 0){		
 					currProcess.setEndTime(timeNow);
-					
-					dequeue();													
+
+					dequeue();
 					System.out.println("p" + currProcess.getId() + " Done executing.");					
-					
+
 					currProcess.preemptedFlag = false;
 					prevProcess = currProcess;
 					prevTimeQuantum = timeNow;
@@ -89,7 +88,7 @@ public class RoundRobin extends PreemptiveQueue{
 					prevTimeQuantum = timeNow;
 					currProcess.setEndTime(timeNow);
 				
-					if(burstLeft > 0){												
+					if(burstLeft > 0){
 						preemptCurrProcess(timeNow);
 						int burstPreempted = currProcess.getBurstTime();
 						currProcess.setPrevBurstPreempted(burstPreempted);										
@@ -101,11 +100,10 @@ public class RoundRobin extends PreemptiveQueue{
 						if(nextQueue == null) {
 							retain(QueueType.RR);
 						}else {
-							demote(dequeue());									
+							demote(dequeue());
 						}
-
 					}
-					counter = 1;
+					counter = 0;
 				}
 				
 				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
@@ -115,9 +113,11 @@ public class RoundRobin extends PreemptiveQueue{
 				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 					getNextProcess();
 				}
+				
+				counter++;
+				
 			}
-			stopThread();
-			counter++;
+			stopThread();			
 		}				
 	}
 
