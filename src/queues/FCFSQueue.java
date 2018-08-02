@@ -3,6 +3,7 @@ import constants.QueueType;
 import scheduler.Main;
 
 public class FCFSQueue extends Queue{
+	
 	public FCFSQueue(int level){
 		super(level);
 		this.queueType = QueueType.FCFS;
@@ -28,8 +29,8 @@ public class FCFSQueue extends Queue{
 					currProcess.setTimePreempted(timeNow);
 					currProcess.setEndTime(timeNow);
 					currProcess.preemptedFlag = true;
-					System.out.println("*****[FCFS] timeNow: " + timeNow);					
-					System.out.println("	*****[FCFS] prevTimeQuantum: " + prevTimeQuantum);					
+					System.out.println("[FCFS] timeNow: " + timeNow);					
+					System.out.println("[FCFS] prevTimeQuantum: " + prevTimeQuantum);					
 					if(hasExecuted(currProcess)) {
 						prevTimeQuantum = timeNow;
 						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
@@ -115,8 +116,8 @@ public class FCFSQueue extends Queue{
 							currProcess.setTimePreempted(timeNow);
 							currProcess.setEndTime(timeNow);
 							currProcess.preemptedFlag = true;
-							System.out.println("*****[FCFS] timeNow: " + timeNow);					
-							System.out.println("	*****[FCFS] prevTimeQuantum: " + prevTimeQuantum);					
+							System.out.println("[FCFS] timeNow: " + timeNow);					
+							System.out.println("[FCFS] prevTimeQuantum: " + prevTimeQuantum);					
 							if(hasExecuted(currProcess)) {
 								prevTimeQuantum = timeNow;
 								int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();

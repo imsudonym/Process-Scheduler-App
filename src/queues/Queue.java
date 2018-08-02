@@ -79,7 +79,7 @@ public abstract class Queue {
 		if(qType == QueueType.PQ) sortPQ();
 		if(qType == QueueType.NPQ) sortNPQ();		
 		if(qType == QueueType.RR) {
-			System.out.println("[Queue] Inserting in RR queue");
+			System.out.println("[Queue] Level: " +  level + " Inserting in RR queue.. clockTime: " + clockTime);
 			if(nextQueue != null || prevQueue != null) {			
 				totalBurstTime += quantum;
 			}else {
@@ -92,12 +92,12 @@ public abstract class Queue {
 		}else {
 			totalBurstTime += newProcess.getBurstTime();
 		}
-		
+
 		if(!processList.contains(newProcess)) {			
 			processList.add(newProcess);
 		}
 	}
-	
+
 	private void sortByBound() {
 		array.givePriorityToIoBounds();
 	}
@@ -258,9 +258,9 @@ public abstract class Queue {
 		for(int i = 0; i < count; i++) {
 			temp.get(i).setWaitTimePreemptive();
 			
-			System.out.print("[p" + temp.get(i).getId() + "]: ");
+			/*System.out.print("[p" + temp.get(i).getId() + "]: ");
 			System.out.println("timesPreempted = " + temp.get(i).timePreempted.size() + " timesResumed = " + temp.get(i).timeResumed.size() 
-					+ " waitTime: " + temp.get(i).getWaitTime() + " responseTime: " + temp.get(i).getResponseTime() + " turnAround: " + temp.get(i).getTurnaroundTime());
+					+ " waitTime: " + temp.get(i).getWaitTime() + " responseTime: " + temp.get(i).getResponseTime() + " turnAround: " + temp.get(i).getTurnaroundTime());*/
 			addTimesInformation(temp.get(i).getId(), temp.get(i).getResponseTime(), temp.get(i).getWaitTime(), temp.get(i).getTurnaroundTime());
 			if(!(temp.get(i) instanceof IOBoundProcess)) {
 				avgResponse += temp.get(i).getResponseTime();
