@@ -103,6 +103,26 @@ public class LinkedList{
 		return null;
 	}
 	
+	public CPUBoundProcess removeSecond(){
+		Link temp = null;						
+		CPUBoundProcess process = null;
+		
+		if(!isEmpty()){
+			temp = first.next;
+			
+			first.next = first.next.next;
+			first.next.next.previous = first;
+			
+			process = temp.getValue();			
+		}						
+		
+		if(process != null){			
+			return process;
+		}
+		
+		return null;
+	}
+	
 	public void printContents(){
 		if(!isEmpty()){
 			System.out.print("[");

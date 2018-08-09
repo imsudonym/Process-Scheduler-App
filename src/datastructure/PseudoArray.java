@@ -38,6 +38,14 @@ public class PseudoArray {
 		return prc;		
 	}
 	
+	public CPUBoundProcess removeSecond(){		
+		CPUBoundProcess prc = list.removeSecond(); 
+		if(prc != null){			
+			ctr--;			
+		}
+		return prc;		
+	}
+	
 	public int getSize(){		
 		return ctr;
 	}	
@@ -139,30 +147,32 @@ public class PseudoArray {
 	public void givePriorityToIoBounds() {
 		ArrayList<Link> tempArray = new ArrayList<Link>();
 		
-		Link current = list.first;						
-		while(true){
+		Link current = list.first;
+		if(current != null) {
+			while(true){
+					
+				CPUBoundProcess currProcess = current.getValue();												
+					
+				if(currProcess instanceof IOBoundProcess){	
+					System.out.println("[PseudoArray] P" + currProcess.getId() + " instanceof IOBoundProcess");
+					tempArray.add(current); 
+					list.remove(current.getKey());
+					ctr--;
+				}
 				
-			CPUBoundProcess currProcess = current.getValue();												
+				if(current.next == null)
+					break;
 				
-			if(currProcess instanceof IOBoundProcess){	
-				System.out.println("[PseudoArray] P" + currProcess.getId() + " instanceof IOBoundProcess");
-				tempArray.add(current); 
-				list.remove(current.getKey());
-				ctr--;
+				current = current.next;
+			}			
+			
+					
+			for(int i = tempArray.size()-1; i >= 0; i--) {
+				Link newLink = new Link(tempArray.get(i).getValue(), tempArray.get(i).getKey());
+				list.addToFront(newLink);
+				ctr++;
 			}
-			
-			if(current.next == null)
-				break;
-			
-			current = current.next;
-		}			
-		
-				
-		for(int i = tempArray.size()-1; i >= 0; i--) {
-			Link newLink = new Link(tempArray.get(i).getValue(), tempArray.get(i).getKey());
-			list.addToFront(newLink);
-			ctr++;
+			printContents();
 		}
-		printContents();
 	}
 }

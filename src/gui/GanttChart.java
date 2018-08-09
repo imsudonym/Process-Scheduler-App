@@ -96,7 +96,7 @@ public class GanttChart extends JFrame{
 	private static int Offset = -2;
 	
 	private static int prevEndTime = 0;
-	
+	private static boolean initFlag = true;
 	private static int quantum1, quantum2, quantum3, quantum4;
 	
 	private static String fileChosen;
@@ -197,21 +197,25 @@ public class GanttChart extends JFrame{
 		mlfqOneLevel.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
 				Offset = -2;
-				reset();
-				con.removeAll();
+				initFlag = false;
+				con.removeAll();			
 				init();
-				initOneLevel();
+				initOneLevel();				
 			}
 		});
 		
 		mlfqTwoLevel = new JMenuItem("2-Level");
 		mlfqTwoLevel.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
+				System.out.println("[GanttChart] 2-Level selected");
 				Offset = 150;
+				initFlag = false;
 				reset();
-				con.removeAll();
-				init();				
+				con.removeAll();				
+				init();	
 				initTwoLevel();
+				mlfq.repaint();
+				mlfq.revalidate();
 			}
 		});
 		
@@ -219,10 +223,11 @@ public class GanttChart extends JFrame{
 		mlfqThreeLevel.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
 				Offset = 270;
+				initFlag = false;
 				reset();
 				con.removeAll();
 				init();
-				initThreeLevel();
+				initThreeLevel();				
 			}
 		});
 		
@@ -230,12 +235,18 @@ public class GanttChart extends JFrame{
 		mlfqFourLevel.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
 				Offset = 450;
+				initFlag = false;
 				reset();
 				con.removeAll();
 				init();
-				initFourLevel();
+				initFourLevel();				
 			}
 		});
+		
+		if(initFlag) {
+			initOneLevel();
+			initFlag = false;
+		}
 		
 		mlfq.add(mlfqOneLevel);
 		mlfq.add(mlfqTwoLevel);
@@ -272,6 +283,10 @@ public class GanttChart extends JFrame{
 			}
 		});
 		quantumItem.add(quantumChange);
+		
+		if(mlfqOneLevel.isSelected()) {
+			initOneLevel();
+		}
 		
 		menuBar.add(insProcess);
 		menuBar.add(mlfq);
@@ -311,10 +326,13 @@ public class GanttChart extends JFrame{
 					processes.add(new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
 				}*/
 				
-				if(algorithm == SchedulingAlgorithm.RR && quantum < 0)
+				System.out.println("[GanttChart] algorithm = " + algorithm);
+				System.out.println("[GanttChart] level = " + level);
+				if(algorithm == SchedulingAlgorithm.RR && quantum <= 0)
 					startButton.setEnabled(false);
 				else
 					startButton.setEnabled(true);
+				
 	        } catch (Exception e1) { 
 	        	e1.printStackTrace();
 	        	startButton.setEnabled(false);
@@ -366,7 +384,7 @@ public class GanttChart extends JFrame{
 			timePanel3 = new JPanel();
 			timePanel3.setLayout(null);
 			timePanel3.setBackground(darkBlue);
-			timePanel3.setBounds(1, 51, 1145, 20);																								
+			timePanel3.setBounds(1, 51, 1145, 20);
 			panel3.add(timePanel3);
 			
 			panel = panel3;
@@ -382,7 +400,7 @@ public class GanttChart extends JFrame{
 			timePanel4 = new JPanel();
 			timePanel4.setLayout(null);
 			timePanel4.setBackground(darkBlue);
-			timePanel4.setBounds(1, 51, 1145, 20);																								
+			timePanel4.setBounds(1, 51, 1145, 20);
 			panel4.add(timePanel4);
 			
 			panel = panel4;
@@ -457,7 +475,7 @@ public class GanttChart extends JFrame{
 		
 		initProcessTable(270, 620, 150, 680);
 		initTimesTable(700);
-		initAvgTimeTable(650, 860);
+		initAvgTimeTable(650, 970);
 	}
 	
 	private void initOneLevelComboBox() {
@@ -1230,7 +1248,9 @@ public class GanttChart extends JFrame{
 			
 			panel1.removeAll();
 			timePanel1.removeAll();
+			
 			panel1.add(timePanel1);
+			
 			panel1.repaint();
 			panel1.revalidate();
 			
@@ -1486,7 +1506,7 @@ public class GanttChart extends JFrame{
 		insProcess.setEnabled(true);
 		mlfq.setEnabled(true);
 		
-		System.out.println(startButton.isEnabled());
+		System.out.println("[GanttChart] " + startButton.isEnabled());
 		
 		con.repaint();
 		con.revalidate();

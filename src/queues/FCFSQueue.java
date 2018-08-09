@@ -14,9 +14,9 @@ public class FCFSQueue extends Queue{
 			clockTime = prevTimeQuantum;
 		}
 		queueStartTime = clockTime;
-		
+		/*
 		System.out.println("[FCFS] inside run");
-		System.out.println("[FCFS] queueStartTime: " + queueStartTime);
+		System.out.println("[FCFS] queueStartTime: " + queueStartTime);*/
 		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
@@ -90,7 +90,8 @@ public class FCFSQueue extends Queue{
 				timeNow = queueStartTime + ctr;
 				clockTime = timeNow;
 				
-				System.out.println("[FCFS:] Level = " + 
+				if(burstLeft < 0) break;
+				/*System.out.println("[FCFS:] Level = " + 
 						level + 
 						" executing P" + 
 						currProcess.getId() + 
@@ -99,7 +100,7 @@ public class FCFSQueue extends Queue{
 						" burstLeft = " +
 						burstLeft +
 						" timeNow = " + timeNow + 
-						" clockTime = " + clockTime);
+						" clockTime = " + clockTime);*/
 				
 				if(burstLeft == 0){
 					currProcess.setEndTime(timeNow);

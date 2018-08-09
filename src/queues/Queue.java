@@ -45,19 +45,20 @@ public abstract class Queue {
 	public void startThread() {
 		run();
 	}
-	
-	
-	public void stopThread() {
+		
+	public void stopThread() {		
+		//System.out.println("[Queue:51] threadStopped: " + threadStopped);
 		if(threadStopped) return;
 		if(peekHead() == null && getSize() == 0 && isHigherQueueDone()) {
 			//if(Main.processes.size() == 0) {
-				if(level == Main.getMaxLevelOfQueues() || (nextQueue != null && nextQueue.getSize() == 0)) {						
-					System.out.println("[Queue:] Level = " + level + " stopping simulation...");
+				if(level == Main.getMaxLevelOfQueues() || (nextQueue != null && nextQueue.getSize() == 0)) {											
 					threadStopped = true;
+					//System.out.println("[Queue:] Level = " + level + " stopping simulation...");
+					//System.out.println("[Queue:58] threadStopped: " + threadStopped);
 					clockTimeEnd = clockTime;
 					simulationDone();
 				}else {
-					System.out.println("[Queue:] starting lower level queues.. clockTime: " + clockTime);
+					//System.out.println("[Queue:] starting lower level queues.. clockTime: " + clockTime);
 					startLowerLevelQueues();
 				}
 			//}
@@ -72,14 +73,14 @@ public abstract class Queue {
 	
 	public void enqueue(CPUBoundProcess newProcess, int qType){
 		array.add(newProcess);		
-		sortByBound();
 
 		if(qType == QueueType.SJF) sortSJF();
 		if(qType == QueueType.SRTF) sortSRTF(); 
 		if(qType == QueueType.PQ) sortPQ();
 		if(qType == QueueType.NPQ) sortNPQ();		
 		if(qType == QueueType.RR) {
-			System.out.println("[Queue] Level: " +  level + " Inserting in RR queue.. clockTime: " + clockTime);
+			//array.printContents();
+			//System.out.println("[Queue] Level: " +  level + " Inserting in RR queue.. clockTime: " + clockTime);
 			if(nextQueue != null || prevQueue != null) {			
 				totalBurstTime += quantum;
 			}else {
@@ -98,7 +99,7 @@ public abstract class Queue {
 		}
 	}
 
-	private void sortByBound() {
+	protected void sortByBound() {
 		array.givePriorityToIoBounds();
 	}
 
@@ -121,11 +122,19 @@ public abstract class Queue {
 	
 	protected CPUBoundProcess dequeue(){					
 		CPUBoundProcess process = array.remove();
-		
-		System.out.println("-----[Queue] endTime: " + process.getEndTime() + " startTime: "  + process.getStartTime());
+		//array.printContents();
 		int burstExecuted = process.getEndTime()-process.getStartTime();			
 		process.setPrevBurstPreempted(process.getBurstTime());
-		System.out.println("[Queue] (Displaying in UI) clockTime: " + clockTime);
+		displayExecutingInUI(burstExecuted, process.getEndTime(), process.getId());
+		return process;
+	}
+	
+	protected CPUBoundProcess dequeueSecondProcess() {
+		System.out.println("[Queue] dequeuing second process");
+		CPUBoundProcess process = array.removeSecond();
+		array.printContents();
+		int burstExecuted = process.getEndTime()-process.getStartTime();			
+		process.setPrevBurstPreempted(process.getBurstTime());
 		displayExecutingInUI(burstExecuted, process.getEndTime(), process.getId());
 		return process;
 	}
@@ -134,12 +143,16 @@ public abstract class Queue {
 		enqueue(dequeue(), qType);
 	}
 	
+	protected void retainSecondProcess(int qType) {
+		enqueue(dequeueSecondProcess(), qType);
+	}
+	
 	protected void insertToReadyQueue(IOBoundProcess process) {
 		Main.enqueue(process);
 	}
 	
 	protected void preemptCurrProcess(int timeNow) {
-		System.out.println("[Queue:] Preempting current process P" + currProcess.getId() + " [timeNow:" + timeNow + "]");
+		//System.out.println("[Queue:] Preempting current process P" + currProcess.getId() + " [timeNow:" + timeNow + "]");
 		currProcess.setPreempted();
 		currProcess.setTimePreempted(timeNow);		
 		currProcess.setEndTime(timeNow);
@@ -149,7 +162,7 @@ public abstract class Queue {
 	
 	public void startExecution() {		
 		if(prevQueue != null && !isHigherQueueDone()) return;
-		System.out.println("[Queue] Starting execution..");
+		//System.out.println("[Queue] Starting execution..");
 		
 //		if(clockTime < Main.getLastArrivalTime()) {
 //			for(int i = clockTime; i < Main.getLastArrivalTime(); i++) {
@@ -180,8 +193,8 @@ public abstract class Queue {
 	}
 	
 	protected void stopLowerLevelQueues() {
-		System.out.println(">>>>>>>>>>>[Queue] stop lower level queue.... clockTime: " + clockTime);
-		System.out.println(">>>>>>>>>>>[Queue] nextQueue: " + nextQueue);
+		//System.out.println(">>>>>>>>>>>[Queue] stop lower level queue.... clockTime: " + clockTime);
+		//System.out.println(">>>>>>>>>>>[Queue] nextQueue: " + nextQueue);
 		if(nextQueue == null) return;		
 		nextQueue.queuePreempted = true;
 	}
@@ -251,7 +264,8 @@ public abstract class Queue {
 		clockTime = -1;
 		ArrayList<CPUBoundProcess> temp = processList;
 		int count =  temp.size();
-		
+//		System.out.println("[Queue] count: " + count);
+//		System.out.println("[Queue] processList: " + processList);
 		double avgResponse = 0;
 		double avgWait = 0;
 		double avgTurnaround = 0;
@@ -261,13 +275,13 @@ public abstract class Queue {
 			/*System.out.print("[p" + temp.get(i).getId() + "]: ");
 			System.out.println("timesPreempted = " + temp.get(i).timePreempted.size() + " timesResumed = " + temp.get(i).timeResumed.size() 
 					+ " waitTime: " + temp.get(i).getWaitTime() + " responseTime: " + temp.get(i).getResponseTime() + " turnAround: " + temp.get(i).getTurnaroundTime());*/
+			if((temp.get(i) instanceof IOBoundProcess)) continue;
 			addTimesInformation(temp.get(i).getId(), temp.get(i).getResponseTime(), temp.get(i).getWaitTime(), temp.get(i).getTurnaroundTime());
 			if(!(temp.get(i) instanceof IOBoundProcess)) {
 				avgResponse += temp.get(i).getResponseTime();
 				avgWait += temp.get(i).getWaitTime();
 				avgTurnaround += temp.get(i).getTurnaroundTime();
-			}			
-			if((temp.get(i) instanceof IOBoundProcess)) continue;
+			}						
 		}
 		
 		//count--;	// Bakit tayo magma-minus ng isa?
@@ -276,7 +290,7 @@ public abstract class Queue {
 		avgWait = avgWait/count;
 		avgTurnaround = avgTurnaround/count;
 		
-		System.out.println("avgResponse = " + avgResponse + " avgWait = " + avgWait + " avgTurnaround = " + avgTurnaround);
+		System.out.println("[Queue] avgResponse = " + avgResponse + " avgWait = " + avgWait + " avgTurnaround = " + avgTurnaround);
 		addAverageTime(avgResponse, avgWait, avgTurnaround);
 		
 		ganttChart.simulationDone(this);
@@ -297,7 +311,7 @@ public abstract class Queue {
 
 	protected void getNextProcess() {
 		CPUBoundProcess nextProcess = Main.getNextProcess();
-		System.out.println("[Queue:] Inserting process P" + nextProcess.getId() + " burst: " + nextProcess.getBurstTime());
+		//System.out.println("[Queue:] Inserting process P" + nextProcess.getId() + " burst: " + nextProcess.getBurstTime());
 		enqueue(nextProcess, this.queueType);
 		displayArrivedInUI(nextProcess.getId(), nextProcess.getArrivalTime(), nextProcess.getBurstNeeded(), nextProcess.getPriority());
 	}
