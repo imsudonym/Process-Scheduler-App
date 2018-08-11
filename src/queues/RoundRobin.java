@@ -35,7 +35,6 @@ public class RoundRobin extends PreemptiveQueue{
 		System.out.println("[Roundrobin:] clockTime: " + clockTime + " getNextArrivalTime: " + getNextArrivalTime());
 
 		for(int ctr = 1; ctr <= totalBurstTime; ctr++){
-									
 			if(queuePreempted) {
 				if(currProcess != null) {
 					currProcess.setPreempted();
@@ -81,7 +80,6 @@ public class RoundRobin extends PreemptiveQueue{
 							}
 							System.out.println("[RR] displaying P" + prevProcess.getId() + " timeNow: " + timeNow);
 						}
-						
 						counter = 1;
 					}
 					currProcess.setStartTime(prevTimeQuantum);
@@ -112,11 +110,10 @@ public class RoundRobin extends PreemptiveQueue{
 								//displayExecutingInUI(burstExecuted, prevProcess.getEndTime(), prevProcess.getId());
 								if(nextQueue == null) {
 									retainSecondProcess(QueueType.RR);
-								}else {
+								}else {									
 									demoteSecondProcess(dequeueSecondProcess());
 								}
-							}
-							
+							}							
 							counter = 1;
 						}
 					}
@@ -155,7 +152,7 @@ public class RoundRobin extends PreemptiveQueue{
 				timeNow = queueStartTime + ctr;
 				clockTime = timeNow;								
 				
-				if(burstLeft < 0) break;
+				
 				System.out.println("[Roundrobin] Level = " + 
 						level + 
 						" executing P" + 
@@ -207,19 +204,18 @@ public class RoundRobin extends PreemptiveQueue{
 					System.out.println("[Roundrobin:] Quantum time is DONE (timeNow = " + timeNow + ")");
 					prevTimeQuantum = timeNow;
 					currProcess.setEndTime(timeNow);
-				
-					//getNextProcessForTopQueue();
 					
 					if(burstLeft > 0){
 						preemptCurrProcess(timeNow);
 						currProcess.setPrevBurstPreempted(currProcess.getBurstTime());										
 												
 						if(nextQueue == null) {
+							System.out.println("[RR] retaining...P" + currProcess.getId());
 							retain(QueueType.RR);
 						}else {
+							System.out.println("[RR] demoting...P" + currProcess.getId());
 							demote(dequeue());
-						}
-												
+						}											
 					}								
 					
 					counter = 0;

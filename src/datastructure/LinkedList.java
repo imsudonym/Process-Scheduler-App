@@ -107,11 +107,19 @@ public class LinkedList{
 		Link temp = null;						
 		CPUBoundProcess process = null;
 		
-		if(!isEmpty()){
+		if(!isEmpty() && first != null){
+			/*System.out.println("[LinkedList] first: P" + first.getValue().getId());
+			System.out.println("[LinkedList] first.next: P" + first.next.getValue().getId());
+			System.out.println("[LinkedList] first.next.next: P" + first.next.next.getValue().getId());
+			System.out.println("[LinkedList] first.next.next.previous: P" + first.next.next.previous.getValue().getId());*/
 			temp = first.next;
 			
-			first.next = first.next.next;
-			first.next.next.previous = first;
+			if(first.next.next != null) {
+				first.next.next.previous = first;
+				first.next = first.next.next;
+			}else {
+				first.next = null;
+			}
 			
 			process = temp.getValue();			
 		}						

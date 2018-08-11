@@ -52,6 +52,32 @@ public class PseudoArray {
 	
 	public void sortSJF(){			
 		for(int i = 0; i <= ctr-1; i++){
+			if(list.first.next == null) return;
+			Link current = list.first.next;					
+			
+			while(true){
+				if(current == null || current.next == null)
+					break;
+				
+				long currBurst = current.getValue().getBurstTime();
+				long nextBurst = current.next.getValue().getBurstTime();												
+				
+				//System.out.println("[PseudoArray:] currBurst: " + currBurst + " nextBurst: " + nextBurst);
+				if(currBurst > nextBurst){					
+					CPUBoundProcess temp = current.getValue();
+					current.setValue(current.next.getValue());
+					current.next.setValue(temp);
+				}
+				current = current.next;
+			}			
+		}
+		
+		//System.out.println("[PseudoArray:] Sorting SJF");
+		printContents();
+	}
+	
+	public void sortSJFFromFirst(){			
+		for(int i = 0; i <= ctr-1; i++){
 			Link current = list.first;					
 			
 			while(true){

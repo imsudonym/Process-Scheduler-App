@@ -20,12 +20,14 @@ public class Main {
 	public static int numOfQueues = 0;		
 	public static ArrayList<CPUBoundProcess> processes = new ArrayList<CPUBoundProcess>();
 	public static int lastArrivalTime;
+	public static int firstArrivalTime;
 	
 	public void initProcesses(int numOfQueues, ArrayList<CPUBoundProcess> processes){
 		Main.numOfQueues = numOfQueues;
 		Main.queues = new Queue[numOfQueues];		
 		Main.processes = processes;		
 		initLastArrivalTime();
+		initFirstArrivalTime();
 		sortByArrivalTime();
 		if(queues[0] instanceof PQueue){
 			prioritySortSameArrivalTime();
@@ -179,7 +181,20 @@ public class Main {
 		}		
 	}
 	
+	private static void initFirstArrivalTime() {
+		firstArrivalTime = 10000;
+		for(int i = 0; i < processes.size(); i++) {
+			if(processes.get(i).getArrivalTime() <= firstArrivalTime) {
+				firstArrivalTime = processes.get(i).getArrivalTime();
+			}
+		}		
+	}
+	
 	public static int getLastArrivalTime() {
 		return lastArrivalTime;
+	}
+	
+	public static int getFirstArrivalTime() {
+		return firstArrivalTime;
 	}
 }
