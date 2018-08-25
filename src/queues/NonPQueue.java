@@ -15,8 +15,8 @@ public class NonPQueue extends Queue{
 		}
 		queueStartTime = clockTime;
 		
-		System.out.println("[FCFS] inside run");
-		System.out.println("[FCFS] queueStartTime: " + queueStartTime);
+		System.out.println("[NPQ] inside run");
+		System.out.println("[NPQ] queueStartTime: " + queueStartTime);
 		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
@@ -30,8 +30,8 @@ public class NonPQueue extends Queue{
 					currProcess.setTimePreempted(timeNow);
 					currProcess.setEndTime(timeNow);
 					currProcess.preemptedFlag = true;
-					System.out.println("[FCFS] timeNow: " + timeNow);					
-					System.out.println("[FCFS] prevTimeQuantum: " + prevTimeQuantum);					
+					System.out.println("[NPQ] timeNow: " + timeNow);					
+					System.out.println("[NPQ] prevTimeQuantum: " + prevTimeQuantum);					
 					if(hasExecuted(currProcess)) {
 						prevTimeQuantum = timeNow;
 						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
@@ -50,13 +50,24 @@ public class NonPQueue extends Queue{
 						currProcess.preemptedFlag = false;
 					}
 				}else {
+					if(prevProcess != null && prevProcess.getId() != currProcess.getId()) {
+						if(prevProcess.getBurstTime() > 0) {
+							prevProcess.setPreempted();
+							prevProcess.setTimePreempted(timeNow);
+							prevProcess.setEndTime(timeNow);
+							prevProcess.preemptedFlag = true;
+							prevTimeQuantum = timeNow;
+							int burstExecuted = prevProcess.getEndTime()-prevProcess.getStartTime();
+							displayExecutingInUI(burstExecuted, prevProcess.getEndTime(), prevProcess.getId());
+						}
+					}
 					if(currProcess.getResponseTime() < 0) {
 						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
 							currProcess.setStartTime(prevTimeQuantum);
 							currProcess.setFirstStartTime(prevTimeQuantum);
 						}else {
-							currProcess.setStartTime(queueStartTime + ctr);
-							currProcess.setFirstStartTime(queueStartTime + ctr);
+							currProcess.setStartTime(queueStartTime + ctr - 1);
+							currProcess.setFirstStartTime(queueStartTime + ctr - 1);
 						}					
 						currProcess.setResponseTime();	
 					}
@@ -65,8 +76,8 @@ public class NonPQueue extends Queue{
 							currProcess.setStartTime(prevTimeQuantum);
 							currProcess.setTimeResumed(prevTimeQuantum);
 						}else {
-							currProcess.setStartTime(queueStartTime + ctr);
-							currProcess.setTimeResumed(queueStartTime + ctr);
+							currProcess.setStartTime(queueStartTime + ctr - 1);
+							currProcess.setTimeResumed(queueStartTime + ctr - 1);
 						}
 						currProcess.preemptedFlag = false;
 					}				
@@ -88,39 +99,52 @@ public class NonPQueue extends Queue{
 						burstLeft +
 						" timeNow = " + (queueStartTime + ctr));
 				
-				if(burstLeft == 0){		
+				if(burstLeft <= 0){		
 					currProcess.setEndTime(timeNow);
+					
 					dequeue();									
+					
 					System.out.println("[NPQ:] p" + currProcess.getId() + " Done executing. prevBurstPreempted = " + currProcess.getPrevBurstPreempted());
 					currProcess.preemptedFlag = false;
 					prevProcess = currProcess;			
 					prevTimeQuantum = timeNow;
 				}
+				
+				sortByBound();
+				
 				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
-					if(prevQueue != null && prevQueue instanceof RoundRobin) {						
-						if(currProcess != null) {
-							currProcess.setPreempted();
-							currProcess.setTimePreempted(timeNow);
-							currProcess.setEndTime(timeNow);
-							currProcess.preemptedFlag = true;
-							System.out.println("[NPQ] timeNow: " + timeNow);					
-							System.out.println("[NPQ] prevTimeQuantum: " + prevTimeQuantum);					
-							if(hasExecuted(currProcess)) {
-								prevTimeQuantum = timeNow;
-								int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
-								displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
-							}
-							currProcess = null;
-						}
-						Main.queues[0].getNextProcess();
-						Main.queues[0].startThread();
-					}else {
-						getNextProcess();
-					}						
+					getNextProcessForTopQueue();
 				}
 				clockTime++;		
 			}
 			stopThread();
+		}
+	}
+	
+	private void getNextProcessForTopQueue() {
+		System.out.println("[NPQ] GETTING NEXT PROCESSES");
+		if(prevQueue != null && prevQueue instanceof RoundRobin) {
+			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
+				if(currProcess != null) {
+					currProcess.setPreempted();
+					currProcess.setTimePreempted(timeNow);
+					currProcess.setEndTime(timeNow);
+					currProcess.preemptedFlag = true;
+					
+					if(hasExecuted(currProcess)) {
+						prevTimeQuantum = timeNow;
+						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
+						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
+					}
+					currProcess = null;
+				}
+				Main.queues[0].getNextProcess();
+				Main.queues[0].startThread();
+			}
+		}else {
+			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
+				getNextProcess();
+			}
 		}
 	}
 }

@@ -166,6 +166,26 @@ public class PseudoArray {
 		}
 	}
 	
+	public void sortNPQFromFirst(){
+		for(int i = 0; i <= ctr-1; i++){
+			Link current = list.first;			
+			while(true){
+				if(current == null || current.next == null)
+					break;
+				
+				int currPriority = current.getValue().getPriority();
+				int nextPriority = current.next.getValue().getPriority();												
+				
+				if(currPriority > nextPriority){					
+					CPUBoundProcess temp = current.getValue();
+					current.setValue(current.next.getValue());
+					current.next.setValue(temp);
+				}
+				current = current.next;
+			}			
+		}
+	}
+	
 	public void printContents(){
 		list.printContents();
 	}

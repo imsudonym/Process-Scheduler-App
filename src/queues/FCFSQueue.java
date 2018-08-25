@@ -22,25 +22,7 @@ public class FCFSQueue extends Queue{
 			getNextProcess();
 		}		
 
-		for(int ctr = 1; ctr <= totalBurstTime; ctr++){					
-			if(queuePreempted) {
-				if(currProcess != null) {
-					currProcess.setPreempted();
-					currProcess.setTimePreempted(timeNow);
-					currProcess.setEndTime(timeNow);
-					currProcess.preemptedFlag = true;
-					System.out.println("[FCFS] timeNow: " + timeNow);					
-					System.out.println("[FCFS] prevTimeQuantum: " + prevTimeQuantum);					
-					if(hasExecuted(currProcess)) {
-						prevTimeQuantum = timeNow;
-						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
-						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
-					}
-				}
-				queuePreempted = false;
-				break;
-			}
-			
+		for(int ctr = 1; ctr <= totalBurstTime; ctr++){											
 			if((currProcess = peekHead()) != null){
 				if(prevQueue != null && prevQueue instanceof RoundRobin) {
 					currProcess.setStartTime(prevTimeQuantum);
@@ -140,6 +122,7 @@ public class FCFSQueue extends Queue{
 					currProcess = null;
 				}
 				Main.queues[0].getNextProcess();
+				preemptQueue();
 				Main.queues[0].startThread();
 			}
 		}else {
@@ -150,6 +133,14 @@ public class FCFSQueue extends Queue{
 	}
 
 	public void preemptQueue() {
-		stopThread();
+		if(currProcess != null) {
+			currProcess.setPreempted();
+			currProcess.setTimePreempted(timeNow);
+			currProcess.setEndTime(timeNow);
+			currProcess.preemptedFlag = true;					
+			prevTimeQuantum = timeNow;
+			int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
+			displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());			
+		}
 	}
 }

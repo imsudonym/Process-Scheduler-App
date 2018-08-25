@@ -104,11 +104,14 @@ public abstract class Queue {
 		array.givePriorityToIoBounds();
 	}
 
-
 	private void sortNPQ() {
 		array.sortNPQ();
 	}
-
+	
+	private void sortNPQFromFirst() {
+		array.sortNPQFromFirst();
+	}
+	
 	private void sortPQ() {
 		array.sortPQ();
 	}
@@ -174,10 +177,13 @@ public abstract class Queue {
 		System.out.println("[Queue] clockTime: " + clockTime + " firstArrivalTime: " + Main.getFirstArrivalTime());
 		if(clockTime <= Main.getFirstArrivalTime()) {
 			for(int i = clockTime; i <= Main.getNextArrivalTime(); i++) {
-				while(Main.getNextArrivalTime() == i) {
-					System.out.println("[Queue] Hay nako");
+				if(Main.getNextArrivalTime() == i){
+					while(Main.getNextArrivalTime() == i) {
+						System.out.println("[Queue] i:" + i + " Main.getNextArriv:" + Main.getNextArrivalTime());
+						Main.queues[0].getNextProcess();						
+					}
 					Main.queues[0].startThread();
-				}				
+				}
 				clockTime++;
 			}
 		}else {
@@ -201,6 +207,8 @@ public abstract class Queue {
 		
 		if(nextQueue.queueType == QueueType.SJF) {
 			nextQueue.sortSJFFromFirst();
+		}else if(nextQueue.queueType == QueueType.NPQ) {
+			nextQueue.sortNPQFromFirst();
 		}
 		
 		nextQueue.startExecution();

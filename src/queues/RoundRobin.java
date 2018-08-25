@@ -172,13 +172,15 @@ public class RoundRobin extends PreemptiveQueue{
 				
 				//System.out.println("[RR] quantum: " + quantum + " counter " + counter + " P" + currProcess.getId());
 				if(burstLeft <= 0){
-					System.out.println("[RR] P" + currProcess.getId() + " Done executing.");					
-					currProcess.setEndTime(timeNow);
-					
-					dequeue();
-					
-					currProcess.preemptedFlag = false;
-					prevProcess = currProcess;
+					//System.out.println("[RR] P" + currProcess.getId() + " Done executing.");
+					if(currProcess != null) {
+						currProcess.setEndTime(timeNow);
+						
+						dequeue();
+						
+						currProcess.preemptedFlag = false;
+						prevProcess = currProcess;						
+					}
 					prevTimeQuantum = timeNow;
 					counter = 0;
 					
@@ -254,7 +256,7 @@ public class RoundRobin extends PreemptiveQueue{
 						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
 						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
 					}
-					currProcess = null;
+					//currProcess = null;
 				}
 				Main.queues[0].getNextProcess();
 				Main.queues[0].startThread();
