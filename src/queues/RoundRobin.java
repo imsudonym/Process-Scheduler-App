@@ -6,7 +6,6 @@ import scheduler.Main;
 
 public class RoundRobin extends PreemptiveQueue{	
 	public boolean executing = false;
-	private int counter = 1;
 	private boolean quantumTimeDone;
 	
 	public RoundRobin(int level, int quantum){
@@ -29,38 +28,62 @@ public class RoundRobin extends PreemptiveQueue{
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
-		
-		System.out.println("[Roundrobin:] Inside run method");		
-		System.out.println("[Roundrobin:] totalBurstTime: " + totalBurstTime);
-		System.out.println("[Roundrobin:] clockTime: " + clockTime + " getNextArrivalTime: " + getNextArrivalTime());
 
-		for(int ctr = 1; ctr <= totalBurstTime; ctr++){
-			if(queuePreempted) {
-				if(currProcess != null) {
-					currProcess.setPreempted();
-					currProcess.setTimePreempted(timeNow);
-					currProcess.setEndTime(timeNow);
-					currProcess.preemptedFlag = true;				
-					if(hasExecuted(currProcess)) {
-						prevTimeQuantum = timeNow;
-						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
-						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
-					}
-				}
-				queuePreempted = false;
-				break;
-			}
-			
+		for(int ctr = 1; ctr <= totalBurstTime; ctr++){			
 			if((currProcess = peekHead()) != null){			
 				
-				if(prevQueue != null && prevQueue instanceof RoundRobin) {
+				// Determine if this queue is a lower level queue
+				if(prevQueue != null && prevQueue instanceof RoundRobin) { 
+					
+					// Update the current process' values
+					currProcess.setStartTime(prevTimeQuantum);
+					if(currProcess.preemptedFlag) {						
+						currProcess.setTimeResumed(prevTimeQuantum);
+						currProcess.preemptedFlag = false;
+					}	
+					
+					// Determine if a preemption has occurred by an IOBound process
 					if(prevProcess != null && 
-							prevProcess.getId() != currProcess.getId() &&
-								currProcess instanceof IOBoundProcess ) {
+							prevProcess.getBurstTime() > 0 && 
+								prevProcess.getId() != currProcess.getId() &&
+									currProcess instanceof IOBoundProcess ) {
+						
+						System.out.println("[RR] Level: " + level + 
+								"Previous process P" + prevProcess.getId() + 
+								" was preempted by P" + currProcess.getId());
+						
+						// Flag the previous process as preempted and set necessary values
+						prevProcess.setPreempted();
+						prevProcess.setTimePreempted(timeNow);
+						prevProcess.setEndTime(timeNow);
+						prevProcess.preemptedFlag = true;					
+						prevTimeQuantum = timeNow;
+						
+						// TODO: Correct time to demote a preempted process.
+						if(!quantumTimeDone) {										
+							if(nextQueue == null) {
+								retainSecondProcess(QueueType.RR);
+							}else {
+								demoteSecondProcess(dequeueSecondProcess());
+							}
+						}
+						counter = 1;
+					}
 					
-					System.out.println("[RR] Previous process P" + prevProcess.getId() + " was preempted by P" + currProcess.getId());
+				// If this is the highest level queue
+				} else {
 					
-					if(prevProcess.getBurstTime() > 0) {
+					// Determine if a preemption has occurred by an I/O-bound process
+					if(prevProcess != null &&
+							prevProcess.getBurstTime() > 0 &&
+								prevProcess.getId() != currProcess.getId() &&
+									currProcess instanceof IOBoundProcess ) {
+						
+						System.out.println("[RR] level: " + level +
+								"Previous process P" + prevProcess.getId() + 
+									" was preempted by P" + currProcess.getId());
+						
+						// Flag previous process as preempted and set necessary values
 						prevProcess.setPreempted();
 						prevProcess.setTimePreempted(timeNow);
 						prevProcess.setEndTime(timeNow);
@@ -68,56 +91,20 @@ public class RoundRobin extends PreemptiveQueue{
 						prevTimeQuantum = timeNow;
 						
 						int burstExecuted = prevProcess.getEndTime()-prevProcess.getStartTime();
-						System.out.println("[RR] quantumTimeDone: " + quantumTimeDone);
-						if(!quantumTimeDone) {													
+
+						// TODO: Correct time to demote a preempted process
+						if(!quantumTimeDone) {
 							if(nextQueue == null) {
-								System.out.println("[RR] NextQueue is NULL");
 								retainSecondProcess(QueueType.RR);
-							}else {
-								System.out.println("[RR] NextQueue is not NULL");
-								//displayExecutingInUI(burstExecuted, prevProcess.getEndTime(), prevProcess.getId());
+							}else {									
 								demoteSecondProcess(dequeueSecondProcess());
 							}
-							System.out.println("[RR] displaying P" + prevProcess.getId() + " timeNow: " + timeNow);
-						}
+						}						
 						counter = 1;
 					}
-					currProcess.setStartTime(prevTimeQuantum);
-					if(currProcess.preemptedFlag) {
-						counter = 1;
-						currProcess.setTimeResumed(prevTimeQuantum);
-						currProcess.preemptedFlag = false;
-					}					
-				}
-				}else {
-					if(prevProcess != null && 
-								prevProcess.getId() != currProcess.getId() &&
-									currProcess instanceof IOBoundProcess ) {
-						
-						System.out.println("[RR] Previous process P" + prevProcess.getId() + " was preempted by P" + currProcess.getId());
-						
-						if(prevProcess.getBurstTime() > 0) {
-							prevProcess.setPreempted();
-							prevProcess.setTimePreempted(timeNow);
-							prevProcess.setEndTime(timeNow);
-							prevProcess.preemptedFlag = true;												
-							prevTimeQuantum = timeNow;
-							
-							int burstExecuted = prevProcess.getEndTime()-prevProcess.getStartTime();
-							System.out.println("[RR] quantumTimeDone: " + quantumTimeDone);
-							if(!quantumTimeDone) {
-								System.out.println("[RR] displaying P" + prevProcess.getId() + " timeNow: " + timeNow);
-								//displayExecutingInUI(burstExecuted, prevProcess.getEndTime(), prevProcess.getId());
-								if(nextQueue == null) {
-									retainSecondProcess(QueueType.RR);
-								}else {									
-									demoteSecondProcess(dequeueSecondProcess());
-								}
-							}							
-							counter = 1;
-						}
-					}
-					if(currProcess.getResponseTime() < 0) {					
+					
+					//	Set the current process' response time if it is executing for the first time
+					if(currProcess.getResponseTime() < 0) {			
 						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
 							currProcess.setStartTime(prevTimeQuantum);
 							currProcess.setFirstStartTime(prevTimeQuantum);
@@ -126,19 +113,25 @@ public class RoundRobin extends PreemptiveQueue{
 							currProcess.setFirstStartTime(queueStartTime + ctr - 1);
 							prevTimeQuantum = queueStartTime + ctr - 1;
 						}
-						currProcess.setResponseTime();
+						
+						currProcess.setResponseTime();						
 						counter = 1;
-						if(currProcess.getStartTime()%10 == 0 && quantum%2 == 1) {
+						
+						// Add 1 to the clockTime if the current process's start time is a multiple 
+						// of 10 and the quantum time is odd in order to match the values of counter
+						// and clock time.
+						if(currProcess.getStartTime() % 10 == 0 
+								&& quantum % 2 == 1) {
 							clockTime++;
 						}					
 					}
+					
+					// Flag current process as resumed if previously preempted
 					if(currProcess.preemptedFlag) {			
 						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
 							currProcess.setStartTime(prevTimeQuantum);
-							currProcess.setStartTime(prevTimeQuantum);
 							currProcess.setTimeResumed(prevTimeQuantum);
 						}else {
-							currProcess.setStartTime(queueStartTime + ctr);
 							currProcess.setStartTime(queueStartTime + ctr);
 							currProcess.setTimeResumed(queueStartTime + ctr);
 						}										
@@ -146,12 +139,13 @@ public class RoundRobin extends PreemptiveQueue{
 					}
 				}							
 				prevProcess = currProcess;
-				
+								
 				int burstLeft = currProcess.getBurstTime() - 1;
-				currProcess.setBurstTime(burstLeft);	
-				timeNow = queueStartTime + ctr;
-				clockTime = timeNow;								
-				
+				if(burstLeft >= 0) {
+					currProcess.setBurstTime(burstLeft);	
+					timeNow = queueStartTime + ctr;
+					clockTime = timeNow;
+				}
 				
 				System.out.println("[Roundrobin] Level = " + 
 						level + 
@@ -166,13 +160,10 @@ public class RoundRobin extends PreemptiveQueue{
 						" clockTime = " + clockTime);					
 				
 				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
-					System.out.println("[RR] Heads up #1");
 					getNextProcessForTopQueue();
 				}
 				
-				//System.out.println("[RR] quantum: " + quantum + " counter " + counter + " P" + currProcess.getId());
 				if(burstLeft <= 0){
-					//System.out.println("[RR] P" + currProcess.getId() + " Done executing.");
 					if(currProcess != null) {
 						currProcess.setEndTime(timeNow);
 						
@@ -185,13 +176,9 @@ public class RoundRobin extends PreemptiveQueue{
 					counter = 0;
 					
 				}else if (counter == quantum-1) {
-					if(currProcess instanceof IOBoundProcess) {
-						System.out.println("[Roundrobin:] IOBOUND Quantum time is DONE (timeNow = " + timeNow + ")");						
-						
+					if(currProcess instanceof IOBoundProcess) {												
 						currProcess.setEndTime(timeNow);
 						currProcess.setArrivalTime(timeNow+((IOBoundProcess) currProcess).getIoSpeed());
-						
-						System.out.println("[RR] Next IOBOUND arrival: " + currProcess.getArrivalTime());
 												
 						prevTimeQuantum = timeNow;
 						Main.enqueue((IOBoundProcess) dequeue());						
@@ -202,8 +189,6 @@ public class RoundRobin extends PreemptiveQueue{
 						quantumTimeDone = false;
 					}
 				}else if(counter == quantum){	
-					
-					System.out.println("[Roundrobin:] Quantum time is DONE (timeNow = " + timeNow + ")");
 					prevTimeQuantum = timeNow;
 					currProcess.setEndTime(timeNow);
 					
@@ -212,10 +197,10 @@ public class RoundRobin extends PreemptiveQueue{
 						currProcess.setPrevBurstPreempted(currProcess.getBurstTime());										
 												
 						if(nextQueue == null) {
-							System.out.println("[RR] retaining...P" + currProcess.getId());
+							System.out.println("[RR] Level: " + level + "retaining P" + currProcess.getId());
 							retain(QueueType.RR);
 						}else {
-							System.out.println("[RR] demoting...P" + currProcess.getId());
+							System.out.println("[RR] Level: " + level + " demoting P" + currProcess.getId());
 							demote(dequeue());
 						}											
 					}								
@@ -230,7 +215,6 @@ public class RoundRobin extends PreemptiveQueue{
 				sortByBound();
 				
 				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
-					System.out.println("[RR] Heads up #2");
 					getNextProcessForTopQueue();
 				}
 				
@@ -238,11 +222,10 @@ public class RoundRobin extends PreemptiveQueue{
 				counter++;								
 			}
 			stopThread();			
-		}				
+		}
 	}
 
 	private void getNextProcessForTopQueue() {
-		System.out.println("[RR] GETTING NEXT PROCESSES");
 		if(prevQueue != null && prevQueue instanceof RoundRobin) {
 			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 				if(currProcess != null) {
@@ -256,7 +239,7 @@ public class RoundRobin extends PreemptiveQueue{
 						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
 						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
 					}
-					//currProcess = null;
+					currProcess = null;
 				}
 				Main.queues[0].getNextProcess();
 				Main.queues[0].startThread();
@@ -273,8 +256,9 @@ public class RoundRobin extends PreemptiveQueue{
 		nextQueue.enqueue(process, nextQueue.queueType);
 	}
 	
-	private void demoteSecondProcess(CPUBoundProcess process) {
+	private void demoteSecondProcess(CPUBoundProcess process) {	
 		if(nextQueue == null) return;
+		System.out.println("[Q] Level: " + level + " demoting P" + process.getId());
 		nextQueue.enqueue(process, nextQueue.queueType);
 	}
 	

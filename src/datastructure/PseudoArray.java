@@ -73,7 +73,7 @@ public class PseudoArray {
 		}
 		
 		//System.out.println("[PseudoArray:] Sorting SJF");
-		printContents();
+		//printContents();
 	}
 	
 	public void sortSJFFromFirst(){			
@@ -98,7 +98,7 @@ public class PseudoArray {
 		}
 		
 		//System.out.println("[PseudoArray:] Sorting SJF");
-		printContents();
+		//printContents();
 	}
 	
 	public void sortSRTF(){			
@@ -123,7 +123,7 @@ public class PseudoArray {
 		}
 		
 		//System.out.println("[PseudoArray:] Sorting SRTF");
-		printContents();
+		//printContents();
 	}
 	
 	public void sortPQ(){
@@ -200,7 +200,7 @@ public class PseudoArray {
 				CPUBoundProcess currProcess = current.getValue();												
 					
 				if(currProcess instanceof IOBoundProcess){	
-					System.out.println("[PseudoArray] P" + currProcess.getId() + " instanceof IOBoundProcess");
+					//System.out.println("[PseudoArray] P" + currProcess.getId() + " instanceof IOBoundProcess");
 					tempArray.add(current); 
 					list.remove(current.getKey());
 					ctr--;
@@ -218,7 +218,7 @@ public class PseudoArray {
 				list.addToFront(newLink);
 				ctr++;
 			}
-			printContents();
+			//printContents();
 		}
 	}
 }
