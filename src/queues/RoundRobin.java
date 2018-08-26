@@ -46,11 +46,7 @@ public class RoundRobin extends PreemptiveQueue{
 					if(prevProcess != null && 
 							prevProcess.getBurstTime() > 0 && 
 								prevProcess.getId() != currProcess.getId() &&
-									currProcess instanceof IOBoundProcess ) {
-						
-						System.out.println("[RR] Level: " + level + 
-								"Previous process P" + prevProcess.getId() + 
-								" was preempted by P" + currProcess.getId());
+									currProcess instanceof IOBoundProcess ) {						
 						
 						// Flag the previous process as preempted and set necessary values
 						prevProcess.setPreempted();
@@ -59,8 +55,7 @@ public class RoundRobin extends PreemptiveQueue{
 						prevProcess.preemptedFlag = true;					
 						prevTimeQuantum = timeNow;
 						
-						// TODO: Correct time to demote a preempted process.
-						if(!quantumTimeDone) {										
+						if(!quantumTimeDone) {							
 							if(nextQueue == null) {
 								retainSecondProcess(QueueType.RR);
 							}else {
@@ -79,9 +74,9 @@ public class RoundRobin extends PreemptiveQueue{
 								prevProcess.getId() != currProcess.getId() &&
 									currProcess instanceof IOBoundProcess ) {
 						
-						System.out.println("[RR] level: " + level +
+						/*System.out.println("[RR] level: " + level +
 								"Previous process P" + prevProcess.getId() + 
-									" was preempted by P" + currProcess.getId());
+									" was preempted by P" + currProcess.getId());*/
 						
 						// Flag previous process as preempted and set necessary values
 						prevProcess.setPreempted();
@@ -92,14 +87,17 @@ public class RoundRobin extends PreemptiveQueue{
 						
 						int burstExecuted = prevProcess.getEndTime()-prevProcess.getStartTime();
 
-						// TODO: Correct time to demote a preempted process
 						if(!quantumTimeDone) {
-							if(nextQueue == null) {
-								retainSecondProcess(QueueType.RR);
-							}else {									
-								demoteSecondProcess(dequeueSecondProcess());
+							if (burstExecuted == quantum){
+								if(nextQueue != null) {
+									demoteSecondProcess(dequeueSecondProcess());
+								}else {
+									retainSecondProcess(QueueType.RR);
+								}
+							}else {
+								retainSecondProcess(QueueType.RR);								
 							}
-						}						
+						}
 						counter = 1;
 					}
 					
@@ -120,10 +118,10 @@ public class RoundRobin extends PreemptiveQueue{
 						// Add 1 to the clockTime if the current process's start time is a multiple 
 						// of 10 and the quantum time is odd in order to match the values of counter
 						// and clock time.
-						if(currProcess.getStartTime() % 10 == 0 
+						/*if(currProcess.getStartTime() % 10 == 0 
 								&& quantum % 2 == 1) {
 							clockTime++;
-						}					
+						}	*/				
 					}
 					
 					// Flag current process as resumed if previously preempted
@@ -188,6 +186,7 @@ public class RoundRobin extends PreemptiveQueue{
 					}else {
 						quantumTimeDone = false;
 					}
+					
 				}else if(counter == quantum){	
 					prevTimeQuantum = timeNow;
 					currProcess.setEndTime(timeNow);
@@ -197,10 +196,10 @@ public class RoundRobin extends PreemptiveQueue{
 						currProcess.setPrevBurstPreempted(currProcess.getBurstTime());										
 												
 						if(nextQueue == null) {
-							System.out.println("[RR] Level: " + level + "retaining P" + currProcess.getId());
+							//System.out.println("[RR] Level: " + level + "retaining P" + currProcess.getId());
 							retain(QueueType.RR);
 						}else {
-							System.out.println("[RR] Level: " + level + " demoting P" + currProcess.getId());
+							//System.out.println("[RR] Level: " + level + " demoting P" + currProcess.getId());
 							demote(dequeue());
 						}											
 					}								
@@ -258,7 +257,7 @@ public class RoundRobin extends PreemptiveQueue{
 	
 	private void demoteSecondProcess(CPUBoundProcess process) {	
 		if(nextQueue == null) return;
-		System.out.println("[Q] Level: " + level + " demoting P" + process.getId());
+		//System.out.println("[Q] Level: " + level + " demoting P" + process.getId());
 		nextQueue.enqueue(process, nextQueue.queueType);
 	}
 	

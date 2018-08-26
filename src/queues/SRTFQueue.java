@@ -20,33 +20,11 @@ public class SRTFQueue extends Queue{
 		}
 		queueStartTime = clockTime;
 		
-		System.out.println("[SRTF] inside run");
-		System.out.println("[SRTF] queueStartTime: " + queueStartTime);
-		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}
 		
-		for(int ctr = 1; ctr <= totalBurstTime; ctr++){
-			//determineToPromote();
-			if(queuePreempted) {
-				if(currProcess != null) {
-					currProcess.setPreempted();
-					currProcess.setTimePreempted(timeNow);
-					currProcess.setEndTime(timeNow);
-					currProcess.preemptedFlag = true;
-					System.out.println("[SRTF] timeNow: " + timeNow);					
-					System.out.println("[SRTF] prevTimeQuantum: " + prevTimeQuantum);					
-					if(hasExecuted(currProcess)) {
-						prevTimeQuantum = timeNow;
-						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
-						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
-					}
-				}
-				queuePreempted = false;
-				break;
-			}
-			
+		for(int ctr = 1; ctr <= totalBurstTime; ctr++){			
 			if((currProcess = peekHead()) != null){	
 				if(prevQueue != null && prevQueue instanceof RoundRobin) {
 					currProcess.setStartTime(prevTimeQuantum);
@@ -80,10 +58,8 @@ public class SRTFQueue extends Queue{
 					if(currProcess.preemptedFlag) {	
 						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
 							currProcess.setStartTime(prevTimeQuantum);
-							currProcess.setStartTime(prevTimeQuantum);
 							currProcess.setTimeResumed(prevTimeQuantum);
 						}else {
-							currProcess.setStartTime(queueStartTime + ctr - 1);
 							currProcess.setStartTime(queueStartTime + ctr - 1);
 							currProcess.setTimeResumed(queueStartTime + ctr - 1);
 						}									
@@ -92,7 +68,7 @@ public class SRTFQueue extends Queue{
 				}
 				prevProcess = currProcess;		
 				
-				int burstLeft = currProcess.getBurstTime() - 1;					
+				int burstLeft = currProcess.getBurstTime() - 1;
 				currProcess.setBurstTime(burstLeft);					
 				timeNow = queueStartTime + ctr;
 				clockTime = timeNow;
@@ -107,7 +83,7 @@ public class SRTFQueue extends Queue{
 						burstLeft +
 						" timeNow = " + (queueStartTime + ctr));
 								
-				if(burstLeft == 0){
+				if(burstLeft <= 0){
 					currProcess.setEndTime(timeNow);
 					
 					dequeue();			
@@ -129,7 +105,6 @@ public class SRTFQueue extends Queue{
 	}
 	
 	private void getNextProcessForTopQueue() {
-		System.out.println("[SRTF] GETTING NEXT PROCESSES");
 		if(prevQueue != null && prevQueue instanceof RoundRobin) {
 			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 				if(currProcess != null) {
@@ -146,12 +121,25 @@ public class SRTFQueue extends Queue{
 					currProcess = null;
 				}
 				Main.queues[0].getNextProcess();
+				preemptQueue();
 				Main.queues[0].startThread();
 			}
 		}else {
 			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 				getNextProcess();
 			}
+		}
+	}
+	
+	public void preemptQueue() {
+		if(currProcess != null) {
+			currProcess.setPreempted();
+			currProcess.setTimePreempted(timeNow);
+			currProcess.setEndTime(timeNow);
+			currProcess.preemptedFlag = true;					
+			prevTimeQuantum = timeNow;
+			int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
+			displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());			
 		}
 	}
 }

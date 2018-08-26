@@ -26,7 +26,7 @@ public class LinkedList{
 			last.next = newLink;
 			last.next.previous = last;
 			last = last.next;
-		}						
+		}				
 	}
 	
 	public void addToFront(Link newLink) {
@@ -108,10 +108,6 @@ public class LinkedList{
 		CPUBoundProcess process = null;
 		
 		if(!isEmpty() && first != null){
-			/*System.out.println("[LinkedList] first: P" + first.getValue().getId());
-			System.out.println("[LinkedList] first.next: P" + first.next.getValue().getId());
-			System.out.println("[LinkedList] first.next.next: P" + first.next.next.getValue().getId());
-			System.out.println("[LinkedList] first.next.next.previous: P" + first.next.next.previous.getValue().getId());*/
 			temp = first.next;
 			
 			if(first.next.next != null) {
@@ -121,14 +117,18 @@ public class LinkedList{
 				first.next = null;
 			}
 			
-			process = temp.getValue();			
-		}						
+			process = temp.getValue();
+			
+			if(last.getValue().getId() == process.getId()) {
+				last = last.previous;
+			}								
+		}
 		
 		if(process != null){			
 			return process;
 		}
 		
-		return null;
+		return null;		
 	}
 	
 	public void printContents(){

@@ -15,9 +15,6 @@ public class FCFSQueue extends Queue{
 		}
 		queueStartTime = clockTime;
 		
-		System.out.println("[FCFS] inside run");
-		System.out.println("[FCFS] queueStartTime: " + queueStartTime);
-		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
 		}		
@@ -39,9 +36,9 @@ public class FCFSQueue extends Queue{
 							prevProcess.getId() != currProcess.getId() && 
 								prevProcess.getBurstTime() > 0) {
 							
-							System.out.println("[FCFS: ] P" + prevProcess.getId() + 
+							/*System.out.println("[FCFS: ] P" + prevProcess.getId() + 
 									" was preempted (endTime: " + timeNow + 
-									" counter: " + counter + ")");
+									" counter: " + counter + ")");*/
 							
 							prevProcess.setPreempted();
 							prevProcess.setTimePreempted(timeNow);
@@ -51,6 +48,7 @@ public class FCFSQueue extends Queue{
 							int burstExecuted = prevProcess.getEndTime()-prevProcess.getStartTime();
 							displayExecutingInUI(burstExecuted, prevProcess.getEndTime(), prevProcess.getId());
 					}
+					
 					if(currProcess.getResponseTime() < 0) {
 						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
 							currProcess.setStartTime(prevTimeQuantum);
@@ -113,7 +111,6 @@ public class FCFSQueue extends Queue{
 	}		
 	
 	private void getNextProcessForTopQueue() {
-		System.out.println("[FCFS] GETTING NEXT PROCESSES");
 		if(prevQueue != null && prevQueue instanceof RoundRobin) {
 			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 				if(currProcess != null) {

@@ -17,9 +17,11 @@ public class PseudoArray {
 	}
 	
 	public void add(CPUBoundProcess value){		
+
 		Link newLink = new Link(value, value.toString());
 		list.add(newLink);
 		ctr++;
+		printContents();
 	}
 	
 	public Link getHead(){
@@ -62,7 +64,6 @@ public class PseudoArray {
 				long currBurst = current.getValue().getBurstTime();
 				long nextBurst = current.next.getValue().getBurstTime();												
 				
-				//System.out.println("[PseudoArray:] currBurst: " + currBurst + " nextBurst: " + nextBurst);
 				if(currBurst > nextBurst){					
 					CPUBoundProcess temp = current.getValue();
 					current.setValue(current.next.getValue());
@@ -86,8 +87,7 @@ public class PseudoArray {
 				
 				long currBurst = current.getValue().getBurstTime();
 				long nextBurst = current.next.getValue().getBurstTime();												
-				
-				//System.out.println("[PseudoArray:] currBurst: " + currBurst + " nextBurst: " + nextBurst);
+								
 				if(currBurst > nextBurst){					
 					CPUBoundProcess temp = current.getValue();
 					current.setValue(current.next.getValue());
@@ -111,8 +111,7 @@ public class PseudoArray {
 				
 				long currBurst = current.getValue().getBurstTime();
 				long nextBurst = current.next.getValue().getBurstTime();												
-				
-				//System.out.println("[PseudoArray:] currBurst: " + currBurst + " nextBurst: " + nextBurst);
+								
 				if(currBurst > nextBurst){					
 					CPUBoundProcess temp = current.getValue();
 					current.setValue(current.next.getValue());
@@ -200,7 +199,6 @@ public class PseudoArray {
 				CPUBoundProcess currProcess = current.getValue();												
 					
 				if(currProcess instanceof IOBoundProcess){	
-					//System.out.println("[PseudoArray] P" + currProcess.getId() + " instanceof IOBoundProcess");
 					tempArray.add(current); 
 					list.remove(current.getKey());
 					ctr--;
