@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -21,9 +22,14 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JSpinner.DefaultEditor;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import constants.SchedulingAlgorithm;
@@ -66,11 +72,11 @@ public class GanttChart extends JFrame{
 	private static JLabel[] timeLabel = new JLabel[100000];
 	
 	private static JMenuBar menuBar;
-	private static JMenu insProcess, mlfq, quantumItem;
+	private static JMenu dataSets, levelOptions;
 
-	private static JButton startButton;
-	private static JButton setQuantum1, setQuantum2, setQuantum3, setQuantum4;
+	private static JButton startButton;	
 	private static JButton button = null;
+	private static JSpinner setQuantum1, setQuantum2, setQuantum3, setQuantum4;
 	
 	private ArrayList<Integer> PID = new ArrayList<Integer>();
 	private ArrayList<Integer> arrivalTime = new ArrayList<Integer>();
@@ -97,7 +103,10 @@ public class GanttChart extends JFrame{
 	
 	private static int prevEndTime = 0;
 	private static boolean initFlag = true;
-	private static int quantum1, quantum2, quantum3, quantum4;
+	private static int quantum1 = 1, 
+			quantum2 = 1, 
+			quantum3 = 1, 
+			quantum4 = 1;
 	
 	private static String fileChosen;
 	private static String[] algorithms = {"FCFS", "SJF", "SRTF", "NP-PRIO", "P-PRIO", "RR"};
@@ -132,17 +141,10 @@ public class GanttChart extends JFrame{
 		
 		menuBar = new JMenuBar();		
 		
-		insProcess = new JMenu("Insert processes");
-		insProcess.setEnabled(true);
+		dataSets = new JMenu("Data set");
+		dataSets.setEnabled(true);
 		
-		mlfq = new JMenu("MLFQ");		
-		
-		quantumItem = new JMenu("Quantum");
-		if(algorithm == SchedulingAlgorithm.RR){
-			quantumItem.setEnabled(true);
-		}else{
-			quantumItem.setEnabled(false);
-		}
+		levelOptions = new JMenu("Levels");
 		
 		mlfqPanel = new JPanel();
 		mlfqPanel.setPreferredSize(new Dimension(con.getWidth(), con.getHeight() + Offset));
@@ -172,25 +174,28 @@ public class GanttChart extends JFrame{
 			    fileChooser.setFileFilter(filter);
 			    int returnVal = fileChooser.showOpenDialog(null);
 			    if(returnVal == JFileChooser.APPROVE_OPTION) {				       
-			        fileChosen = fileChooser.getSelectedFile().getAbsolutePath();			        
-			        readFile(fileChosen);
+			        fileChosen = fileChooser.getSelectedFile().getAbsolutePath();
+			        
+			        resetGanttChart();
+					resetTimesInformation();
+					resetArrivedTable();
+					resetTimeAverages();			        
 			    }
-			    
+
+			    if(fileChosen != null) {
+			    	readFile(fileChosen);
+			    }
+			    			    
 			    Queue.threadStopped = false;
 				Queue.processList.removeAll(Queue.processList);
-				Queue.clockTime = 0;
-				
-				resetGanttChart();
-				resetTimesInformation();
-				resetArrivedTable();
-				resetTimeAverages();
+				Queue.clockTime = 0;							
 				
 				con.repaint();
 				con.revalidate();
 			}
 		});
 		
-		insProcess.add(importFile);	
+		dataSets.add(importFile);	
 				
 		JMenuItem mlfqOneLevel, mlfqTwoLevel, mlfqThreeLevel, mlfqFourLevel;
 		mlfqOneLevel = new JMenuItem("1-Level");
@@ -214,8 +219,6 @@ public class GanttChart extends JFrame{
 				con.removeAll();				
 				init();	
 				initTwoLevel();
-				mlfq.repaint();
-				mlfq.revalidate();
 			}
 		});
 		
@@ -248,10 +251,10 @@ public class GanttChart extends JFrame{
 			initFlag = false;
 		}
 		
-		mlfq.add(mlfqOneLevel);
-		mlfq.add(mlfqTwoLevel);
-		mlfq.add(mlfqThreeLevel);
-		mlfq.add(mlfqFourLevel);
+		levelOptions.add(mlfqOneLevel);
+		levelOptions.add(mlfqTwoLevel);
+		levelOptions.add(mlfqThreeLevel);
+		levelOptions.add(mlfqFourLevel);
 		
 		new JMenuItem("Set");
 		
@@ -282,15 +285,13 @@ public class GanttChart extends JFrame{
 				
 			}
 		});
-		quantumItem.add(quantumChange);
 		
 		if(mlfqOneLevel.isSelected()) {
 			initOneLevel();
 		}
 		
-		menuBar.add(insProcess);
-		menuBar.add(mlfq);
-		menuBar.add(quantumItem);
+		menuBar.add(dataSets);
+		menuBar.add(levelOptions);
 		
 		setJMenuBar(menuBar);
 		
@@ -304,10 +305,7 @@ public class GanttChart extends JFrame{
 		burstTime.removeAll(burstTime);
 		priority.removeAll(priority);
 		iOBoundFlag.removeAll(iOBoundFlag);
-		try(
-	        	BufferedReader in = new BufferedReader(new FileReader(fileChosen));
-	        ){
-	        	
+		try(BufferedReader in = new BufferedReader(new FileReader(fileChosen));){	        	
 	        	String line;
 				while((line = in.readLine()) != null){
 				    System.out.println(line);
@@ -319,24 +317,20 @@ public class GanttChart extends JFrame{
 				    priority.add(Integer.parseInt(token[3]));
 				    iOBoundFlag.add(Integer.parseInt(token[4]));
 				}
-				in.close();
-									
-				/*int size = PID.size();
-				for(int i = 0; i < size; i++){
-					processes.add(new CPUBoundProcess(PID.get(i), arrivalTime.get(i), burstTime.get(i), priority.get(i)));
-				}*/
+				in.close();								
+				startButton.setEnabled(true);
+				startButton.setToolTipText("Start simulation!");
 				
-				System.out.println("[GanttChart] algorithm = " + algorithm);
-				System.out.println("[GanttChart] level = " + level);
-				if(algorithm == SchedulingAlgorithm.RR && quantum <= 0)
-					startButton.setEnabled(false);
-				else
-					startButton.setEnabled(true);
-				
-	        } catch (Exception e1) { 
-	        	e1.printStackTrace();
+	        } catch (NumberFormatException nfe) { 
+	        	JOptionPane.showMessageDialog(null, "An exception has occurred while parsing the data. " +
+        				"\nPlease make sure to follow the correct format of the contents of the file.", "Error", 
+	        				JOptionPane.ERROR_MESSAGE);
 	        	startButton.setEnabled(false);
-	        }
+	        } catch (IOException e) {
+	        	JOptionPane.showMessageDialog(null, "An error has occurred while reading the file.", "Error", 
+        				JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
+			}
 	}
 
 	private void initGanttChart(int x, int y, int level /*JComboBox cb,*/) {
@@ -478,10 +472,9 @@ public class GanttChart extends JFrame{
 		initAvgTimeTable(650, 970);
 	}
 	
-	private void initOneLevelComboBox() {
-		addSetQuantum(160, 65, 1);
-		//disableQuantum(1);
-				
+	private void initOneLevelComboBox() {		
+		addSetQuantum(160, 62, 1);
+		
 		mlfqPanel.remove(algoList1);
 		algoList1.setBounds(70, 65, 80, 20);		
 		algoList1.addActionListener(new ActionListener() {
@@ -508,11 +501,11 @@ public class GanttChart extends JFrame{
 				}else if (selected.equals("P-PRIO")) {
 					algorithm1 = SchedulingAlgorithm.PRIO;
 				}else if (selected.equals("RR")) {
-					algorithm1 = SchedulingAlgorithm.RR;
+					algorithm1 = SchedulingAlgorithm.RR;						
 				}else {
 					algorithm1 = SchedulingAlgorithm.FCFS;					
 				}
-				
+								
 				if(selected.equals("RR")){					
 					enableQuantum(1);
 				}else{
@@ -521,7 +514,7 @@ public class GanttChart extends JFrame{
 			}
 			
 		});				
-		algoList1.setSelectedIndex(0);
+		//algoList1.setSelectedIndex(0);
 		mlfqPanel.add(algoList1);
 	}
 	
@@ -568,8 +561,7 @@ public class GanttChart extends JFrame{
 				}
 			}
 			
-		});
-		algoList2.setSelectedIndex(0);
+		});		
 		mlfqPanel.add(algoList2);
 	}
 	
@@ -671,145 +663,69 @@ public class GanttChart extends JFrame{
 	}
 
 	protected void addSetQuantum(int x, int y, int level) {
-		String label = "Quantum = "; 
+		JSpinner spinner = null;
+		SpinnerModel model = new SpinnerNumberModel(1, 1, 100, 1);		
+		JLabel qLabel = new JLabel("Quantum: ");
+		qLabel.setBounds(x, y, 100, 22);
+		mlfqPanel.add(qLabel);		
 		
-		if(level == 1) {
-			label += quantum1;
-			
-			setQuantum1 = new JButton();
-			setQuantum1.setText(label);
-			setQuantum1.setBounds(x, y, 150, 20);
-			setQuantum1.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					while(true){
-						String result = JOptionPane.showInputDialog("Quantum", quantum1);	
-						if(result != null){
-							char[] letters = result.toCharArray();
-							
-							int i;
-							for(i = 0; i < letters.length; i++){
-								if(!Character.isDigit(letters[i])){
-									break;
-								}
-							}							
-							if(i == letters.length){
-								quantum1 = Integer.parseInt(result);
-								break;
-							}
-						}else {
-							break;
-						}
-					}
-					setQuantum1.setText("Quantum = " + quantum1);
+		if(level == 1) {			
+			setQuantum1 = new JSpinner(model);			
+			setQuantum1.setBounds(x + 60, y, 50, 22);
+			setQuantum1.setEnabled(false);
+			((DefaultEditor)setQuantum1.getEditor()).getTextField().setEditable(false);
+			setQuantum1.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					quantum1 = (int) ((JSpinner)e.getSource()).getValue();
 				}
 			});
-			
-			button = setQuantum1;
+
+			spinner = setQuantum1;		
 		}
 		
 		if(level == 2) {
-			label += quantum2;
-			
-			setQuantum2 = new JButton(label);
-			setQuantum2.setBounds(x, y, 150, 20);
-			setQuantum2.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					while(true){
-						String result = JOptionPane.showInputDialog("Quantum", quantum2);	
-						if(result != null){
-							char[] letters = result.toCharArray();
-							
-							int i;
-							for(i = 0; i < letters.length; i++){
-								if(!Character.isDigit(letters[i])){
-									break;
-								}
-							}
-							
-							if(i == letters.length){
-								quantum2 = Integer.parseInt(result);
-								break;
-							}
-						}else {
-							break;
-						}
-					}
-					setQuantum2.setText("Quantum = " + quantum2);
+			setQuantum2 = new JSpinner(model);			
+			setQuantum2.setBounds(x + 60, y, 50, 22);
+			setQuantum2.setEnabled(false);
+			((DefaultEditor)setQuantum2.getEditor()).getTextField().setEditable(false);
+			setQuantum2.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					quantum2 = (int) ((JSpinner)e.getSource()).getValue();
 				}
 			});
 			
-			button = setQuantum2;
-		}
+			spinner = setQuantum2;	
+		}		
 		
 		if(level == 3) {
-			label += quantum3;
-			
-			setQuantum3 = new JButton(label);
-			setQuantum3.setBounds(x, y, 150, 20);
-			setQuantum3.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					while(true){
-						String result = JOptionPane.showInputDialog("Quantum", quantum3);	
-						if(result != null){
-							char[] letters = result.toCharArray();
-							
-							int i;
-							for(i = 0; i < letters.length; i++){
-								if(!Character.isDigit(letters[i])){
-									break;
-								}
-							}
-							
-							if(i == letters.length){
-								quantum3 = Integer.parseInt(result);
-								break;
-							}
-						}else {
-							break;
-						}
-					}
-					setQuantum3.setText("Quantum = " + quantum3);
+			setQuantum3 = new JSpinner(model);			
+			setQuantum3.setBounds(x + 60, y, 50, 22);
+			setQuantum3.setEnabled(false);
+			((DefaultEditor)setQuantum3.getEditor()).getTextField().setEditable(false);
+			setQuantum3.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					quantum3 = (int) ((JSpinner)e.getSource()).getValue();
 				}
 			});
 			
-			button = setQuantum3;
+			spinner = setQuantum3;
 		}
 		
 		if(level == 4) {
-			label += quantum4;
-			
-			setQuantum4 = new JButton(label);
-			setQuantum4.setBounds(x, y, 150, 20);
-			setQuantum4.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					while(true){
-						String result = JOptionPane.showInputDialog("Quantum", quantum4);	
-						if(result != null){
-							char[] letters = result.toCharArray();
-							
-							int i;
-							for(i = 0; i < letters.length; i++){
-								if(!Character.isDigit(letters[i])){
-									break;
-								}
-							}
-							
-							if(i == letters.length){
-								quantum4 = Integer.parseInt(result);
-								break;
-							}
-						}else {
-							break;
-						}
-					}
-					setQuantum4.setText("Quantum = " + quantum4);
+			setQuantum4 = new JSpinner(model);			
+			setQuantum4.setBounds(x + 60, y, 50, 22);
+			setQuantum4.setEnabled(false);
+			((DefaultEditor)setQuantum4.getEditor()).getTextField().setEditable(false);
+			setQuantum4.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					quantum4 = (int) ((JSpinner)e.getSource()).getValue();
 				}
 			});
 			
-			button = setQuantum4;
+			spinner = setQuantum4;
 		}
 		
-		mlfqPanel.add(button);
+		mlfqPanel.add(spinner);
 		mlfqPanel.repaint();
 		mlfqPanel.revalidate();
 	}
@@ -818,17 +734,17 @@ public class GanttChart extends JFrame{
 		startButton = new JButton("START");
 		startButton.setBounds(xOffset, yOffset, 100, 50);
 		
-		if(processes == null || (algorithm == SchedulingAlgorithm.RR && quantum == 0)){
-			System.out.println("[GanttChart:] processes: " + processes);
+		if(processes.size() == 0){
 			startButton.setEnabled(false);
+			startButton.setToolTipText("Import a data set first!");
 		}else{
 			startButton.setEnabled(true);
+			startButton.setToolTipText("Start simulation");
 		}
 		
 		startButton.addActionListener(new ActionListener(){			
 			public void actionPerformed(ActionEvent e) {
-					
-					System.out.println("[GanttChart:] Start Button pressed.");
+				
 					Queue.threadStopped = false;
 					Queue.processList.removeAll(Queue.processList);
 					Queue.clockTime = 0;
@@ -855,13 +771,7 @@ public class GanttChart extends JFrame{
 					
 					int[] algorithms = {algorithm1, algorithm2, algorithm3, algorithm4};
 					int[] quanta = {quantum1, quantum2, quantum3, quantum4};
-					scheduler.generateQueues(algorithms, quanta);
-					
-					startButton.setEnabled(false);
-					insProcess.setEnabled(false);
-					mlfq.setEnabled(false);
-					quantumItem.setEnabled(false);
-					
+					scheduler.generateQueues(algorithms, quanta);							
 			}			
 		});
 		mlfqPanel.add(startButton);
@@ -1254,8 +1164,9 @@ public class GanttChart extends JFrame{
 			panel1.repaint();
 			panel1.revalidate();
 			
-			panel1.setPreferredSize(new Dimension(panelWidth-2, 73));
-			timePanel1.setSize(new Dimension(panelWidth, 73));
+			panel1.setSize(new Dimension(panelWidth, 73));
+			panel1.setPreferredSize(new Dimension(panelWidth-5, 73));
+			timePanel1.setSize(new Dimension(panelWidth, 20));
 			
 		}else if (level == 2) {
 			if(panel1 == null || timePanel1 == null || 
@@ -1498,21 +1409,9 @@ public class GanttChart extends JFrame{
 		mlfqPanel.revalidate();
 	}*/
 	
-	public void simulationDone(Object queue) {	
-		con.removeAll();
-		init();
-		
-		startButton.setEnabled(true);
-		insProcess.setEnabled(true);
-		mlfq.setEnabled(true);
+	public void simulationDone(Object queue) {				
 		
 		System.out.println("[GanttChart] " + startButton.isEnabled());
-		
-		con.repaint();
-		con.revalidate();
-		
-		if(algorithm == SchedulingAlgorithm.RR)
-			quantumItem.setEnabled(true);
 		
 		if(queue instanceof FCFSQueue){
 			((FCFSQueue) queue).stopThread();
