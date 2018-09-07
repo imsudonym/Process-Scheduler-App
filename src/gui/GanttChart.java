@@ -125,9 +125,21 @@ public class GanttChart extends JFrame{
 	JComboBox<String> algoList3 = new JComboBox<String>(algorithms);
 	JComboBox<String> algoList4 = new JComboBox<String>(algorithms);
 	
+	private JScrollPane timesScrollPane;
+	private JScrollPane pcbScrollPane;
+	private JLabel arrivingProcesses;
+	private JScrollPane scrollPane4;
+	private JScrollPane scrollPane3;
+	private JScrollPane scrollPane2;
+	private JScrollPane scrollPane1;
+	private JLabel qLabel1;
+	private JLabel qLabel2;
+	private JLabel qLabel3;
+	private JLabel qLabel4;
+	private JScrollPane scrollPane;
+	
 	public GanttChart(){
 		super("CPU Scheduling Gantt Chart");		
-		
 		setExtendedState(MAXIMIZED_BOTH);
 		con = getContentPane();
 		con.setBackground(Color.WHITE);
@@ -151,7 +163,7 @@ public class GanttChart extends JFrame{
 		mlfqPanel.setBackground(Color.WHITE);
 		mlfqPanel.setLayout(null);
 			
-		JScrollPane scrollPane = new JScrollPane(mlfqPanel);
+		scrollPane = new JScrollPane(mlfqPanel);
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setBounds(0, 0, con.getWidth(), con.getHeight());
@@ -203,8 +215,8 @@ public class GanttChart extends JFrame{
 			public void actionPerformed(ActionEvent arg0) {
 				Offset = -2;
 				initFlag = false;
-				con.removeAll();			
-				init();
+				resetNewLevel();
+				reset();
 				initOneLevel();				
 			}
 		});
@@ -212,12 +224,11 @@ public class GanttChart extends JFrame{
 		mlfqTwoLevel = new JMenuItem("2-Level");
 		mlfqTwoLevel.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("[GanttChart] 2-Level selected");
+				
 				Offset = 150;
 				initFlag = false;
-				reset();
-				con.removeAll();				
-				init();	
+				resetNewLevel();
+				reset();	
 				initTwoLevel();
 			}
 		});
@@ -227,9 +238,8 @@ public class GanttChart extends JFrame{
 			public void actionPerformed(ActionEvent arg0) {
 				Offset = 270;
 				initFlag = false;
-				reset();
-				con.removeAll();
-				init();
+				resetNewLevel();
+				reset();				
 				initThreeLevel();				
 			}
 		});
@@ -239,9 +249,8 @@ public class GanttChart extends JFrame{
 			public void actionPerformed(ActionEvent arg0) {
 				Offset = 450;
 				initFlag = false;
+				resetNewLevel();
 				reset();
-				con.removeAll();
-				init();
 				initFourLevel();				
 			}
 		});
@@ -296,9 +305,41 @@ public class GanttChart extends JFrame{
 		setJMenuBar(menuBar);
 		
 		con.repaint();
-		con.revalidate();					
+		con.revalidate();
+		
+		mlfqPanel.repaint();
+		mlfqPanel.revalidate();
 	}
 	
+	protected void resetNewLevel() {		
+		if(scrollPane1 != null) mlfqPanel.remove(scrollPane1);
+		if(scrollPane2 != null) mlfqPanel.remove(scrollPane2);
+		if(scrollPane3 != null) mlfqPanel.remove(scrollPane3);
+		if(scrollPane4 != null) mlfqPanel.remove(scrollPane4);
+		
+		if(setQuantum1 != null) mlfqPanel.remove(setQuantum1);
+		if(setQuantum2 != null) mlfqPanel.remove(setQuantum2);
+		if(setQuantum3 != null) mlfqPanel.remove(setQuantum3);
+		if(setQuantum4 != null) mlfqPanel.remove(setQuantum4);
+		
+		if(qLabel1 != null) mlfqPanel.remove(qLabel1);
+		if(qLabel2 != null) mlfqPanel.remove(qLabel2);
+		if(qLabel3 != null) mlfqPanel.remove(qLabel3);
+		if(qLabel4 != null) mlfqPanel.remove(qLabel4);
+		
+		mlfqPanel.remove(algoList1);
+		mlfqPanel.remove(algoList2);
+		mlfqPanel.remove(algoList3);
+		mlfqPanel.remove(algoList4);
+		
+		mlfqPanel.remove(arrivingProcesses);
+		mlfqPanel.remove(pcbScrollPane);
+		mlfqPanel.remove(timesScrollPane);	
+		mlfqPanel.remove(avgTimeTable);
+		mlfqPanel.repaint();
+		mlfqPanel.revalidate();
+	}
+
 	protected void readFile(String fileChosen) {
 		PID.removeAll(PID);
 		arrivalTime.removeAll(arrivalTime);
@@ -334,9 +375,8 @@ public class GanttChart extends JFrame{
 	}
 
 	private void initGanttChart(int x, int y, int level /*JComboBox cb,*/) {
-		JPanel panel = null;
-		
-		if(level == 1) {			
+				
+		if(level == 1) {
 			panel1 = new JPanel();
 			panel1.setLayout(null);
 			panel1.setBackground(Color.LIGHT_GRAY);
@@ -349,7 +389,12 @@ public class GanttChart extends JFrame{
 			timePanel1.setBounds(1, 51, 1145, 20);																								
 			panel1.add(timePanel1);
 			
-			panel = panel1;
+			scrollPane1 = new JScrollPane(panel1);
+			scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			scrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+			scrollPane1.setBounds(x, y, panelWidth, 85);
+			
+			mlfqPanel.add(scrollPane1);
 			
 		}else if (level == 2) {
 			
@@ -365,7 +410,12 @@ public class GanttChart extends JFrame{
 			timePanel2.setBounds(1, 51, 1145, 20);																								
 			panel2.add(timePanel2);
 			
-			panel = panel2;
+			scrollPane2 = new JScrollPane(panel2);
+			scrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+			scrollPane2.setBounds(x, y, panelWidth, 85);
+			
+			mlfqPanel.add(scrollPane2);
 			
 		}else if (level == 3) {
 			
@@ -381,7 +431,12 @@ public class GanttChart extends JFrame{
 			timePanel3.setBounds(1, 51, 1145, 20);
 			panel3.add(timePanel3);
 			
-			panel = panel3;
+			scrollPane3 = new JScrollPane(panel3);
+			scrollPane3.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			scrollPane3.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+			scrollPane3.setBounds(x, y, panelWidth, 85);
+			
+			mlfqPanel.add(scrollPane3);
 			
 		}else if (level == 4) {
 			
@@ -395,18 +450,15 @@ public class GanttChart extends JFrame{
 			timePanel4.setLayout(null);
 			timePanel4.setBackground(darkBlue);
 			timePanel4.setBounds(1, 51, 1145, 20);
-			panel4.add(timePanel4);
+			panel4.add(timePanel4);			
 			
-			panel = panel4;
+			scrollPane4 = new JScrollPane(panel4);
+			scrollPane4.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			scrollPane4.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+			scrollPane4.setBounds(x, y, panelWidth, 85);
+			
+			mlfqPanel.add(scrollPane4);
 		}
-		
-		JScrollPane scrollPane = new JScrollPane(panel);
-		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-		scrollPane.setBounds(x, y, panelWidth, 85);
-		
-		mlfqPanel.add(scrollPane);
-
 	}
 	
 	private void initOneLevel() {
@@ -436,6 +488,11 @@ public class GanttChart extends JFrame{
 		initProcessTable(270, 320, 150, 380);
 		initTimesTable(400);
 		initAvgTimeTable(650, 660);
+		
+		mlfqPanel.repaint();
+		mlfqPanel.revalidate();
+		con.repaint();
+		con.revalidate();
 	}
 	
 	private void initThreeLevel() {
@@ -567,7 +624,6 @@ public class GanttChart extends JFrame{
 	
 	private void initThreeLevelComboBox() {
 		addSetQuantum(160, 335, 3);
-		//disableQuantum(3);
 		
 		algoList3.setBounds(70, 335, 80, 20);		
 		algoList3.addActionListener(new ActionListener() {
@@ -664,12 +720,14 @@ public class GanttChart extends JFrame{
 
 	protected void addSetQuantum(int x, int y, int level) {
 		JSpinner spinner = null;
-		SpinnerModel model = new SpinnerNumberModel(1, 1, 100, 1);		
-		JLabel qLabel = new JLabel("Quantum: ");
-		qLabel.setBounds(x, y, 100, 22);
-		mlfqPanel.add(qLabel);		
+		SpinnerModel model = new SpinnerNumberModel(1, 1, 100, 1);				
 		
 		if(level == 1) {			
+			
+			qLabel1 = new JLabel("Quantum: ");
+			qLabel1.setBounds(x, y, 100, 22);
+			mlfqPanel.add(qLabel1);
+			
 			setQuantum1 = new JSpinner(model);			
 			setQuantum1.setBounds(x + 60, y, 50, 22);
 			setQuantum1.setEnabled(false);
@@ -684,6 +742,11 @@ public class GanttChart extends JFrame{
 		}
 		
 		if(level == 2) {
+			
+			qLabel2 = new JLabel("Quantum: ");
+			qLabel2.setBounds(x, y, 100, 22);
+			mlfqPanel.add(qLabel2);
+			
 			setQuantum2 = new JSpinner(model);			
 			setQuantum2.setBounds(x + 60, y, 50, 22);
 			setQuantum2.setEnabled(false);
@@ -698,6 +761,11 @@ public class GanttChart extends JFrame{
 		}		
 		
 		if(level == 3) {
+			
+			qLabel3 = new JLabel("Quantum: ");
+			qLabel3.setBounds(x, y, 100, 22);
+			mlfqPanel.add(qLabel3);
+			
 			setQuantum3 = new JSpinner(model);			
 			setQuantum3.setBounds(x + 60, y, 50, 22);
 			setQuantum3.setEnabled(false);
@@ -712,6 +780,11 @@ public class GanttChart extends JFrame{
 		}
 		
 		if(level == 4) {
+			
+			qLabel4 = new JLabel("Quantum: ");
+			qLabel4.setBounds(x, y, 100, 22);
+			mlfqPanel.add(qLabel4);
+			
 			setQuantum4 = new JSpinner(model);			
 			setQuantum4.setBounds(x + 60, y, 50, 22);
 			setQuantum4.setEnabled(false);
@@ -744,7 +817,7 @@ public class GanttChart extends JFrame{
 		
 		startButton.addActionListener(new ActionListener(){			
 			public void actionPerformed(ActionEvent e) {
-				
+									
 					Queue.threadStopped = false;
 					Queue.processList.removeAll(Queue.processList);
 					Queue.clockTime = 0;
@@ -778,7 +851,7 @@ public class GanttChart extends JFrame{
 	}
 
 	private void initProcessTable(int lbl_x, int lbl_y, int scrl_x, int scrl_y) {
-		JLabel arrivingProcesses = new JLabel("PROCESSES");
+		arrivingProcesses = new JLabel("PROCESSES");
 		arrivingProcesses.setFont(font);
 		arrivingProcesses.setBounds(lbl_x, lbl_y, 500, 50);
 		mlfqPanel.add(arrivingProcesses);
@@ -787,7 +860,7 @@ public class GanttChart extends JFrame{
 		pcbPanel.setBorder(border);		
 		pcbPanel.setPreferredSize(new Dimension(400, 350));		
 		
-		JScrollPane pcbScrollPane = new JScrollPane(pcbPanel);
+		pcbScrollPane = new JScrollPane(pcbPanel);
 		pcbScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		pcbScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		pcbScrollPane.setBounds(scrl_x, scrl_y, 405, 355);
@@ -845,7 +918,7 @@ public class GanttChart extends JFrame{
 		timesPanel.setBorder(border);		
 		timesPanel.setPreferredSize(new Dimension(575, 250));		
 		
-		JScrollPane timesScrollPane = new JScrollPane(timesPanel);
+		timesScrollPane = new JScrollPane(timesPanel);
 		timesScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		timesScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		timesScrollPane.setBounds(650, offset, 435, 255);
@@ -976,10 +1049,7 @@ public class GanttChart extends JFrame{
 		}else{							
 			xOffset += prevBurstLength;											
 		}
-		
-		
-		System.out.println("[GanttChart] prevEndTime: " + prevEndTime + " timeNow: " + timeNow + 
-				" exec: " + executionTime + " timeNow-executionTime: " + (timeNow-executionTime));
+				
 		if(prevEndTime < timeNow-executionTime) {
 			
 			addGap();		
@@ -1033,8 +1103,10 @@ public class GanttChart extends JFrame{
 		resetArrivedTable();
 		resetTimeAverages();
 		
+		mlfqPanel.setPreferredSize(new Dimension(con.getWidth(), con.getHeight() + Offset));
+								
 		con.repaint();
-		con.revalidate();
+		con.revalidate();		
 	}
 		
 	public static void addNewArrivedProcess(int processId, int arrivalTime, int burstTime, int priority){							
@@ -1395,40 +1467,20 @@ public class GanttChart extends JFrame{
 		mlfqPanel.revalidate();
 	}
 	
-/*	private void disableQuantum(int lvl) {
-//		if(lvl == 1) {
-//			/setQuantum1.setEnabled(false);
-		}else if(lvl == 2) {
-			setQuantum2.setEnabled(false);
-		}else if(lvl == 3) {
-			setQuantum3.setEnabled(false);
-		}else if(lvl == 4) {
-			setQuantum4.setEnabled(false);
-		}
-		mlfqPanel.repaint();
-		mlfqPanel.revalidate();
-	}*/
-	
 	public void simulationDone(Object queue) {				
-		
-		System.out.println("[GanttChart] " + startButton.isEnabled());
 		
 		if(queue instanceof FCFSQueue){
 			((FCFSQueue) queue).stopThread();
-			System.out.println("FCFSThread stopped.");
 		}else if(queue instanceof SJFQueue){
 			((SJFQueue) queue).stopThread();
 		}else if(queue instanceof SRTFQueue){
 			((SRTFQueue) queue).stopThread();
-			System.out.println("SRTFThread stopped.");
 		}else if(queue instanceof PQueue){
-			System.out.println("PThread stopped.");
 			((PQueue) queue).stopThread();
 		}else if(queue instanceof NonPQueue){			
 			((NonPQueue) queue).stopThread();
 		}else if(queue instanceof RoundRobin){
 			((RoundRobin) queue).stopThread();
-			System.out.println("RRThread stopped.");
 		}
 		
 	}
