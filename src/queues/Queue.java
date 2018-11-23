@@ -300,9 +300,14 @@ public abstract class Queue {
 		clockTime = -1;
 		ArrayList<CPUBoundProcess> temp = processList;
 		int count =  temp.size();
+		int count2 = temp.size();
 		double avgResponse = 0;
 		double avgWait = 0;
 		double avgTurnaround = 0;
+		double avgResponse2 = 0;
+		double avgWait2 = 0;
+		double avgTurnaround2 = 0;
+		
 		for(int i = 0; i < count; i++) {
 			if(temp.get(i) == null) continue;
 			temp.get(i).setWaitTimePreemptive();
@@ -313,21 +318,34 @@ public abstract class Queue {
 			addTimesInformation(temp.get(i).getId(), temp.get(i).getResponseTime(), temp.get(i).getWaitTime(), temp.get(i).getTurnaroundTime());			
 			avgResponse += temp.get(i).getResponseTime();
 			avgWait += temp.get(i).getWaitTime();
-			avgTurnaround += temp.get(i).getTurnaroundTime();			
+			avgTurnaround += temp.get(i).getTurnaroundTime();
+			
+			if (!(temp.get(i) instanceof IOBoundProcess)) {
+				avgResponse2 += temp.get(i).getResponseTime();
+				avgWait2 += temp.get(i).getWaitTime();
+				avgTurnaround2 += temp.get(i).getTurnaroundTime();
+			}else {
+				count2--;
+			}
 		}
 		
 		avgResponse = avgResponse/count;
 		avgWait = avgWait/count;
 		avgTurnaround = avgTurnaround/count;
 		
+		avgResponse2 = avgResponse2/count2;
+		avgWait2 = avgWait2/count2;
+		avgTurnaround2 = avgTurnaround2/count2;
+		
 		System.out.println("[Queue] avgResponse = " + avgResponse + " avgWait = " + avgWait + " avgTurnaround = " + avgTurnaround);
-		addAverageTime(avgResponse, avgWait, avgTurnaround);
+		
+		addAverageTime(avgResponse, avgWait, avgTurnaround, avgResponse2, avgWait2, avgTurnaround2);
 		
 		ganttChart.simulationDone(this);
 	}
 	
-	private void addAverageTime(double avgResponse, double avgWait, double avgTurnaround) {
-		GanttChart.addTimeAverages(avgResponse, avgWait, avgTurnaround);
+	private void addAverageTime(double avgResponse, double avgWait, double avgTurnaround, double avgResponse2, double avgWait2, double avgTurnaround2) {
+		GanttChart.addTimeAverages(avgResponse, avgWait, avgTurnaround, avgResponse2, avgWait2, avgTurnaround2);
 	}
 	
 	private void addTimesInformation(int processId, long responseTime, long waitTime, long turnaroundTime) {

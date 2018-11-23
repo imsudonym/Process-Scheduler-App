@@ -140,7 +140,12 @@ public class GanttChart extends JFrame{
 	private JLabel qLabel2;
 	private JLabel qLabel3;
 	private JLabel qLabel4;
-	private JLabel fileLabl;	
+	private JLabel fileLabl;
+	private JPanel avgTimeTable2;
+	private JPanel avgTimeLblPanel2;
+	private static JPanel avgResponseTime2;
+	private static JPanel avgWaitTime2;
+	private static JPanel avgTurnaroundTime2;	
 	
 	public GanttChart(){
 		super("CPU Scheduling Gantt Chart");		
@@ -1012,7 +1017,38 @@ public class GanttChart extends JFrame{
 		avgTurnaroundTime = new JPanel(null);
 		avgTurnaroundTime.setBorder(border);		
 		avgTurnaroundTime.setBounds(291, 1, 141, 25);
-		avgTimeTable.add(avgTurnaroundTime);		
+		avgTimeTable.add(avgTurnaroundTime);
+		
+		avgTimeTable2 = new JPanel(null);
+		avgTimeTable2.setBorder(border);		
+		avgTimeTable2.setBounds(xOffset-10, yOffset + 30, 442, 26);		
+		mlfqPanel.add(avgTimeTable2);
+		
+		avgTimeLblPanel2 = new JPanel(null);
+		avgTimeLblPanel2.setBorder(border);		
+		avgTimeLblPanel2.setBounds(1, 1, 60, 25);
+		
+		JPanel avgTimeLbl2 = new JPanel();
+		avgTimeLbl2.setBounds(0, 0, 60, 25);
+		avgTimeLbl2.setBorder(border);
+		avgTimeLbl2.add(new JLabel("Avg - I/O:"));
+		avgTimeLblPanel2.add(avgTimeLbl2);		
+		avgTimeTable2.add(avgTimeLblPanel2);			
+		
+		avgResponseTime2 = new JPanel(null);
+		avgResponseTime2.setBorder(border);		
+		avgResponseTime2.setBounds(61, 1, 120, 25);		
+		avgTimeTable2.add(avgResponseTime2);
+		
+		avgWaitTime2 = new JPanel(null);
+		avgWaitTime2.setBorder(border);		
+		avgWaitTime2.setBounds(181, 1, 120, 25);
+		avgTimeTable2.add(avgWaitTime2);
+		
+		avgTurnaroundTime2 = new JPanel(null);
+		avgTurnaroundTime2.setBorder(border);		
+		avgTurnaroundTime2.setBounds(301, 1, 140, 25);
+		avgTimeTable2.add(avgTurnaroundTime2);
 		
 	}
 	
@@ -1205,7 +1241,8 @@ public class GanttChart extends JFrame{
 		con.revalidate();
 	}
 	
-	public static void addTimeAverages(double avgResponse, double avgWait, double avgTurnaround) {
+	public static void addTimeAverages(double avgResponse, double avgWait, double avgTurnaround, 
+			double avgResponse2, double avgWait2, double avgTurnaround2) {
 		JPanel resLabelPanel = new JPanel();
 		resLabelPanel.setBounds(1, 1, 120, 23);
 		resLabelPanel.add(new JLabel("" + String.format("%.2f", avgResponse)));		
@@ -1220,13 +1257,34 @@ public class GanttChart extends JFrame{
 		turnaroundLabelPanel.setBounds(1, 1, 141, 23);
 		turnaroundLabelPanel.add(new JLabel("" + String.format("%.2f", avgTurnaround)));		
 		avgTurnaroundTime.add(turnaroundLabelPanel);
+		
+		JPanel resLabelPanel2 = new JPanel();
+		resLabelPanel2.setBounds(1, 1, 120, 23);
+		resLabelPanel2.add(new JLabel("" + String.format("%.2f", avgResponse2)));		
+		avgResponseTime2.add(resLabelPanel2);
+		
+		JPanel waitLabelPanel2 = new JPanel();
+		waitLabelPanel2.setBounds(1, 1, 120, 23);
+		waitLabelPanel2.add(new JLabel("" + String.format("%.2f", avgWait2)));		
+		avgWaitTime2.add(waitLabelPanel2);				
+		
+		JPanel turnaroundLabelPanel2 = new JPanel();
+		turnaroundLabelPanel2.setBounds(1, 1, 141, 23);
+		turnaroundLabelPanel2.add(new JLabel("" + String.format("%.2f", avgTurnaround2)));		
+		avgTurnaroundTime2.add(turnaroundLabelPanel2);
 				
 		resLabelPanel.repaint();
 		waitLabelPanel.repaint();
 		turnaroundLabelPanel.repaint();
+		resLabelPanel2.repaint();
+		waitLabelPanel2.repaint();
+		turnaroundLabelPanel2.repaint();
 		resLabelPanel.revalidate();
 		waitLabelPanel.revalidate();
 		turnaroundLabelPanel.revalidate();
+		resLabelPanel2.revalidate();
+		waitLabelPanel2.revalidate();
+		turnaroundLabelPanel2.revalidate();
 	}
 	
 	private void resetGanttChart() {
@@ -1456,13 +1514,18 @@ public class GanttChart extends JFrame{
 	}
 		
 	private void resetTimeAverages() {
-		if(avgResponseTime == null || avgWaitTime == null || 
-				avgTurnaroundTime == null)
-			return;
-		
-		avgResponseTime.removeAll();
-		avgWaitTime.removeAll();
-		avgTurnaroundTime.removeAll();
+		if(avgResponseTime != null)
+			avgResponseTime.removeAll();
+		if(avgWaitTime != null)
+			avgWaitTime.removeAll();
+		if(avgTurnaroundTime != null)
+			avgTurnaroundTime.removeAll();
+		if(avgResponseTime2 != null)
+			avgResponseTime2.removeAll();
+		if(avgWaitTime2 != null)
+			avgWaitTime2.removeAll();
+		if(avgTurnaroundTime2 != null)
+			avgTurnaroundTime2.removeAll();
 	}
 	
 	private void enableQuantum(int level) {
