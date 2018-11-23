@@ -349,6 +349,7 @@ public class GanttChart extends JFrame{
 		mlfqPanel.remove(pcbScrollPane);
 		mlfqPanel.remove(timesScrollPane);	
 		mlfqPanel.remove(avgTimeTable);
+		mlfqPanel.remove(avgTimeTable2);
 		mlfqPanel.repaint();
 		mlfqPanel.revalidate();
 	}
