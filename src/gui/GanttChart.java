@@ -128,17 +128,19 @@ public class GanttChart extends JFrame{
 	JComboBox<String> algoList4 = new JComboBox<String>(algorithms);
 	
 	private JScrollPane timesScrollPane;
-	private JScrollPane pcbScrollPane;
-	private JLabel arrivingProcesses;
+	private JScrollPane pcbScrollPane;	
 	private JScrollPane scrollPane4;
 	private JScrollPane scrollPane3;
 	private JScrollPane scrollPane2;
 	private JScrollPane scrollPane1;
+	private JScrollPane scrollPane;
+	
+	private JLabel arrivingProcesses;
 	private JLabel qLabel1;
 	private JLabel qLabel2;
 	private JLabel qLabel3;
 	private JLabel qLabel4;
-	private JScrollPane scrollPane;
+	private JLabel fileLabl;	
 	
 	public GanttChart(){
 		super("CPU Scheduling Gantt Chart");		
@@ -190,6 +192,7 @@ public class GanttChart extends JFrame{
 			    if(returnVal == JFileChooser.APPROVE_OPTION) {				       
 			        fileChosen = fileChooser.getSelectedFile().getAbsolutePath();
 			        
+			        fileLabl.setText("File: " + fileChooser.getSelectedFile().getName());
 			        resetGanttChart();
 					resetTimesInformation();
 					resetArrivedTable();
@@ -304,6 +307,10 @@ public class GanttChart extends JFrame{
 		menuBar.add(levelOptions);
 		
 		setJMenuBar(menuBar);
+				
+		fileLabl = new JLabel("File: " + fileChosen);
+		fileLabl.setBounds(70, 20, 500, 50);
+		mlfqPanel.add(fileLabl);
 		
 		con.repaint();
 		con.revalidate();
@@ -538,6 +545,7 @@ public class GanttChart extends JFrame{
 		algoList1.setBounds(70, 65, 80, 20);		
 		algoList1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				@SuppressWarnings("rawtypes")
 				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();				
 				Queue.threadStopped = false;
 				Queue.processList.removeAll(Queue.processList);
@@ -584,6 +592,7 @@ public class GanttChart extends JFrame{
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				@SuppressWarnings("rawtypes")
 				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
 				
 				Queue.threadStopped = false;
@@ -631,6 +640,7 @@ public class GanttChart extends JFrame{
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				@SuppressWarnings("rawtypes")
 				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
 				
 				Queue.threadStopped = false;
@@ -678,6 +688,7 @@ public class GanttChart extends JFrame{
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				@SuppressWarnings("rawtypes")
 				String selected = (String) ((JComboBox)arg0.getSource()).getSelectedItem();
 				
 				Queue.threadStopped = false;
