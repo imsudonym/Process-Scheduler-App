@@ -46,6 +46,10 @@ import scheduler.Main;
 
 public class GanttChart extends JFrame{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private static final int ONE_LEVEL = 1, TWO_LEVEL = 2, THREE_LEVEL = 3, FOUR_LEVEL = 4;
 	private static int level = 1;
 	
