@@ -75,7 +75,6 @@ public class GanttChart extends JFrame{
 	private static JMenu dataSets, levelOptions;
 
 	private static JButton startButton;	
-	private static JButton button = null;
 	private static JSpinner setQuantum1, setQuantum2, setQuantum3, setQuantum4;
 	
 	private ArrayList<Integer> PID = new ArrayList<Integer>();
@@ -84,7 +83,7 @@ public class GanttChart extends JFrame{
 	private ArrayList<Integer> priority = new ArrayList<Integer>();
 	private ArrayList<Integer> iOBoundFlag = new ArrayList<Integer>();
 	
-	private static int algorithm1, algorithm2, algorithm3, algorithm4, algorithm;
+	private static int algorithm1, algorithm2, algorithm3, algorithm4;
 	private static int procYOffset;
 	private static int timesYOffset;
 	private static int processCount = 0;		
@@ -100,7 +99,6 @@ public class GanttChart extends JFrame{
 	private static int timesEntry;
 	private static int quantum = 2;
 	private static int Offset = -2;
-	
 	private static int prevEndTime = 0;
 	private static boolean initFlag = true;
 	private static int quantum1 = 1, 
@@ -143,7 +141,7 @@ public class GanttChart extends JFrame{
 		setExtendedState(MAXIMIZED_BOTH);
 		con = getContentPane();
 		con.setBackground(Color.WHITE);
-		con.setLayout(null);
+		con.setLayout(null);		
 	}
 		
 	public void init(){
@@ -213,7 +211,7 @@ public class GanttChart extends JFrame{
 		mlfqOneLevel = new JMenuItem("1-Level");
 		mlfqOneLevel.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
-				Offset = -2;
+				Offset = -2;			
 				initFlag = false;
 				resetNewLevel();
 				reset();
@@ -224,8 +222,7 @@ public class GanttChart extends JFrame{
 		mlfqTwoLevel = new JMenuItem("2-Level");
 		mlfqTwoLevel.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
-				
-				Offset = 150;
+				Offset = 150;								
 				initFlag = false;
 				resetNewLevel();
 				reset();	
@@ -235,7 +232,7 @@ public class GanttChart extends JFrame{
 		
 		mlfqThreeLevel = new JMenuItem("3-Level");
 		mlfqThreeLevel.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent arg0) {				
 				Offset = 270;
 				initFlag = false;
 				resetNewLevel();
@@ -533,6 +530,7 @@ public class GanttChart extends JFrame{
 		addSetQuantum(160, 62, 1);
 		
 		mlfqPanel.remove(algoList1);
+		algoList1.setSelectedIndex(0);
 		algoList1.setBounds(70, 65, 80, 20);		
 		algoList1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -571,13 +569,12 @@ public class GanttChart extends JFrame{
 			}
 			
 		});				
-		//algoList1.setSelectedIndex(0);
 		mlfqPanel.add(algoList1);
 	}
 	
 	private void initTwoLevelComboBox() {
 		addSetQuantum(160, 200, 2);
-		
+		algoList2.setSelectedIndex(0);
 		algoList2.setBounds(70, 200, 80, 20);		
 		algoList2.addActionListener(new ActionListener() {
 
@@ -624,7 +621,7 @@ public class GanttChart extends JFrame{
 	
 	private void initThreeLevelComboBox() {
 		addSetQuantum(160, 335, 3);
-		
+		algoList3.setSelectedIndex(0);
 		algoList3.setBounds(70, 335, 80, 20);		
 		algoList3.addActionListener(new ActionListener() {
 
@@ -665,14 +662,13 @@ public class GanttChart extends JFrame{
 				}
 			}
 			
-		});
-		algoList3.setSelectedIndex(0);
+		});		
 		mlfqPanel.add(algoList3);
 	}
 	
 	private void initFourLevelComboBox() {
 		addSetQuantum(160, 475, 4);
-		
+		algoList4.setSelectedIndex(0);
 		algoList4.setBounds(70, 475, 80, 20);		
 		algoList4.addActionListener(new ActionListener() {
 
@@ -714,7 +710,7 @@ public class GanttChart extends JFrame{
 			}
 			
 		});
-		algoList4.setSelectedIndex(0);
+		
 		mlfqPanel.add(algoList4);
 	}
 
@@ -1103,6 +1099,7 @@ public class GanttChart extends JFrame{
 		resetArrivedTable();
 		resetTimeAverages();
 		
+		con = this.getContentPane();
 		mlfqPanel.setPreferredSize(new Dimension(con.getWidth(), con.getHeight() + Offset));
 								
 		con.repaint();
@@ -1462,7 +1459,7 @@ public class GanttChart extends JFrame{
 			setQuantum3.setEnabled(true);
 		}else if(level == 4) {
 			setQuantum4.setEnabled(true);
-		}
+		}		
 		mlfqPanel.repaint();
 		mlfqPanel.revalidate();
 	}

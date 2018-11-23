@@ -1,7 +1,6 @@
 package datastructure;
 
 import process.CPUBoundProcess;
-import process.IOBoundProcess;
 
 public class LinkedList{
 	
@@ -110,18 +109,20 @@ public class LinkedList{
 		if(!isEmpty() && first != null){
 			temp = first.next;
 			
-			if(first.next.next != null) {
-				first.next.next.previous = first;
-				first.next = first.next.next;
-			}else {
-				first.next = null;
+			if(first.next != null) {
+				if(first.next.next != null) {
+					first.next.next.previous = first;
+					first.next = first.next.next;
+				}else {
+					first.next = null;
+				}
+				
+				process = temp.getValue();
+				
+				if(last.getValue().getId() == process.getId()) {
+					last = last.previous;
+				}
 			}
-			
-			process = temp.getValue();
-			
-			if(last.getValue().getId() == process.getId()) {
-				last = last.previous;
-			}								
 		}
 		
 		if(process != null){			

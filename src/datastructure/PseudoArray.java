@@ -18,6 +18,8 @@ public class PseudoArray {
 	
 	public void add(CPUBoundProcess value){		
 
+		if(value == null) return;
+		
 		Link newLink = new Link(value, value.toString());
 		list.add(newLink);
 		ctr++;

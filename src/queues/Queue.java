@@ -150,9 +150,11 @@ public abstract class Queue {
 	
 	protected CPUBoundProcess dequeueSecondProcess() {
 		CPUBoundProcess process = array.removeSecond();
-		int burstExecuted = process.getEndTime()-process.getStartTime();			
-		process.setPrevBurstPreempted(process.getBurstTime());
-		displayExecutingInUI(burstExecuted, process.getEndTime(), process.getId());
+		if(process != null) {
+			int burstExecuted = process.getEndTime()-process.getStartTime();
+			process.setPrevBurstPreempted(process.getBurstTime());
+			displayExecutingInUI(burstExecuted, process.getEndTime(), process.getId());
+		}		
 		return process;
 	}
 	
@@ -302,6 +304,7 @@ public abstract class Queue {
 		double avgWait = 0;
 		double avgTurnaround = 0;
 		for(int i = 0; i < count; i++) {
+			if(temp.get(i) == null) continue;
 			temp.get(i).setWaitTimePreemptive();
 			
 			/*System.out.print("[p" + temp.get(i).getId() + "]: ");

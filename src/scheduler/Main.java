@@ -1,10 +1,6 @@
 package scheduler;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
 import constants.SchedulingAlgorithm;
-import gui.GanttChart;
 import process.CPUBoundProcess;
 import process.IOBoundProcess;
 import queues.FCFSQueue;
