@@ -737,7 +737,7 @@ public class GanttChart extends JFrame{
 
 	protected void addSetQuantum(int x, int y, int level) {
 		JSpinner spinner = null;
-		SpinnerModel model = new SpinnerNumberModel(1, 1, 100, 1);				
+		SpinnerModel model = new SpinnerNumberModel(2, 2, 100, 1);				
 		
 		if(level == 1) {			
 			
