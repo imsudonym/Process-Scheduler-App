@@ -1,6 +1,5 @@
 package queues;
 import constants.QueueType;
-import scheduler.Main;
 
 public class PQueue extends Queue{
 
@@ -29,8 +28,9 @@ public class PQueue extends Queue{
 					System.out.println("[PQ] prevTimeQuantum: " + prevTimeQuantum);					
 					if(hasExecuted(currProcess)) {
 						prevTimeQuantum = timeNow;
-						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
-						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
+						displayExecutingInUI(currProcess.getEndTime()-currProcess.getLastTimeResumed(),
+								currProcess.getEndTime(), 
+								currProcess.getId());
 					}
 				}
 				queuePreempted = false;
@@ -38,23 +38,25 @@ public class PQueue extends Queue{
 			}
 			
 			if((currProcess = peekHead()) != null){
-				if(prevQueue != null && prevQueue instanceof RoundRobin) {
+				if(isLowerLevelQueue()) {
+					
 					currProcess.setStartTime(prevTimeQuantum);
 					if(currProcess.preemptedFlag) {
 						currProcess.setTimeResumed(prevTimeQuantum);
 						currProcess.preemptedFlag = false;
-					}					
+					}
+					
 				}else {
-					if(prevProcess != null && prevProcess.getId() != currProcess.getId()) {
-						if(prevProcess.getBurstTime() > 0) {
-							prevProcess.setPreempted();
-							prevProcess.setTimePreempted(timeNow);		
-							prevProcess.setEndTime(timeNow);
-							prevProcess.preemptedFlag = true;
-							prevTimeQuantum = timeNow;
-							int burstExecuted = prevProcess.getEndTime()-prevProcess.getStartTime();
-							displayExecutingInUI(burstExecuted, prevProcess.getEndTime(), prevProcess.getId());
-						}
+					
+					if(isRecentlyPreempted()) {
+						
+						//if(prevProcess.getBurstTime() > 0) {
+							setPrevProcessPreempted();
+							displayExecutingInUI(prevProcess.getEndTime()-prevProcess.getLastTimeResumed(),
+									prevProcess.getEndTime(), 
+									prevProcess.getId());
+						//}
+						
 					}					
 					
 					if(currProcess.getResponseTime() < 0) {
@@ -62,20 +64,29 @@ public class PQueue extends Queue{
 							currProcess.setStartTime(prevTimeQuantum);
 							currProcess.setFirstStartTime(prevTimeQuantum);
 						}else {
-							currProcess.setStartTime(queueStartTime + ctr);
-							currProcess.setFirstStartTime(queueStartTime + ctr);
+							currProcess.setStartTime(currProcess.getArrivalTime());
+							currProcess.setFirstStartTime(currProcess.getArrivalTime());							
+							if(currProcess.getArrivalTime() == (queueStartTime + ctr)) {
+								currProcess.setBurstTime(currProcess.getBurstTime());
+								prevTimeQuantum = timeNow;
+								continue;
+							}
+
+							while((queueStartTime + ctr) <= currProcess.getArrivalTime()) {
+								ctr++;
+							}
 						}				
 						currProcess.setResponseTime();		
 					}
 					if(currProcess.preemptedFlag) {						
 						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
 							currProcess.setStartTime(prevTimeQuantum);
-							currProcess.setStartTime(prevTimeQuantum);
 							currProcess.setTimeResumed(prevTimeQuantum);
 						}else {
-							currProcess.setStartTime(queueStartTime + ctr);
-							currProcess.setStartTime(queueStartTime + ctr);
-							currProcess.setTimeResumed(queueStartTime + ctr);
+							/*currProcess.setStartTime(queueStartTime + ctr);
+							currProcess.setTimeResumed(queueStartTime + ctr);*/
+							currProcess.setStartTime(queueStartTime + ctr - 1);
+							currProcess.setTimeResumed(queueStartTime + ctr - 1 );
 						}									
 						currProcess.preemptedFlag = false;
 					}				
@@ -97,7 +108,7 @@ public class PQueue extends Queue{
 						burstLeft +
 						" timeNow = " + (queueStartTime + ctr));
 							
-				if(burstLeft == 0){	
+				if(burstLeft <= 0){	
 					currProcess.setEndTime(timeNow);
 					
 					dequeue();									
@@ -108,7 +119,7 @@ public class PQueue extends Queue{
 					prevTimeQuantum = timeNow;
 				}
 				while(clockTime != -1 && getNextArrivalTime() == clockTime) {
-					if(prevQueue != null && prevQueue instanceof RoundRobin) {						
+					/*if(prevQueue != null && prevQueue instanceof RoundRobin) {						
 						if(currProcess != null) {
 							currProcess.setPreempted();
 							currProcess.setTimePreempted(timeNow);
@@ -127,7 +138,8 @@ public class PQueue extends Queue{
 						Main.queues[0].startThread();
 					}else {
 						getNextProcess();
-					}						
+					}*/		
+					getNextProcessForTopQueue();
 				}
 				clockTime++;
 			}

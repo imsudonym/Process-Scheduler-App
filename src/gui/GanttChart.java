@@ -1325,7 +1325,8 @@ public class GanttChart extends JFrame{
 		xOffset = -1;
 		prevBurstLength = -1;
 		prevEndTime = 0;
-		panelWidth = 1150;		
+		panelWidth = 1150;
+		quantum1 = quantum2 = quantum3 = quantum4 = 2;
 		
 		if(level == 1) {
 			if(panel1 == null || timePanel1 == null)

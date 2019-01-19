@@ -151,10 +151,8 @@ public class CPUBoundProcess {
 
 	public int getLastTimeResumed() {
 		if(timeResumed.size() > 0) {
-			System.out.println("------>timeResumed.get(timeResumed.size()-1): " + timeResumed.get(timeResumed.size()-1));
 			return timeResumed.get(timeResumed.size()-1);
 		}else {
-			System.out.println("------>getStartTime: " + getStartTime());
 			return getStartTime();
 		}
 	}

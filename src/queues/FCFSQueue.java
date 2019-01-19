@@ -1,6 +1,5 @@
 package queues;
 import constants.QueueType;
-import scheduler.Main;
 
 public class FCFSQueue extends Queue{
 	
@@ -38,7 +37,9 @@ public class FCFSQueue extends Queue{
 									" counter: " + counter + ")");*/
 							
 							setPrevProcessPreempted();
-							displayExecutingInUI(prevProcess.getEndTime()-prevProcess.getLastTimeResumed(), prevProcess.getEndTime(), prevProcess.getId());
+							displayExecutingInUI(prevProcess.getEndTime()-prevProcess.getLastTimeResumed(), 
+									prevProcess.getEndTime(), 
+									prevProcess.getId());
 					}
 					
 					if(currProcess.getResponseTime() < 0) {
@@ -48,6 +49,7 @@ public class FCFSQueue extends Queue{
 						}else {
 							currProcess.setStartTime(currProcess.getArrivalTime());
 							currProcess.setFirstStartTime(currProcess.getArrivalTime());							
+							
 							if(currProcess.getArrivalTime() == (queueStartTime + ctr)) {
 								currProcess.setBurstTime(currProcess.getBurstTime());
 								prevTimeQuantum = timeNow;
@@ -112,32 +114,7 @@ public class FCFSQueue extends Queue{
 		}
 	}		
 
-	private void getNextProcessForTopQueue() {
-		if(prevQueue != null && prevQueue instanceof RoundRobin) {
-			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
-				if(currProcess != null) {
-					currProcess.setPreempted();
-					currProcess.setTimePreempted(timeNow);
-					currProcess.setEndTime(timeNow);
-					currProcess.preemptedFlag = true;
-					
-					if(hasExecuted(currProcess)) {
-						prevTimeQuantum = timeNow;
-						int burstExecuted = currProcess.getEndTime()-currProcess.getLastTimeResumed();
-						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
-					}
-					currProcess = null;
-				}
-				Main.queues[0].getNextProcess();
-				//preemptQueue();
-				Main.queues[0].startThread();
-			}
-		}else {
-			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
-				getNextProcess();
-			}
-		}
-	}
+	
 
 	/*public void preemptQueue() {
 		if(currProcess != null) {

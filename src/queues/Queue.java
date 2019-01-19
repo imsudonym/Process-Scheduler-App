@@ -430,5 +430,33 @@ public abstract class Queue {
 	protected boolean isLowerLevelQueue() {
 		return (prevQueue != null && prevQueue instanceof RoundRobin);
 	}
+	
+	protected void getNextProcessForTopQueue() {
+		if(prevQueue != null && prevQueue instanceof RoundRobin) {
+			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
+				if(currProcess != null) {
+					currProcess.setPreempted();
+					currProcess.setTimePreempted(timeNow);
+					currProcess.setEndTime(timeNow);
+					currProcess.preemptedFlag = true;
+					
+					if(hasExecuted(currProcess)) {
+						prevTimeQuantum = timeNow;
+						int burstExecuted = currProcess.getEndTime()-currProcess.getLastTimeResumed();
+						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
+					}
+					currProcess = null;
+				}
+				Main.queues[0].getNextProcess();
+				//preemptQueue();
+				Main.queues[0].startThread();
+			}
+		}else {
+			prevTimeQuantum = timeNow;
+			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
+				getNextProcess();
+			}
+		}
+	}
 
 }

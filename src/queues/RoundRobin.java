@@ -228,7 +228,7 @@ public class RoundRobin extends PreemptiveQueue{
 		stopThread();			
 	}	
 
-	private void getNextProcessForTopQueue() {
+/*	private void getNextProcessForTopQueue() {
 		System.out.println("Getting next process for top queue...");
 		if(prevQueue != null && prevQueue instanceof RoundRobin) {
 			while(clockTime != -1 && getNextArrivalTime() == clockTime) {
@@ -254,7 +254,7 @@ public class RoundRobin extends PreemptiveQueue{
 				getNextProcess();
 			}
 		}
-	}
+	}*/
 
 	private void demote(CPUBoundProcess process) {
 		if(nextQueue == null) return;
