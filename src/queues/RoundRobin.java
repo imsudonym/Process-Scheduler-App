@@ -27,10 +27,8 @@ public class RoundRobin extends PreemptiveQueue{
 			getNextProcess();
 		}
 		
-		for(int ctr = 1; ctr <= totalBurstTime; ctr++){
-			
-			if((currProcess = peekHead()) != null){
-				
+		for(int ctr = 1; ctr <= totalBurstTime; ctr++){			
+			if((currProcess = peekHead()) != null){				
 				if(isLowerLevelQueue()) { 					
 					
 					// Current process starts/resumes executing now.
@@ -228,27 +226,7 @@ public class RoundRobin extends PreemptiveQueue{
 			}
 		}		
 		stopThread();			
-	}
-
-	private boolean isSequentialIOJobs() {	
-		return (prevProcess != null && prevProcess.getBurstTime() > 0 && prevProcess.getId() == currProcess.getId() && currProcess instanceof IOBoundProcess && prevProcess instanceof IOBoundProcess);
-	}
-
-	private void setPrevProcessPreempted() {
-		prevProcess.setPreempted();
-		prevProcess.setTimePreempted(timeNow);
-		prevProcess.setEndTime(timeNow);
-		prevProcess.preemptedFlag = true;					
-		prevTimeQuantum = timeNow;
-	}
-
-	private boolean isRecentlyPreemptedByIOJob() {
-		return (prevProcess != null && prevProcess.getBurstTime() > 0 && prevProcess.getId() != currProcess.getId() && currProcess instanceof IOBoundProcess);
-	}
-
-	private boolean isLowerLevelQueue() {
-		return (prevQueue != null && prevQueue instanceof RoundRobin);
-	}
+	}	
 
 	private void getNextProcessForTopQueue() {
 		System.out.println("Getting next process for top queue...");

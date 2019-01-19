@@ -10,9 +10,7 @@ public class PQueue extends Queue{
 	}
 				
 	public void run(){
-		if(prevQueue != null && prevQueue instanceof RoundRobin) {
-			clockTime = prevTimeQuantum;
-		}
+		clockTime = prevTimeQuantum;
 		queueStartTime = clockTime;
 		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {

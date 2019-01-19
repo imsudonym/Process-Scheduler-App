@@ -405,4 +405,30 @@ public abstract class Queue {
 			prevQueue.enqueue(dequeue(), this.queueType);
 		}
 	}
+	
+	protected boolean isSequentialIOJobs() {	
+		return (prevProcess != null && prevProcess.getBurstTime() > 0 && prevProcess.getId() == currProcess.getId() && currProcess instanceof IOBoundProcess && prevProcess instanceof IOBoundProcess);
+	}
+	
+	protected void setPrevProcessPreempted() {
+		prevProcess.setPreempted();
+		prevProcess.setTimePreempted(timeNow);
+		prevProcess.setEndTime(timeNow);
+		prevProcess.preemptedFlag = true;					
+		prevTimeQuantum = timeNow;
+	}
+	
+
+	protected boolean isRecentlyPreemptedByIOJob() {
+		return (prevProcess != null && prevProcess.getBurstTime() > 0 && prevProcess.getId() != currProcess.getId() && currProcess instanceof IOBoundProcess);
+	}
+	
+	protected boolean isRecentlyPreempted() {		
+		return prevProcess != null && prevProcess.getId() != currProcess.getId() && prevProcess.getBurstTime() > 0;
+	}
+
+	protected boolean isLowerLevelQueue() {
+		return (prevQueue != null && prevQueue instanceof RoundRobin);
+	}
+
 }

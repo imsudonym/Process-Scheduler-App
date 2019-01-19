@@ -9,14 +9,9 @@ public class SJFQueue extends Queue{
 		this.queueType = QueueType.SJF;
 	}
 					
-	public void run(){
-		if(prevQueue != null && prevQueue instanceof RoundRobin) {
-			clockTime = prevTimeQuantum;
-		}
+	public void run(){		
+		clockTime = prevTimeQuantum;
 		queueStartTime = clockTime;	
-		
-		System.out.println("[SJF] inside run");
-		System.out.println("[SJF] queueStartTime: " + queueStartTime);
 		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
 			getNextProcess();
@@ -33,7 +28,7 @@ public class SJFQueue extends Queue{
 					System.out.println("[SJF] prevTimeQuantum: " + prevTimeQuantum);					
 					if(hasExecuted(currProcess)) {
 						prevTimeQuantum = timeNow;
-						int burstExecuted = currProcess.getEndTime()-currProcess.getStartTime();
+						int burstExecuted = currProcess.getEndTime()-currProcess.getLastTimeResumed();
 						displayExecutingInUI(burstExecuted, currProcess.getEndTime(), currProcess.getId());
 					}
 				}
@@ -42,34 +37,46 @@ public class SJFQueue extends Queue{
 			}
 			
 			if((currProcess = peekHead()) != null){	
-				if(prevQueue != null && prevQueue instanceof RoundRobin) {
+				if(isLowerLevelQueue()) {
+					
 					currProcess.setStartTime(prevTimeQuantum);
 					if(currProcess.preemptedFlag) {
 						currProcess.setTimeResumed(prevTimeQuantum);
 						currProcess.preemptedFlag = false;
 					}
+					
 				}else {
-					if(prevProcess != null && prevProcess.getId() != currProcess.getId()) {
-						if(prevProcess.getBurstTime() > 0) {
-							prevProcess.setPreempted();
-							prevProcess.setTimePreempted(timeNow);
-							prevProcess.setEndTime(timeNow);
-							prevProcess.preemptedFlag = true;
-							prevTimeQuantum = timeNow;
-							int burstExecuted = prevProcess.getEndTime()-prevProcess.getStartTime();
-							displayExecutingInUI(burstExecuted, prevProcess.getEndTime(), prevProcess.getId());
-						}
+					
+					if(isRecentlyPreempted()) {
+					
+						//if(prevProcess.getBurstTime() > 0) {
+							setPrevProcessPreempted();
+							displayExecutingInUI(prevProcess.getEndTime()-prevProcess.getLastTimeResumed(), 
+									prevProcess.getEndTime(), 
+									prevProcess.getId());
+						//}
 					}
+					
 					if(currProcess.getResponseTime() < 0) {
 						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
 							currProcess.setStartTime(prevTimeQuantum);
 							currProcess.setFirstStartTime(prevTimeQuantum);
 						}else {
-							currProcess.setStartTime(queueStartTime + ctr - 1);
-							currProcess.setFirstStartTime(queueStartTime + ctr - 1);
+							currProcess.setStartTime(currProcess.getArrivalTime());
+							currProcess.setFirstStartTime(currProcess.getArrivalTime());							
+							if(currProcess.getArrivalTime() == (queueStartTime + ctr)) {
+								currProcess.setBurstTime(currProcess.getBurstTime());
+								prevTimeQuantum = timeNow;
+								continue;
+							}
+
+							while((queueStartTime + ctr) <= currProcess.getArrivalTime()) {
+								ctr++;
+							}	
 						}					
 						currProcess.setResponseTime();
 					}
+					
 					if(currProcess.preemptedFlag) {						
 						if(currProcess.getArrivalTime() <= prevTimeQuantum) {
 							currProcess.setStartTime(prevTimeQuantum);
