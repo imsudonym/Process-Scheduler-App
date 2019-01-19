@@ -9,10 +9,8 @@ public class FCFSQueue extends Queue{
 		this.queueType = QueueType.FCFS;
 	}
 
-	public void run(){
-		if(prevQueue != null && prevQueue instanceof RoundRobin) {
-			clockTime = prevTimeQuantum;
-		}
+	public void run(){			
+		clockTime = prevTimeQuantum;
 		queueStartTime = clockTime;
 		
 		while(clockTime != -1 && getNextArrivalTime() == clockTime) {
@@ -54,8 +52,19 @@ public class FCFSQueue extends Queue{
 							currProcess.setStartTime(prevTimeQuantum);
 							currProcess.setFirstStartTime(prevTimeQuantum);
 						}else {
-							currProcess.setStartTime(queueStartTime + ctr - 1);
-							currProcess.setFirstStartTime(queueStartTime + ctr - 1);
+							//////////////////////////////// TODO: Changes
+							currProcess.setStartTime(currProcess.getArrivalTime());
+							currProcess.setFirstStartTime(currProcess.getArrivalTime());							
+							if(currProcess.getArrivalTime() == (queueStartTime + ctr)) {
+								currProcess.setBurstTime(currProcess.getBurstTime());
+								prevTimeQuantum = timeNow;
+								continue;
+							}
+
+							while((queueStartTime + ctr) <= currProcess.getArrivalTime()) {
+								ctr++;
+							}							
+							/////////////////////////////////
 						}					
 						currProcess.setResponseTime();						
 					}

@@ -105,10 +105,10 @@ public class GanttChart extends JFrame{
 	private static int Offset = -2;
 	private static int prevEndTime = 0;
 	private static boolean initFlag = true;
-	private static int quantum1 = 1, 
-			quantum2 = 1, 
-			quantum3 = 1, 
-			quantum4 = 1;
+	private static int quantum1 = 2, 
+			quantum2 = 2, 
+			quantum3 = 2, 
+			quantum4 = 2;
 	
 	private static String fileChosen;
 	private static String[] algorithms = {"FCFS", "SJF", "SRTF", "NP-PRIO", "P-PRIO", "RR"};
@@ -141,6 +141,7 @@ public class GanttChart extends JFrame{
 	private JLabel qLabel3;
 	private JLabel qLabel4;
 	private JLabel fileLabl;
+	private JLabel execTime;
 	private JPanel avgTimeTable2;
 	private JPanel avgTimeLblPanel2;
 	private static JPanel avgResponseTime2;
@@ -158,7 +159,7 @@ public class GanttChart extends JFrame{
 	public void init(){
 		
 		JMenuItem importFile;				
-		JMenuItem quantumChange;
+		JMenuItem randomize;
 		
 		menuBar = new JMenuBar();		
 		
@@ -180,6 +181,13 @@ public class GanttChart extends JFrame{
 		add(scrollPane);
 		
 		initStartButton(1100, 25);
+		GanttChart g = this;
+		randomize = new JMenuItem("Randomize");
+		randomize.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {				
+				DataGenerator dg = new DataGenerator(g);
+			}
+		});
 		
 		importFile = new JMenuItem("Import file");
 		importFile.addActionListener(new ActionListener(){
@@ -217,7 +225,8 @@ public class GanttChart extends JFrame{
 			}
 		});
 		
-		dataSets.add(importFile);	
+		dataSets.add(importFile);
+		dataSets.add(randomize);
 				
 		JMenuItem mlfqOneLevel, mlfqTwoLevel, mlfqThreeLevel, mlfqFourLevel;
 		mlfqOneLevel = new JMenuItem("1-Level");
@@ -274,35 +283,7 @@ public class GanttChart extends JFrame{
 		levelOptions.add(mlfqThreeLevel);
 		levelOptions.add(mlfqFourLevel);
 		
-		new JMenuItem("Set");
-		
-		quantumChange = new JMenuItem("Change (quantum = " + quantum + ")");
-		quantumChange.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {	
-				while(true){
-					String result = JOptionPane.showInputDialog(null, "Quantum:");	
-					if(result != null){
-						char[] letters = result.toCharArray();
-						
-						int i;
-						for(i = 0; i < letters.length; i++){
-							if(!Character.isDigit(letters[i])){
-								break;
-							}
-						}
-						
-						if(i == letters.length){
-							quantum = Integer.parseInt(result);
-							break;
-						}
-					}
-				}
-				reset();
-				con.removeAll();
-				init();
-				
-			}
-		});
+		new JMenuItem("Set");		
 		
 		if(mlfqOneLevel.isSelected()) {
 			initOneLevel();
@@ -312,10 +293,15 @@ public class GanttChart extends JFrame{
 		menuBar.add(levelOptions);
 		
 		setJMenuBar(menuBar);
-				
+			
+		execTime = new JLabel("Expected execution time: --");
+		execTime.setBounds(70, 5, 500, 50);
+		
 		fileLabl = new JLabel("File: " + fileChosen);
 		fileLabl.setBounds(70, 20, 500, 50);
+		
 		mlfqPanel.add(fileLabl);
+		mlfqPanel.add(execTime);
 		
 		con.repaint();
 		con.revalidate();
@@ -354,20 +340,64 @@ public class GanttChart extends JFrame{
 		mlfqPanel.revalidate();
 	}
 
+	public void readData(ArrayList<int[]> data, int execTime) {
+		PID.removeAll(PID);
+		arrivalTime.removeAll(arrivalTime);
+		burstTime.removeAll(burstTime);
+		priority.removeAll(priority);
+		iOBoundFlag.removeAll(iOBoundFlag);
+		for(int i = 0; i < data.size(); i++) {
+			int[] arr = data.get(i);
+			for(int j = 0; j < arr.length; j++) {
+				if(i == 0) {
+					PID.add(arr[j]);
+				}else if(i == 1) {
+					arrivalTime.add(arr[j]);
+				}else if(i == 2) {
+					burstTime.add(arr[j]);
+				}else if(i == 3) {
+					priority.add(arr[j]);
+				}else if(i == 4) {
+					iOBoundFlag.add(arr[j]);
+				}
+			}			
+		}
+		
+		this.execTime.setText("Expected execution time: " + execTime);
+		startButton.setEnabled(true);
+		startButton.setToolTipText("Start simulation!");
+		
+		resetGanttChart();
+		resetTimesInformation();
+		resetArrivedTable();
+		resetTimeAverages();			        
+    
+	    Queue.threadStopped = false;
+		Queue.processList.removeAll(Queue.processList);
+		Queue.clockTime = 0;							
+		
+		con.repaint();
+		con.revalidate();
+	}
+	
 	protected void readFile(String fileChosen) {
 		PID.removeAll(PID);
 		arrivalTime.removeAll(arrivalTime);
 		burstTime.removeAll(burstTime);
 		priority.removeAll(priority);
 		iOBoundFlag.removeAll(iOBoundFlag);
+		
+		int totalExecTime = 0;
+		
 		try(BufferedReader in = new BufferedReader(new FileReader(fileChosen));){	        	
 	        	String line;
 				while((line = in.readLine()) != null){
 				    System.out.println(line);
 				    String[] token = line.split(" ");
 				    
-				    PID.add(Integer.parseInt(token[0]));
+				    PID.add(Integer.parseInt(token[0]));				    
 				    arrivalTime.add(Integer.parseInt(token[1]));
+				    totalExecTime += Integer.parseInt(token[2]);
 				    burstTime.add(Integer.parseInt(token[2]));
 				    priority.add(Integer.parseInt(token[3]));
 				    iOBoundFlag.add(Integer.parseInt(token[4]));
@@ -375,6 +405,7 @@ public class GanttChart extends JFrame{
 				in.close();								
 				startButton.setEnabled(true);
 				startButton.setToolTipText("Start simulation!");
+				execTime.setText("Expected execution time: " + totalExecTime);
 				
 	        } catch (NumberFormatException nfe) { 
 	        	JOptionPane.showMessageDialog(null, "An exception has occurred while parsing the data. " +
@@ -1097,7 +1128,8 @@ public class GanttChart extends JFrame{
 		}else{							
 			xOffset += prevBurstLength;											
 		}
-				
+		
+		System.out.println("==========[GC] prevEndTime: " + prevEndTime + " timeNow: " + timeNow + " executionTime: " + executionTime);
 		if(prevEndTime < timeNow-executionTime) {
 			
 			addGap();		
@@ -1462,7 +1494,7 @@ public class GanttChart extends JFrame{
 		pcbPriorityPanel.revalidate();
 	}
 	
-	private void resetTimesInformation() {
+	public static void resetTimesInformation() {
 		timesEntry = 0;
 		timesPanelHeight = 350;
 		timesYOffset = 0;
@@ -1514,7 +1546,7 @@ public class GanttChart extends JFrame{
 		turnaroundTimePanel.revalidate();
 	}
 		
-	private void resetTimeAverages() {
+	public static void resetTimeAverages() {
 		if(avgResponseTime != null)
 			avgResponseTime.removeAll();
 		if(avgWaitTime != null)
