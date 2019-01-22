@@ -10,7 +10,7 @@ public class RoundRobin extends PreemptiveQueue{
 	
 	public RoundRobin(int level, int quantum){
 		super(level);
-		this.quantum = quantum;
+		this.quantum = quantum;		
 		this.queueType = QueueType.RR;
 	}
 

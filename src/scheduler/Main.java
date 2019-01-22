@@ -47,7 +47,7 @@ public class Main {
 				}
 			}			
 		}
-		System.out.print("After by type sorting: ");
+		/*System.out.print("After by type sorting: ");*/
 		printContents(processes);
 	}
 
@@ -66,7 +66,7 @@ public class Main {
 				}
 			}			
 		}
-		System.out.print("After arrival time sorting: ");
+		/*System.out.print("After arrival time sorting: ");*/
 		printContents(processes);
 	}
 	
@@ -86,7 +86,7 @@ public class Main {
 			}			
 		}
 		
-		System.out.print("After priority sorting: ");
+		/*System.out.print("After priority sorting: ");*/
 		printContents(processes);
 	}
 
@@ -104,13 +104,14 @@ public class Main {
 	}
 	
 	public void generateQueues(int[] algorithms, int[] quantums){
-		System.out.println("[Main:] Generating multilevel queues...");
-		System.out.println("[Main:] numOfQueues: " + numOfQueues);	
+		/*System.out.println("[Main:] Generating multilevel queues...");
+		System.out.println("[Main:] numOfQueues: " + numOfQueues);	*/
 		
 		for(int i = 0; i < numOfQueues; i++){			
 			if(algorithms[i] == SchedulingAlgorithm.FCFS){
 				queues[i] = new FCFSQueue(i);
 			}else if (algorithms[i] == SchedulingAlgorithm.RR){
+				/*System.out.println("=============> [Main] generating Lvl" + i + " RR with quantum:" + quantums[i]);*/
 				queues[i] = new RoundRobin(i, quantums[i]);
 			}else if (algorithms[i] == SchedulingAlgorithm.SJF){
 				queues[i] = new SJFQueue(i);
@@ -127,23 +128,23 @@ public class Main {
 		
 			if(i == numOfQueues-1) { 
 				if(numOfQueues != 1) {
-					System.out.println("[Main:] Level = " + i + " previous = " + queues[i-1]);				
+					/*System.out.println("[Main:] Level = " + i + " previous = " + queues[i-1]);	*/			
 					queues[i].setPrevQueue(queues[i-1]);
 				}else {
-					System.out.println("[Main:] Level = " + i + " previous = null");
+					/*System.out.println("[Main:] Level = " + i + " previous = null");*/
 					queues[i].setPrevQueue(null);
 				}
 				queues[i].setNextQueue(null);
-				System.out.println("[Main:] Level = " + i + " next = null");
+				/*System.out.println("[Main:] Level = " + i + " next = null");*/
 			}else if(i == 0) {
-				System.out.println("[Main:] Level = " + i + " previous = null");
-				System.out.println("[Main:] Level = " + i + " next = " + queues[i+1]);
+				/*System.out.println("[Main:] Level = " + i + " previous = null");
+				System.out.println("[Main:] Level = " + i + " next = " + queues[i+1]);*/
 				queues[i].setPrevQueue(null);
 				queues[i].setNextQueue(queues[i+1]);
 				
 			}else {
-				System.out.println("[Main:] Level = " + i + " previous = " + queues[i-1]);
-				System.out.println("[Main:] Level = " + i + " next = " + queues[i+1]);
+				/*System.out.println("[Main:] Level = " + i + " previous = " + queues[i-1]);
+				System.out.println("[Main:] Level = " + i + " next = " + queues[i+1]);*/
 				queues[i].setPrevQueue(queues[i-1]);
 				queues[i].setNextQueue(queues[i+1]);
 			}			

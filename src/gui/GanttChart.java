@@ -781,8 +781,9 @@ public class GanttChart extends JFrame{
 			setQuantum1.setEnabled(false);
 			((DefaultEditor)setQuantum1.getEditor()).getTextField().setEditable(false);
 			setQuantum1.addChangeListener(new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
+				public void stateChanged(ChangeEvent e) {					
 					quantum1 = (int) ((JSpinner)e.getSource()).getValue();
+					System.out.println("**************************** quantum1 = " + quantum1);
 				}
 			});
 
@@ -802,6 +803,7 @@ public class GanttChart extends JFrame{
 			setQuantum2.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					quantum2 = (int) ((JSpinner)e.getSource()).getValue();
+					System.out.println("**************************** quantum1 = " + quantum1);
 				}
 			});
 			
@@ -891,7 +893,10 @@ public class GanttChart extends JFrame{
 					scheduler.initProcesses(queues_num, processes);
 					
 					int[] algorithms = {algorithm1, algorithm2, algorithm3, algorithm4};
-					int[] quanta = {quantum1, quantum2, quantum3, quantum4};
+					int[] quanta = {((setQuantum1 == null)? 0 : (int) setQuantum1.getValue()), 
+									((setQuantum2 == null)? 0 : (int) setQuantum2.getValue()),
+									((setQuantum3 == null)? 0 : (int) setQuantum3.getValue()), 
+									((setQuantum4 == null)? 0 : (int) setQuantum4.getValue())};
 					scheduler.generateQueues(algorithms, quanta);							
 			}			
 		});
