@@ -1123,7 +1123,7 @@ public class GanttChart extends JFrame{
 		}
 			
 		if(timeCounter > 21){
-			panel.setPreferredSize(new Dimension(panelWidth += 50, 73));
+			panel.setPreferredSize(new Dimension(panelWidth += 100, 73));
 			timePanel.setSize(new Dimension(panelWidth, 73));
 		}
 		

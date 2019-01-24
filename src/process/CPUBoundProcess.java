@@ -22,6 +22,7 @@ public class CPUBoundProcess {
 	protected int turnaroundTime;
 	
 	public boolean preemptedFlag = false;
+	private int prevArrivalTime;
 	
 	public CPUBoundProcess(int id, int arrivalTime, int burstTime, int priority){
 		this.id = id;
@@ -145,8 +146,12 @@ public class CPUBoundProcess {
 		return startTime;
 	}
 
-	public void setArrivalTime(long time) {
+	public void setArrivalTime(long time) {		
 		this.arrivalTime = (int)time;
+	}
+	
+	public void setPrevArrivalTime(long time) {
+		this.prevArrivalTime = (int) time;
 	}
 
 	public int getLastTimeResumed() {
@@ -155,5 +160,10 @@ public class CPUBoundProcess {
 		}else {
 			return getStartTime();
 		}
+	}
+
+	public int getPreviousArrivalTime() {
+		System.out.println("--------------------------- prevArrivalTime = " + prevArrivalTime);
+		return prevArrivalTime;
 	}
 }

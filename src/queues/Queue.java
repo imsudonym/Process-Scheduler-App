@@ -146,7 +146,9 @@ public abstract class Queue {
 	protected CPUBoundProcess dequeue(){					
 		CPUBoundProcess process = array.remove();
 		//array.printContents();
-		int burstExecuted = process.getEndTime()-process.getLastTimeResumed();			
+		int burstExecuted = process.getEndTime()-process.getLastTimeResumed();		
+		System.out.println("===========================p" + process.getId() + " endTime: " + process.getEndTime() + 
+				" lastTimeResumed: " + process.getLastTimeResumed());
 		process.setPrevBurstPreempted(process.getBurstTime());
 		displayExecutingInUI(burstExecuted, process.getEndTime(), process.getId());
 		return process;
