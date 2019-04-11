@@ -85,8 +85,8 @@ public abstract class Queue {
 		if(newProcess == null) return;
 		array.add(newProcess);		
 		
-		System.out.println("[Queue] Level: " + level + " P" + newProcess.getId() + " enqueued!");
-		System.out.print("[Queue] Level: " + level + " ");
+		/*System.out.println("[Queue] Level: " + level + " P" + newProcess.getId() + " enqueued!");
+		System.out.print("[Queue] Level: " + level + " ");*/
 		array.printContents();
 		
 		if(qType == QueueType.SJF) sortSJF();
@@ -95,7 +95,7 @@ public abstract class Queue {
 		if(qType == QueueType.NPQ) sortNPQ();		
 		if(qType == QueueType.RR) {			
 
-			System.out.print("[Queue] Lvl" + level + " tbt(before): " + totalBurstTime);
+			//System.out.print("[Queue] Lvl" + level + " tbt(before): " + totalBurstTime);
 			if(nextQueue != null || prevQueue != null) {			
 				totalBurstTime += quantum;
 			}else {
@@ -104,7 +104,7 @@ public abstract class Queue {
 					processList.add(newProcess);
 				}				
 			}
-			System.out.println(" tbt(after): " + totalBurstTime);
+			//System.out.println(" tbt(after): " + totalBurstTime);
 			stopLowerLevelQueues();			
 		}else {
 			totalBurstTime += newProcess.getBurstTime();
@@ -147,8 +147,8 @@ public abstract class Queue {
 		CPUBoundProcess process = array.remove();
 		//array.printContents();
 		int burstExecuted = process.getEndTime()-process.getLastTimeResumed();		
-		System.out.println("===========================p" + process.getId() + " endTime: " + process.getEndTime() + 
-				" lastTimeResumed: " + process.getLastTimeResumed());
+		/*System.out.println("===========================p" + process.getId() + " endTime: " + process.getEndTime() + 
+				" lastTimeResumed: " + process.getLastTimeResumed());*/
 		process.setPrevBurstPreempted(process.getBurstTime());
 		displayExecutingInUI(burstExecuted, process.getEndTime(), process.getId());
 		return process;
@@ -157,7 +157,7 @@ public abstract class Queue {
 	protected CPUBoundProcess dequeueSecondProcess() {
 		CPUBoundProcess process = array.removeSecond();
 		if(process != null) {
-			System.out.println("OHHHOOOOOOOOOOOO");
+			/*System.out.println("OHHHOOOOOOOOOOOO");*/
 			int burstExecuted = process.getEndTime()-process.getLastTimeResumed();
 			process.setPrevBurstPreempted(process.getBurstTime());
 			displayExecutingInUI(burstExecuted, process.getEndTime(), process.getId());
@@ -193,11 +193,11 @@ public abstract class Queue {
 		if(clockTime <= Main.getFirstArrivalTime()) {			
 			prevTimeQuantum = Main.getFirstArrivalTime();
 			for(int i = clockTime; i <= Main.getNextArrivalTime(); i++) {
-				System.out.println("[Q] Lvl" + level + " i: " + i + " clockTime: " + clockTime + " nextArrivTime: " + Main.getNextArrivalTime() +
-						" peekHead: " + ((peekHead() == null)? "null": "p" + peekHead().getId()));
+				/*System.out.println("[Q] Lvl" + level + " i: " + i + " clockTime: " + clockTime + " nextArrivTime: " + Main.getNextArrivalTime() +
+						" peekHead: " + ((peekHead() == null)? "null": "p" + peekHead().getId()));*/
 				if(Main.getNextArrivalTime() == i){
 					while(Main.getNextArrivalTime() == i) {
-						System.out.println("[Q] Enqueuing... CT: " + clockTime);
+						/*System.out.println("[Q] Enqueuing... CT: " + clockTime);*/
 						Main.queues[0].getNextProcess();						
 					}
 					
@@ -223,7 +223,7 @@ public abstract class Queue {
 	protected void startLowerLevelQueues() {
 		if(nextQueue == null) return;
 		
-		System.out.println("[Queue] Level " + level + " starting lower level queues");
+		//System.out.println("[Queue] Level " + level + " starting lower level queues");
 		
 		if(nextQueue.queueType == QueueType.SJF) {
 			nextQueue.sortSJFFromFirst();
@@ -236,7 +236,7 @@ public abstract class Queue {
 	
 	protected void stopLowerLevelQueues() {		
 		if(nextQueue == null) return;		
-		System.out.println("[Queue] Level: " + level + " stopping lower level queues");
+		//System.out.println("[Queue] Level: " + level + " stopping lower level queues");
 		Queue currNextQueue = nextQueue;
 		
 		while(true) {

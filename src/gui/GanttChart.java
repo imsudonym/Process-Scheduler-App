@@ -1134,7 +1134,7 @@ public class GanttChart extends JFrame{
 			xOffset += prevBurstLength;											
 		}
 		
-		System.out.println("==========[GC] prevEndTime: " + prevEndTime + " timeNow: " + timeNow + " executionTime: " + executionTime);
+		/*System.out.println("==========[GC] prevEndTime: " + prevEndTime + " timeNow: " + timeNow + " executionTime: " + executionTime);*/
 		if(prevEndTime < timeNow-executionTime) {
 			
 			addGap();		
